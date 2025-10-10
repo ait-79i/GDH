@@ -1,8 +1,8 @@
 <?php
-namespace JDH\Frontend;
+namespace GDH\Frontend;
 
-use MyPlugin\Services\Logger;
-use MyPlugin\Services\TwigService;
+use GDH\Services\Logger;
+use GDH\Services\TwigService;
 
 class FrontendController{
     private $logger;
@@ -15,20 +15,20 @@ class FrontendController{
     }
 
     private function init(){
-        add_action('wp_enqueue_scripts',[$this,enqueue_front_scripts]);
+        add_action('wp_enqueue_scripts', [$this, 'enqueue_front_scripts']);
     }
 
     public function enqueue_front_scripts(){
         wp_enqueue_style(
             'gdh-rdv-style',
-            GDH_RDV_PLUGIN_URL . 'assets/css/frontend.css',
+            GDH_PLUGIN_URL . 'assets/css/frontend.css',
             array(),
             '1.0.0'
         );
         
         wp_enqueue_script(
             'gdh-rdv-script',
-            GDH_RDV_PLUGIN_URL . 'assets/js/frontend.js',
+            GDH_PLUGIN_URL . 'assets/js/frontend.js',
             array('jquery'),
             '1.0.0',
             true

@@ -32,7 +32,7 @@ class Plugin
             new FrontendController($this->logger,$this->twig);
         // }
 
-        new ShortCodeManger($this->logger,$this->twig);
+        new ShortcodeManager($this->logger,$this->twig);
 
          $this->logger->info('Plugin initialisé');
         

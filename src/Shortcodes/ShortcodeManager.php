@@ -1,40 +1,53 @@
 <?php
-
 namespace GDH\Shortcodes;
 
 use GDH\Services\Logger;
 use GDH\Services\TwigService;
 
-class ShortcodeManger {
+class ShortcodeManager
+{
 
     private $logger;
     private $twig;
 
-    public function __construct(Logger $logger,TwigService $twig){
+    public function __construct(Logger $logger, TwigService $twig)
+    {
         $this->logger = $logger;
-        $this->twig = $twig;
+        $this->twig   = $twig;
 
-        $this->registerShorcodes();
+        $this->registerShortcodes();
     }
 
-    public function registerShorcodes(){
-        add_shortcode( 'gdh_rdv', [$this,'render_shortcode'] );
+    public function registerShortcodes()
+    {
+        add_shortcode('gdh_rdv', [$this, 'renderShortcode']);
     }
 
-    public function render_shortcode($atts){
-        $atts = shortcode_atts( [
-            'gdh_rdv' => "Prendre rendez-vous",
-            'class' => "gdh-rdv-btn",
-            'style' => "primary",
+    public function renderShortcode($atts)
+    {
+        $atts = shortcode_atts([
+            'button_label' => 'Prendre rendez-vous',
+            'class'        => "gdh-rdv-btn",
+            'style'        => "",
         ],
-        $atts,
-        'gdh_rdv' );
+            $atts,
+            'gdh_rdv');
 
-          return $this->twig->render('shortcodes/popup.twig', [
-            'gdh_rdv' => $atts['gdh_rdv'],
-            'class' => sanitize_html_class($atts['class']),
-            'style' => sanitize_html_class($atts['style']),
-            
+        $label = sanitize_text_field($atts['button_label']);
+        $class = sanitize_html_class($atts['class']);
+        $style = sanitize_text_field($atts['style']);
+
+        $html = $this->twig->render('shortcodes/popup.twig', [
+            'button_label' => $label,
+            'class'   => $class,
+            'style'   => $style,
+
         ]);
+
+        if (trim($html) === '') {
+            $this->logger->error('GDH: Shortcode render returned empty HTML');
+        }
+
+        return $html;
     }
 }

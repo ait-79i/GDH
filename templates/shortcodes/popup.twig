@@ -1,37 +1,37 @@
-<button type="button" 
-        class="{{ class }} gdh-rdv-btn" 
-        data-gdh-rdv-open style="{{ style }}" >
-    {{ gdh_rdv }}
+<button type="button" class="{{ class }} gdh-rdv-btn" data-gdh-rdv-open style="{{ style }}">
+	{{ button_label }}
 </button>
 
 <div id="gdh-rdv-popup" class="gdh-rdv-popup" style="display: none;">
-    <div class="gdh-rdv-popup-overlay"></div>
-    <div class="gdh-rdv-popup-content">
-        {# Header #}
-        <div class="gdh-rdv-popup-header">
-            <h2>Prendre rendez-vous</h2>
-            <button type="button" class="gdh-rdv-close" data-gdh-rdv-close>&times;</button>
-        </div>
-        
-        {# Progress Bar #}
-        {% include 'shortcodes/parts/progress.twig' %}
-        
-        {# Form #}
-        <form id="gdh-rdv-form" class="gdh-rdv-form">
-            {# Step 1: Time Slots #}
-            {% include 'shortcodes/steps/step-1-slots.twig' %}
-            
-            {# Step 2: Address #}
-            {% include 'shortcodes/steps/step-2-address.twig' %}
-            
-            {# Step 3: Lead Information #}
-            {% include 'shortcodes/steps/step-3-info.twig' %}
-            
-            {# Form Actions #}
-            {% include 'shortcodes/parts/form-actions.twig' %}
-        </form>
-        
-        {# Success Message #}
-        {% include 'shortcodes/parts/success.twig' %}
-    </div>
+	<div class="gdh-rdv-popup-overlay"></div>
+	<div
+		class="gdh-rdv-popup-content">
+		{# Header #}
+		<div class="gdh-rdv-popup-header">
+			<h2>Prendre rendez-vous</h2>
+			<button type="button" class="gdh-rdv-close" data-gdh-rdv-close>&times;</button>
+		</div>
+
+		{# Progress Bar #}
+		{% include 'shortcodes/parts/progress.twig' %}
+
+		{# Form #}
+		<form
+			id="gdh-rdv-form" class="gdh-rdv-form">
+			{# Step 1: Time Slots #}
+			{% include 'shortcodes/steps/step-1-slots.twig' %}
+
+			{# Step 2: Slots #}
+			{% include 'shortcodes/steps/step-2-slots.twig' %}
+
+			{# Step 3: Slots #}
+			{% include 'shortcodes/steps/step-3-slots.twig' %}
+
+			{# Form Actions #}
+			{% include 'shortcodes/parts/form-actions.twig' %}
+		</form>
+
+		{# Success Message #}
+		{% include 'shortcodes/parts/success.twig' %}
+	</div>
 </div>
