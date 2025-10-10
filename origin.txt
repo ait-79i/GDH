@@ -1,0 +1,200 @@
+<?php
+/**
+ * Plugin Name: GDH Rendez-vous 
+ * Description: Plugin WordPress pour la prise de rendez-vous en ligne via un formulaire multi-étapes dans une popup.
+ * Version: 1.0.0
+ * Author: Abdelkarim AIT HQI
+ */
+
+
+if (!defined('ABSPATH')) {
+    exit;
+}
+
+// Définir les constantes du plugin
+define('GDH_RDV_PLUGIN_URL', plugin_dir_url(__FILE__));
+define('GDH_RDV_PLUGIN_PATH', plugin_dir_path(__FILE__));
+
+
+class GDH_RDV_Plugin {
+    
+
+    public function __construct() {
+        add_action('init', array($this, 'init'));
+        add_action('wp_enqueue_scripts', array($this, 'enqueue_scripts'));
+    }
+    
+    public function init() {
+        add_shortcode('gdh_rdv', array($this, 'render_shortcode'));
+    }
+    
+
+    public function enqueue_scripts() {
+        wp_enqueue_style(
+            'gdh-rdv-style',
+            GDH_RDV_PLUGIN_URL . 'assets/css/frontend.css',
+            array(),
+            '1.0.0'
+        );
+        
+        wp_enqueue_script(
+            'gdh-rdv-script',
+            GDH_RDV_PLUGIN_URL . 'assets/js/frontend.js',
+            array('jquery'),
+            '1.0.0',
+            true
+        );
+    }
+    
+    public function render_shortcode($atts) {
+        $atts = shortcode_atts(array(
+            'button_label' => 'Prendre rendez-vous',
+            'class' => 'gdh-rdv-btn',
+            'style' => 'primary'
+        ), $atts, 'gdh_rdv');
+        
+        $button_class = esc_attr($atts['class']);
+        $button_style = esc_attr($atts['style']);
+        $button_label = esc_html($atts['button_label']);
+        
+        ob_start();
+        ?>
+        <button type="button" class="<?php echo $button_class; ?> gdh-rdv-button" style="<?php echo $button_style; ?>" data-gdh-rdv-open>
+            <?php echo $button_label; ?>
+        </button>
+           <?php echo $this->get_popup_html(); ?>
+        <?php
+        return ob_get_clean();
+    }
+
+    /**
+     * Générer le HTML de la popup
+     */
+    private function get_popup_html() {
+        ob_start();
+        ?>
+        <div id="gdh-rdv-popup" class="gdh-rdv-popup" style="display: none;">
+            <div class="gdh-rdv-popup-overlay"></div>
+            <div class="gdh-rdv-popup-content">
+                <div class="gdh-rdv-popup-header">
+                    <h2>Prendre rendez-vous</h2>
+                    <button type="button" class="gdh-rdv-close" data-gdh-rdv-close>&times;</button>
+                </div>
+                
+                <div class="gdh-rdv-progress">
+                    <div class="gdh-rdv-progress-bar">
+                        <div class="gdh-rdv-progress-fill" style="width: 33.33%;"></div>
+                    </div>
+                    <div class="gdh-rdv-steps">
+                        <span class="gdh-rdv-step active">Créneaux</span>
+                        <span class="gdh-rdv-step">Adresse</span>
+                        <span class="gdh-rdv-step">Informations</span>
+                    </div>
+                </div>
+                
+                <form id="gdh-rdv-form" class="gdh-rdv-form">
+                    
+                    <!-- Étape 1: Sélection des créneaux -->
+                    <div class="gdh-rdv-step-content active" data-step="1">
+                        <h3>Sélectionnez vos créneaux de disponibilité</h3>
+                        <p class="gdh-rdv-help">Choisissez entre 1 et 3 créneaux de disponibilité</p>
+                        
+                        <div class="gdh-rdv-slots">
+                            <div class="gdh-rdv-slot">
+                                <label>Créneau 1 (obligatoire)</label>
+                                <input type="datetime-local" name="slot_1" required class="gdh-rdv-datetime">
+                            </div>
+                            <div class="gdh-rdv-slot">
+                                <label>Créneau 2 (optionnel)</label>
+                                <input type="datetime-local" name="slot_2" class="gdh-rdv-datetime">
+                            </div>
+                            <div class="gdh-rdv-slot">
+                                <label>Créneau 3 (optionnel)</label>
+                                <input type="datetime-local" name="slot_3" class="gdh-rdv-datetime">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 2: Informations d'adresse -->
+                    <div class="gdh-rdv-step-content" data-step="2">
+                        <h3>Informations d'adresse</h3>
+                        
+                        <div class="gdh-rdv-field">
+                            <label for="address">Adresse *</label>
+                            <input type="text" id="address" name="address" required>
+                        </div>
+                        
+                        <div class="gdh-rdv-field-group">
+                            <div class="gdh-rdv-field">
+                                <label for="postal_code">Code postal *</label>
+                                <input type="text" id="postal_code" name="postal_code" required pattern="[0-9]{5}">
+                            </div>
+                            <div class="gdh-rdv-field">
+                                <label for="city">Ville *</label>
+                                <input type="text" id="city" name="city" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Étape 3: Informations du lead -->
+                    <div class="gdh-rdv-step-content" data-step="3">
+                        <h3>Vos informations</h3>
+                        
+                        <div class="gdh-rdv-field-group">
+                            <div class="gdh-rdv-field">
+                                <label for="first_name">Prénom *</label>
+                                <input type="text" id="first_name" name="first_name" required>
+                            </div>
+                            <div class="gdh-rdv-field">
+                                <label for="last_name">Nom *</label>
+                                <input type="text" id="last_name" name="last_name" required>
+                            </div>
+                        </div>
+                        
+                        <div class="gdh-rdv-field-group">
+                            <div class="gdh-rdv-field">
+                                <label for="email">Email *</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                            <div class="gdh-rdv-field">
+                                <label for="phone">Téléphone *</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                        </div>
+                        
+                        <div class="gdh-rdv-field">
+                            <label class="gdh-rdv-checkbox">
+                                <input type="checkbox" name="accept_terms" required>
+                                <span class="gdh-rdv-checkmark"></span>
+                                J\'accepte les conditions générales de vente *
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <div class="gdh-rdv-form-actions">
+                        <button type="button" class="gdh-rdv-btn gdh-rdv-btn-secondary gdh-rdv-prev" style="display: none;">
+                            Précédent
+                        </button>
+                        <button type="button" class="gdh-rdv-btn gdh-rdv-btn-primary gdh-rdv-next">
+                            Suivant
+                        </button>
+                        <button type="submit" class="gdh-rdv-btn gdh-rdv-btn-primary gdh-rdv-submit" style="display: none;">
+                            Envoyer la demande
+                        </button>
+                    </div>
+                </form>
+                
+                <div id="gdh-rdv-success" class="gdh-rdv-success" style="display: none;">
+                    <div class="gdh-rdv-success-icon">✓</div>
+                    <h3>Demande envoyée !</h3>
+                    <p>Votre demande de rendez-vous a bien été envoyée. Vous recevrez une confirmation par email.</p>
+                </div>
+            </div>
+        </div>
+        <?php
+        return ob_get_clean();
+    }
+}
+
+// Initialiser le plugin
+new GDH_RDV_Plugin();
