@@ -507,9 +507,16 @@ jQuery(document).ready(function ($) {
 
     function attachCardEvents($card) {
       const $date = $card.find('.gdh-rdv-date');
+      const $dateIcon = $card.find('.gdh-rdv-date-icon');
       const $allDay = $card.find('[data-all-day]');
       const $timeBtns = $card.find('.gdh-rdv-time');
       const $removeBtn = $card.find('.gdh-rdv-remove-slot');
+
+      // Date icon click event - trigger date input
+      $dateIcon.on('click', function () {
+        $date.focus();
+        $date[0].showPicker && $date[0].showPicker();
+      });
 
       // Date change event
       $date.on('change', function () {
@@ -554,6 +561,19 @@ jQuery(document).ready(function ($) {
 
         $btn.toggleClass('selected');
         $btn.attr('aria-pressed', $btn.hasClass('selected') ? 'true' : 'false');
+        
+        // Check if all 6 time slots are selected
+        const selectedCount = $card.find('.gdh-rdv-time.selected').length;
+        const totalSlots = $timeBtns.length;
+        
+        if (selectedCount === totalSlots && totalSlots === 6) {
+          // Deselect all time slots
+          $timeBtns.removeClass('selected').attr('aria-pressed', 'false');
+          // Activate "Toute la journée"
+          $allDay.addClass('active').attr('aria-pressed', 'true');
+          $timeBtns.prop('disabled', true);
+        }
+        
         updateCombinedValue($card);
         // Remove error when time is selected
         clearCardError($card);
