@@ -39,9 +39,8 @@ class ShortcodeManager
 
         $html = $this->twig->render('shortcodes/popup.twig', [
             'button_label' => $label,
-            'class'   => $class,
-            'style'   => $style,
-
+            'class'        => $class,
+            'style'        => $style,
         ]);
 
         if (trim($html) === '') {
