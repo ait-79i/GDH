@@ -455,7 +455,7 @@ jQuery(document).ready(function ($) {
               <span class="gdh-rdv-slot-number">#${index}</span>
             </div>
             <h5 class="gdh-rdv-slot-title">${cardTitle}</h5>
-            ${showRemove ? '<button type="button" class="gdh-rdv-remove-slot" title="Supprimer cette disponibilité"><span class="dashicons dashicons-trash"></span></button>' : ''}
+            ${showRemove ? '<button type="button" class="gdh-rdv-remove-slot" title="Supprimer cette disponibilité">&times;</button>' : ''}
           </div>
           <div class="gdh-rdv-slot-content">
             <div class="gdh-rdv-date-section">
@@ -491,10 +491,6 @@ jQuery(document).ready(function ($) {
                   <span class="gdh-rdv-all-day-badge">Journée complète</span>
                 </button>
               </div>
-            </div>
-            <div class="gdh-rdv-slot-summary">
-              <span class="dashicons dashicons-info"></span>
-              <span class="gdh-rdv-summary-text">Aucune sélection</span>
             </div>
           </div>
           <input type="hidden" name="slot_${index}" class="gdh-rdv-combined" ${isRequired ? 'required' : ''}>
@@ -561,11 +557,11 @@ jQuery(document).ready(function ($) {
 
         $btn.toggleClass('selected');
         $btn.attr('aria-pressed', $btn.hasClass('selected') ? 'true' : 'false');
-        
+
         // Check if all 6 time slots are selected
         const selectedCount = $card.find('.gdh-rdv-time.selected').length;
         const totalSlots = $timeBtns.length;
-        
+
         if (selectedCount === totalSlots && totalSlots === 6) {
           // Deselect all time slots
           $timeBtns.removeClass('selected').attr('aria-pressed', 'false');
@@ -573,7 +569,7 @@ jQuery(document).ready(function ($) {
           $allDay.addClass('active').attr('aria-pressed', 'true');
           $timeBtns.prop('disabled', true);
         }
-        
+
         updateCombinedValue($card);
         // Remove error when time is selected
         clearCardError($card);
@@ -593,29 +589,17 @@ jQuery(document).ready(function ($) {
       const date = $card.find('.gdh-rdv-date').val();
       const $combined = $card.find('.gdh-rdv-combined');
       const $allDay = $card.find('[data-all-day]');
-      const $summary = $card.find('.gdh-rdv-summary-text');
 
       if (!date) {
         $combined.val('');
-        $summary.text('Aucune sélection');
         $card.removeClass('has-selection');
         return;
       }
 
       let value = date;
-      let summaryText = '';
-
-      // Format date for display
-      const dateObj = new Date(date + 'T00:00:00');
-      const dateFormatted = dateObj.toLocaleDateString('fr-FR', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long'
-      });
 
       if ($allDay.hasClass('active')) {
         value += ' | Toute la journée';
-        summaryText = `${dateFormatted} - Toute la journée`;
         $card.addClass('has-selection has-all-day');
       } else {
         const selectedTimes = $card.find('.gdh-rdv-time.selected').map(function () {
@@ -624,20 +608,14 @@ jQuery(document).ready(function ($) {
 
         if (selectedTimes.length > 0) {
           value += ' | ' + selectedTimes.join(',');
-          const timesText = $card.find('.gdh-rdv-time.selected').map(function () {
-            return $(this).find('.gdh-rdv-time-text').text();
-          }).get().join(', ');
-          summaryText = `${dateFormatted} - ${timesText}`;
           $card.addClass('has-selection');
           $card.removeClass('has-all-day');
         } else {
-          summaryText = `${dateFormatted} - Aucun horaire sélectionné`;
           $card.removeClass('has-selection has-all-day');
         }
       }
 
       $combined.val(value);
-      $summary.text(summaryText);
     }
 
     function clearCardError($card) {
@@ -808,14 +786,14 @@ jQuery(document).ready(function ($) {
         if (!dateValue) {
           isValid = false;
           $date.addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">⚠ Veuillez sélectionner une date</div>');
+          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner une date</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
 
         if (dateValue && !hasAllDay && !hasTimeSelected) {
           isValid = false;
           $card.find('.gdh-rdv-times-grid').addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">⚠ Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
+          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
       }
@@ -825,14 +803,14 @@ jQuery(document).ready(function ($) {
         if (!dateValue) {
           isValid = false;
           $date.addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">⚠ Veuillez sélectionner une date pour cette disponibilité</div>');
+          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner une date pour cette disponibilité</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
 
         if (dateValue && !hasAllDay && !hasTimeSelected) {
           isValid = false;
           $card.find('.gdh-rdv-times-grid').addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">⚠ Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
+          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
       }
