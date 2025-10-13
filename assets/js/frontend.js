@@ -70,9 +70,6 @@ jQuery(document).ready(function ($) {
     switch (currentStep) {
       case 1:
         isValid = validateStep1Slots();
-        if (!isValid) {
-          showError("Veuillez compléter au moins la disponibilité principale avec une date et des horaires.");
-        }
         break;
       case 2:
       case 3:
