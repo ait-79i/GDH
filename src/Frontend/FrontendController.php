@@ -46,5 +46,15 @@ class FrontendController
             $js_ver,
             true
         );
+
+        // Localize script with AJAX data
+        wp_localize_script(
+            'gdh-rdv-script',
+            'gdhRdvData',
+            [
+                'ajaxUrl' => admin_url('admin-ajax.php'),
+                'nonce'   => wp_create_nonce('gdh_rdv_nonce')
+            ]
+        );
     }
 }

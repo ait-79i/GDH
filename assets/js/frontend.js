@@ -373,36 +373,31 @@ jQuery(document).ready(function ($) {
     const originalText = $submitBtn.text();
     $submitBtn.prop('disabled', true).text('Envoi en cours...');
 
-    // TODO: Replace with actual AJAX submission
-    // Simulate AJAX call
-    setTimeout(() => {
-      $submitBtn.prop('disabled', false).text(originalText);
-      showSuccess();
-    }, 1500);
-
-    /* Uncomment for real AJAX submission:
+    // AJAX submission
     $.ajax({
-      url: gdhRdvData.ajaxUrl, // Define this in your PHP
+      url: gdhRdvData.ajaxUrl,
       type: 'POST',
       data: {
         action: 'gdh_rdv_submit',
         nonce: gdhRdvData.nonce,
-        formData: formData
+        formData: JSON.stringify(formData)
       },
       success: function(response) {
         $submitBtn.prop('disabled', false).text(originalText);
         if (response.success) {
+          console.log('Appointment created successfully:', response.data);
           showSuccess();
         } else {
           showError(response.data.message || 'Une erreur est survenue');
         }
       },
-      error: function() {
+      error: function(xhr, status, error) {
+        console.error('AJAX Error:', status, error);
+        console.error('Response:', xhr.responseText);
         $submitBtn.prop('disabled', false).text(originalText);
         showError('Erreur de connexion. Veuillez réessayer.');
       }
     });
-    */
   }
 
   // Initialize validation
