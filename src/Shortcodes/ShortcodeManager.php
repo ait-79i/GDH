@@ -37,10 +37,19 @@ class ShortcodeManager
         $class = sanitize_html_class($atts['class']);
         $style = sanitize_text_field($atts['style']);
 
+        // Read admin design settings for title
+        $opts = get_option('gdh_rdv_design_settings', []);
+        $title_text = isset($opts['title_text']) ? sanitize_text_field($opts['title_text']) : 'Prendre rendez-vous';
+        $align_raw = isset($opts['title_align']) ? $opts['title_align'] : 'left';
+        $allowed = ['left','center','right'];
+        $title_align = in_array($align_raw, $allowed, true) ? $align_raw : 'left';
+
         $html = $this->twig->render('shortcodes/popup.twig', [
             'button_label' => $label,
             'class'        => $class,
             'style'        => $style,
+            'title_text'   => $title_text,
+            'title_align'  => $title_align,
         ]);
 
         if (trim($html) === '') {

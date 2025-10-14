@@ -44,11 +44,11 @@ class Plugin
         // Register AJAX handler
         new AppointmentAjaxHandler($this->logger);
 
-        // if(is_admin()){
-        //     new AdminController($this->logger,$this->twig);
-        // }else{
-            new FrontendController($this->logger,$this->twig);
-        // }
+        if (is_admin()) {
+            new AdminController();
+        } else {
+            new FrontendController($this->logger, $this->twig);
+        }
 
         new ShortcodeManager($this->logger,$this->twig);
 

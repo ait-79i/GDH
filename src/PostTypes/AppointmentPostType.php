@@ -140,7 +140,6 @@ class AppointmentPostType
 
 // [Save meta data]
 
-
     public function saveMetaData($post_id, $post)
     {
         // Verify nonce
@@ -180,7 +179,6 @@ class AppointmentPostType
 // []
 
 // [Custom Columns]
-
 
     public function setCustomColumns($columns)
     {
