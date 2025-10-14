@@ -61,6 +61,8 @@ class AppointmentPostType
         register_post_type(self::POST_TYPE, $args);
     }
 
+// [Metaboxes]
+
     public function addMetaBoxes()
     {
         add_meta_box(
@@ -134,6 +136,10 @@ class AppointmentPostType
             'city'        => get_post_meta($post->ID, '_gdh_city', true),
         ]);
     }
+// []
+
+// [Save meta data]
+
 
     public function saveMetaData($post_id, $post)
     {
@@ -171,6 +177,10 @@ class AppointmentPostType
             }
         }
     }
+// []
+
+// [Custom Columns]
+
 
     public function setCustomColumns($columns)
     {
@@ -254,9 +264,10 @@ class AppointmentPostType
         }
     }
 
-    /**
-     * Create a new appointment from form data
-     */
+// []
+
+// [Create anew appointment from form data]
+
     public static function createAppointment($data)
     {
         // Create post title
@@ -296,4 +307,6 @@ class AppointmentPostType
 
         return $post_id;
     }
+// [/]
+
 }

@@ -366,8 +366,6 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    console.log('Form data to submit:', formData);
-
     // Show loading state
     const $submitBtn = $('.gdh-rdv-submit');
     const originalText = $submitBtn.text();
@@ -385,7 +383,6 @@ jQuery(document).ready(function ($) {
       success: function(response) {
         $submitBtn.prop('disabled', false).text(originalText);
         if (response.success) {
-          console.log('Appointment created successfully:', response.data);
           showSuccess();
         } else {
           showError(response.data.message || 'Une erreur est survenue');
