@@ -51,21 +51,35 @@ class FrontendController
         // Inject dynamic CSS variables from settings
         $this->add_inline_design_variables();
 
+        // Twig.js for client-side rendering of templates
+        wp_enqueue_script(
+            'twigjs',
+            'https://cdn.jsdelivr.net/npm/twig@1.15.4/twig.min.js',
+            [],
+            null,
+            true
+        );
+
         wp_enqueue_script(
             'gdh-rdv-script',
             GDH_PLUGIN_URL . 'assets/js/frontend.js',
-            ['jquery'],
+            ['jquery', 'twigjs'],
             $js_ver,
             true
         );
 
         // Localize script with AJAX data
+        $slot_tpl_path = GDH_PLUGIN_PATH . 'templates/frontend/cards/slot-card.twig';
+        $slot_tpl      = file_exists($slot_tpl_path) ? file_get_contents($slot_tpl_path) : '';
         wp_localize_script(
             'gdh-rdv-script',
             'gdhRdvData',
             [
-                'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce'   => wp_create_nonce('gdh_rdv_nonce'),
+                'ajaxUrl'   => admin_url('admin-ajax.php'),
+                'nonce'     => wp_create_nonce('gdh_rdv_nonce'),
+                'templates' => [
+                    'slotCard' => $slot_tpl,
+                ],
             ]
         );
     }

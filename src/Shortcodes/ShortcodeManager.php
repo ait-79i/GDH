@@ -44,7 +44,7 @@ class ShortcodeManager
         $allowed     = ['left', 'center', 'right'];
         $title_align = in_array($align_raw, $allowed, true) ? $align_raw : 'left';
 
-        $html = $this->twig->render('shortcodes/popup.twig', [
+        $html = $this->twig->render('frontend/popup.twig', [
             'button_label' => $label,
             'class'        => $class,
             'style'        => $style,

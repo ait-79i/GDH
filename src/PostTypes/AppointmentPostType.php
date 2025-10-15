@@ -18,6 +18,8 @@ class AppointmentPostType
         add_action('save_post_' . self::POST_TYPE, [$this, 'saveMetaData'], 10, 2);
         add_filter('manage_' . self::POST_TYPE . '_posts_columns', [$this, 'setCustomColumns']);
         add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderCustomColumns'], 10, 2);
+        add_filter('post_row_actions', [$this, 'filterRowActions'], 10, 2);
+        add_action('admin_head', [$this, 'makeTitleReadonly']);
     }
 
     public function register()
@@ -65,6 +67,9 @@ class AppointmentPostType
 
     public function addMetaBoxes()
     {
+        // Remove the default Publish box from the sidebar
+        remove_meta_box('submitdiv', self::POST_TYPE, 'side');
+
         add_meta_box(
             'gdh_appointment_details',
             'Détails du rendez-vous',
@@ -97,7 +102,7 @@ class AppointmentPostType
     {
         wp_nonce_field('gdh_appointment_meta_box', 'gdh_appointment_meta_box_nonce');
 
-        echo $this->twig->render('admin/appointment-details-metabox.twig', [
+        echo $this->twig->render('admin/appointment-metaboxes/appointment-details-metabox.twig', [
             'first_name'   => get_post_meta($post->ID, '_gdh_first_name', true),
             'last_name'    => get_post_meta($post->ID, '_gdh_last_name', true),
             'email'        => get_post_meta($post->ID, '_gdh_email', true),
@@ -123,14 +128,14 @@ class AppointmentPostType
             }
         }
 
-        echo $this->twig->render('admin/appointment-slots-metabox.twig', [
+        echo $this->twig->render('admin/appointment-metaboxes/appointment-slots-metabox.twig', [
             'slots' => $formattedSlots,
         ]);
     }
 
     public function renderAddressMetaBox($post)
     {
-        echo $this->twig->render('admin/appointment-address-metabox.twig', [
+        echo $this->twig->render('admin/appointment-metaboxes/appointment-address-metabox.twig', [
             'address'     => get_post_meta($post->ID, '_gdh_address', true),
             'postal_code' => get_post_meta($post->ID, '_gdh_postal_code', true),
             'city'        => get_post_meta($post->ID, '_gdh_city', true),
@@ -175,6 +180,23 @@ class AppointmentPostType
                 update_post_meta($post_id, $meta_key, sanitize_text_field($_POST[$field]));
             }
         }
+    }
+
+    public function filterRowActions($actions, $post)
+    {
+        if (! isset($post->post_type) || $post->post_type !== self::POST_TYPE) {
+            return $actions;
+        }
+
+        $filtered = [];
+        if (isset($actions['view'])) {
+            $filtered['view'] = $actions['view'];
+        }
+        if (isset($actions['trash'])) {
+            $filtered['trash'] = $actions['trash'];
+        }
+
+        return $filtered;
     }
 // []
 
@@ -254,10 +276,21 @@ class AppointmentPostType
                     }
                 }
 
-                echo $this->twig->render('admin/appointment-availability-column.twig', [
+                echo $this->twig->render('admin/appointment-metaboxes/appointment-availability-column.twig', [
                     'slots' => $formattedSlots,
                 ]);
                 break;
+        }
+    }
+
+    public function makeTitleReadonly()
+    {
+        if (! function_exists('get_current_screen')) {
+            return;
+        }
+        $screen = get_current_screen();
+        if ($screen && isset($screen->post_type) && $screen->post_type === self::POST_TYPE) {
+            echo "<script>jQuery(function($){ $('#title').prop('readonly', true); });</script>";
         }
     }
 

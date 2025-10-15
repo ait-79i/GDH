@@ -1,12 +1,16 @@
 <?php
 namespace GDH\Admin;
 
+use GDH\Services\TwigService;
+
 class AdminController
 {
     private $page_hook;
+    private $twig;
 
     public function __construct()
     {
+        $this->twig = new TwigService();
         add_action('admin_menu', [$this, 'addSettingsSubmenu']);
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
@@ -102,8 +106,11 @@ class AdminController
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
-        echo '<input type="text" class="regular-text gdh-color-field" name="gdh_rdv_design_settings[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" data-default-color="' . esc_attr($default) . '" />';
-        echo '<script>jQuery(function($){ $(".gdh-color-field").wpColorPicker(); });</script>';
+        echo $this->twig->render('admin/fields/color.twig', [
+            'name'    => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'value'   => esc_attr($value),
+            'default' => esc_attr($default),
+        ]);
     }
 
     public function fieldOpacity($args)
@@ -112,7 +119,10 @@ class AdminController
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
-        echo '<input type="number" step="0.05" min="0" max="1" name="gdh_rdv_design_settings[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" />';
+        echo $this->twig->render('admin/fields/opacity.twig', [
+            'name'  => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'value' => esc_attr($value),
+        ]);
     }
 
     public function fieldFontFamily($args)
@@ -121,7 +131,10 @@ class AdminController
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
-        echo '<input type="text" class="regular-text" placeholder="Ex: Inter, \"Segoe UI\", Roboto, sans-serif" name="gdh_rdv_design_settings[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" />';
+        echo $this->twig->render('admin/fields/font-family.twig', [
+            'name'  => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'value' => esc_attr($value),
+        ]);
     }
 
     public function fieldText($args)
@@ -132,7 +145,12 @@ class AdminController
         $value       = isset($options[$key]) ? $options[$key] : $default;
         $type        = ($key === 'font_url') ? 'url' : 'text';
         $placeholder = ($key === 'font_url') ? 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap' : '';
-        echo '<input type="' . esc_attr($type) . '" class="regular-text" placeholder="' . esc_attr($placeholder) . '" name="gdh_rdv_design_settings[' . esc_attr($key) . ']" value="' . esc_attr($value) . '" />';
+        echo $this->twig->render('admin/fields/text.twig', [
+            'name'        => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'value'       => esc_attr($value),
+            'placeholder' => esc_attr($placeholder),
+            'type'        => esc_attr($type),
+        ]);
     }
 
     public function fieldSelect($args)
@@ -142,12 +160,11 @@ class AdminController
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
         $opts    = isset($args['options']) && is_array($args['options']) ? $args['options'] : [];
-        echo '<select name="gdh_rdv_design_settings[' . esc_attr($key) . ']">';
-        foreach ($opts as $val => $label) {
-            $selected = selected($value, $val, false);
-            echo '<option value="' . esc_attr($val) . '" ' . $selected . '>' . esc_html($label) . '</option>';
-        }
-        echo '</select>';
+        echo $this->twig->render('admin/fields/select.twig', [
+            'name'    => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'value'   => $value,
+            'options' => $opts,
+        ]);
     }
 
     public function sanitizeSettings($input)

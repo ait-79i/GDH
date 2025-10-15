@@ -380,7 +380,7 @@ jQuery(document).ready(function ($) {
         nonce: gdhRdvData.nonce,
         formData: JSON.stringify(formData)
       },
-      success: function(response) {
+      success: function (response) {
         $submitBtn.prop('disabled', false).text(originalText);
         if (response.success) {
           showSuccess();
@@ -388,7 +388,7 @@ jQuery(document).ready(function ($) {
           showError(response.data.message || 'Une erreur est survenue');
         }
       },
-      error: function(xhr, status, error) {
+      error: function (xhr, status, error) {
         console.error('AJAX Error:', status, error);
         console.error('Response:', xhr.responseText);
         $submitBtn.prop('disabled', false).text(originalText);
@@ -436,55 +436,21 @@ jQuery(document).ready(function ($) {
 
       const cardTitle = titles[index] || `Disponibilité ${index}`;
 
-      const $card = $(`
-        <div class="gdh-rdv-slot-card" data-index="${index}">
-          <div class="gdh-rdv-slot-header">
-            <div class="gdh-rdv-slot-badge">
-              <span class="dashicons dashicons-calendar-alt"></span>
-              <span class="gdh-rdv-slot-number">#${index}</span>
-            </div>
-            <h5 class="gdh-rdv-slot-title">${cardTitle}</h5>
-            ${showRemove ? '<button type="button" class="gdh-rdv-remove-slot" title="Supprimer cette disponibilité">&times;</button>' : ''}
-          </div>
-          <div class="gdh-rdv-slot-content">
-            <div class="gdh-rdv-date-section">
-              <label class="gdh-rdv-date-label">
-                <span class="dashicons dashicons-calendar"></span>
-                <span>Choisissez une date</span>
-                ${isRequired ? '<span class="gdh-rdv-required">*</span>' : ''}
-              </label>
-              <div class="gdh-rdv-date-input-wrapper">
-                <input type="date" name="slot_${index}_date" class="gdh-rdv-date" ${isRequired ? 'required' : ''} min="${todayStr}">
-                <span class="gdh-rdv-date-icon dashicons dashicons-calendar-alt"></span>
-              </div>
-            </div>
-            <div class="gdh-rdv-time-section">
-              <label class="gdh-rdv-time-label">
-                <span class="dashicons dashicons-clock"></span>
-                <span>Sélectionnez vos horaires</span>
-                ${isRequired ? '<span class="gdh-rdv-required">*</span>' : ''}
-              </label>
-              <div class="gdh-rdv-times-grid">
-                ${timeSlots.map(slot =>
-        `<button type="button" class="gdh-rdv-time" data-value="${slot.value}" aria-pressed="false">
-                    <span class="gdh-rdv-time-icon dashicons dashicons-clock"></span>
-                    <span class="gdh-rdv-time-text">${slot.label}</span>
-                    <span class="gdh-rdv-time-check dashicons dashicons-yes"></span>
-                  </button>`
-      ).join('')}
-              </div>
-              <div class="gdh-rdv-all-day-section">
-                <button type="button" class="gdh-rdv-all-day" data-all-day aria-pressed="false">
-                  <span class="dashicons dashicons-clock"></span>
-                  <span>Toute la journée</span>
-                  <span class="gdh-rdv-all-day-badge">Journée complète</span>
-                </button>
-              </div>
-            </div>
-          </div>
-          <input type="hidden" name="slot_${index}" class="gdh-rdv-combined" ${isRequired ? 'required' : ''}>
-        </div>
-      `);
+      // Try client-side Twig rendering first
+      const context = { index, isRequired, showRemove, todayStr, timeSlots, cardTitle };
+      let html = '';
+      try {
+        if (window.Twig && typeof window.Twig.twig === 'function' &&
+          window.gdhRdvData && window.gdhRdvData.templates && window.gdhRdvData.templates.slotCard) {
+          html = window.Twig.twig({ data: window.gdhRdvData.templates.slotCard }).render(context);
+        }
+      } catch (e) {
+        console.error('Twig render error (slotCard):', e);
+      }
+
+      const $card = html && typeof html === 'string' && html.trim().length
+        ? $(html)
+        : null;
 
       attachCardEvents($card);
       return $card;
