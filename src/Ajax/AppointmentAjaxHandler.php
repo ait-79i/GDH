@@ -3,14 +3,17 @@ namespace GDH\Ajax;
 
 use GDH\PostTypes\AppointmentPostType;
 use GDH\Services\Logger;
+use GDH\Services\EmailTemplateService;
 
 class AppointmentAjaxHandler
 {
     private $logger;
+    private $emailService;
 
     public function __construct(Logger $logger)
     {
         $this->logger = $logger;
+        $this->emailService = new EmailTemplateService($this->logger);
         $this->init();
     }
 
@@ -110,6 +113,16 @@ class AppointmentAjaxHandler
             }
 
             $this->logger->info("GDH AJAX: Appointment created successfully - ID: {$post_id}");
+
+            // Try to send email (non-blocking for booking result)
+            try {
+                $sent = $this->emailService->sendOnAppointment($post_id, $formData);
+                if (! $sent) {
+                    $this->logger->error('GDH AJAX: Email sending failed or skipped');
+                }
+            } catch (\Throwable $e) {
+                $this->logger->error('GDH AJAX: Email exception - ' . $e->getMessage());
+            }
 
             // Send success response
             wp_send_json_success([

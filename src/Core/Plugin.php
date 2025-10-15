@@ -5,6 +5,7 @@ use GDH\Admin\AdminController;
 use GDH\Ajax\AppointmentAjaxHandler;
 use GDH\Frontend\FrontendController;
 use GDH\PostTypes\AppointmentPostType;
+use GDH\PostTypes\EmailTemplatePostType;
 use GDH\Services\Logger;
 use GDH\Services\TwigService;
 use GDH\Shortcodes\ShortcodeManager;
@@ -41,6 +42,7 @@ class Plugin
 
         // Register custom post type
         new AppointmentPostType();
+        new EmailTemplatePostType();
 
         // Register AJAX handler
         new AppointmentAjaxHandler($this->logger);
