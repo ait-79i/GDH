@@ -151,10 +151,6 @@
   }
 }
 
-/* Custom Scrollbar for Popup */
-.gdh-rdv-popup-content::-webkit-scrollbar {
-  width: 8px;
-}
 
 .gdh-rdv-popup-content::-webkit-scrollbar-track {
   background: var(--gdh-bg-light);
@@ -886,7 +882,7 @@
 
 .gdh-rdv-btn-primary {
   background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
-  color: #000000;
+  color: var(--gdh-button-text-color, #000000);
   font-weight: 700;
   box-shadow: var(--gdh-shadow-md);
 }
@@ -1195,12 +1191,7 @@
   }
 
   .gdh-rdv-slot-header {
-    padding: 8px 10px;
-  }
-
-  .gdh-rdv-slot-content {
-    padding: 10px;
-    gap: 10px;
+    padding: 7px 9px;
   }
 
   .gdh-rdv-slot-badge {
@@ -1268,7 +1259,7 @@
     width: 100%;
     padding: 14px;
     border-radius: 16px 16px 0 0;
-    max-height: 92vh;
+    height: 100%;
     animation: slideUpMobile 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   }
 
@@ -1353,6 +1344,7 @@
   /* Form mobile phone */
   .gdh-rdv-form-section {
     gap: 10px;
+    position: relative;
   }
 
   .gdh-rdv-field-group {
@@ -1408,6 +1400,9 @@
   .gdh-rdv-form-actions {
     gap: 8px;
     margin-top: 12px;
+    position: fixed;
+    bottom: 1rem;
+    width: 100%;
   }
 
   .gdh-rdv-btn {
@@ -1928,7 +1923,7 @@
   border: none;
   border-radius: 50%;
   background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
-  color: #000;
+  color: var(--gdh-button-text-color, #000000);
   cursor: pointer;
   transition: var(--gdh-transition);
   box-shadow: var(--gdh-shadow-md);
@@ -2356,7 +2351,7 @@
   }
 
   .gdh-rdv-times-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
     gap: 12px;
   }
 

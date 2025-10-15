@@ -38,6 +38,7 @@ class AdminController
         add_settings_field('primary_color_dark', 'Couleur primaire (foncé)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color_dark', 'default' => '#004d35']);
         add_settings_field('accent_color', 'Couleur accent', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'accent_color', 'default' => '#FFB81c']);
         add_settings_field('accent_color_dark', 'Couleur accent (foncé)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'accent_color_dark', 'default' => '#F5A623']);
+        add_settings_field('buttons_text_color', 'Couleur texte des boutons', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'buttons_text_color', 'default' => '#000000']);
         add_settings_field('overlay_color', 'Couleur d\'overlay', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'overlay_color', 'default' => '#000000']);
         add_settings_field('overlay_opacity', 'Opacité overlay (0-1)', [$this, 'fieldOpacity'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'overlay_opacity', 'default' => '0.4']);
         add_settings_field(
@@ -157,6 +158,7 @@ class AdminController
             'primary_color_dark'  => '#004d35',
             'accent_color'        => '#FFB81c',
             'accent_color_dark'   => '#F5A623',
+            'buttons_text_color'  => '#000000',
             'overlay_color'       => '#000000',
             'overlay_opacity'     => '0.4',
             'font_family'         => '',
@@ -169,6 +171,7 @@ class AdminController
         $output['primary_color_dark']  = sanitize_hex_color(isset($input['primary_color_dark']) ? $input['primary_color_dark'] : $defaults['primary_color_dark']);
         $output['accent_color']        = sanitize_hex_color(isset($input['accent_color']) ? $input['accent_color'] : $defaults['accent_color']);
         $output['accent_color_dark']   = sanitize_hex_color(isset($input['accent_color_dark']) ? $input['accent_color_dark'] : $defaults['accent_color_dark']);
+        $output['buttons_text_color']  = sanitize_hex_color(isset($input['buttons_text_color']) ? $input['buttons_text_color'] : $defaults['buttons_text_color']);
         $overlay                       = isset($input['overlay_color']) ? $input['overlay_color'] : $defaults['overlay_color'];
         $output['overlay_color']       = sanitize_hex_color($overlay) ?: '#000000';
         $opacity                       = isset($input['overlay_opacity']) ? floatval($input['overlay_opacity']) : floatval($defaults['overlay_opacity']);

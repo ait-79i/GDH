@@ -190,7 +190,6 @@ class AppointmentPostType
         $new_columns['phone']        = 'Téléphone';
         $new_columns['address']      = 'Adresse';
         $new_columns['availability'] = 'Disponibilités';
-        $new_columns['date']         = 'Date de soumission';
 
         return $new_columns;
     }
@@ -270,10 +269,9 @@ class AppointmentPostType
     {
         // Create post title
         $title = sprintf(
-            'RDV - %s %s - %s',
+            'RDV - %s %s',
             sanitize_text_field($data['first_name']),
-            sanitize_text_field($data['last_name']),
-            date('Y-m-d H:i:s')
+            sanitize_text_field($data['last_name'])
         );
 
         // Create the post

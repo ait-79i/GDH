@@ -83,6 +83,7 @@ class FrontendController
             '--gdh-primary-green-dark'  => 'primary_color_dark',
             '--gdh-accent-yellow'       => 'accent_color',
             '--gdh-accent-yellow-dark'  => 'accent_color_dark',
+            '--gdh-button-text-color'   => 'buttons_text_color',
         ];
 
         $vars = [];
