@@ -1,12 +1,12 @@
 <?php
-
 namespace GDH\Services;
 
 class Logger
 {
     private $logFile;
 
-    public function __construct(){
+    public function __construct()
+    {
         $this->logFile = GDH_PLUGIN_PATH . 'logs/gdh.log';
         $this->ensureLogDirectory();
     }
@@ -14,7 +14,7 @@ class Logger
     private function ensureLogDirectory()
     {
         $logDir = dirname($this->logFile);
-        if (!file_exists($logDir)) {
+        if (! file_exists($logDir)) {
             wp_mkdir_p($logDir);
         }
     }
@@ -37,7 +37,7 @@ class Logger
     private function log($level, $message)
     {
         $timestamp = date('Y-m-d H:i:s');
-        $logEntry = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
+        $logEntry  = "[{$timestamp}] [{$level}] {$message}" . PHP_EOL;
         file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
     }
 }

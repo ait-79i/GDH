@@ -2,12 +2,12 @@
 namespace GDH\Core;
 
 use GDH\Admin\AdminController;
+use GDH\Ajax\AppointmentAjaxHandler;
 use GDH\Frontend\FrontendController;
-use GDH\Shortcodes\ShortcodeManager;
+use GDH\PostTypes\AppointmentPostType;
 use GDH\Services\Logger;
 use GDH\Services\TwigService;
-use GDH\PostTypes\AppointmentPostType;
-use GDH\Ajax\AppointmentAjaxHandler;
+use GDH\Shortcodes\ShortcodeManager;
 
 /**
  * Main plugin class
@@ -25,7 +25,7 @@ class Plugin
      */
     public static function getInstance()
     {
-        if(self::$instance === null){
+        if (self::$instance === null) {
             self::$instance = new self();
         }
         return self::$instance;
@@ -34,9 +34,10 @@ class Plugin
     /**
      * Initialize the plugin
      */
-    public function init(){
+    public function init()
+    {
         $this->logger = new Logger();
-        $this->twig = new TwigService();
+        $this->twig   = new TwigService();
 
         // Register custom post type
         new AppointmentPostType();
@@ -50,10 +51,10 @@ class Plugin
             new FrontendController($this->logger, $this->twig);
         }
 
-        new ShortcodeManager($this->logger,$this->twig);
+        new ShortcodeManager($this->logger, $this->twig);
 
-         $this->logger->info('Plugin initialisé');
-        
+        $this->logger->info('Plugin initialisé');
+
     }
 
     /**

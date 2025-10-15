@@ -34,9 +34,9 @@ class FrontendController
 
         // Optional custom font URL from settings
         $opts = get_option('gdh_rdv_design_settings', []);
-        if (is_array($opts) && !empty($opts['font_url'])) {
+        if (is_array($opts) && ! empty($opts['font_url'])) {
             $font_url = esc_url($opts['font_url']);
-            if (!empty($font_url)) {
+            if (! empty($font_url)) {
                 wp_enqueue_style('gdh-rdv-font', $font_url, [], null);
             }
         }
@@ -65,7 +65,7 @@ class FrontendController
             'gdhRdvData',
             [
                 'ajaxUrl' => admin_url('admin-ajax.php'),
-                'nonce'   => wp_create_nonce('gdh_rdv_nonce')
+                'nonce'   => wp_create_nonce('gdh_rdv_nonce'),
             ]
         );
     }
@@ -78,11 +78,11 @@ class FrontendController
         }
 
         $map = [
-            '--gdh-primary-green'        => 'primary_color',
-            '--gdh-primary-green-light'  => 'primary_color_light',
-            '--gdh-primary-green-dark'   => 'primary_color_dark',
-            '--gdh-accent-yellow'        => 'accent_color',
-            '--gdh-accent-yellow-dark'   => 'accent_color_dark',
+            '--gdh-primary-green'       => 'primary_color',
+            '--gdh-primary-green-light' => 'primary_color_light',
+            '--gdh-primary-green-dark'  => 'primary_color_dark',
+            '--gdh-accent-yellow'       => 'accent_color',
+            '--gdh-accent-yellow-dark'  => 'accent_color_dark',
         ];
 
         $vars = [];
@@ -97,21 +97,27 @@ class FrontendController
 
         // Overlay RGB and opacity
         if (! empty($opts['overlay_color'])) {
-            $hex = sanitize_hex_color($opts['overlay_color']);
-            $rgb = $hex ? $this->hex_to_rgb_string($hex) : '0, 0, 0';
+            $hex    = sanitize_hex_color($opts['overlay_color']);
+            $rgb    = $hex ? $this->hex_to_rgb_string($hex) : '0, 0, 0';
             $vars[] = '--gdh-overlay-rgb: ' . $rgb;
         }
         if (isset($opts['overlay_opacity'])) {
             $opacity = floatval($opts['overlay_opacity']);
-            if ($opacity < 0) $opacity = 0;
-            if ($opacity > 1) $opacity = 1;
+            if ($opacity < 0) {
+                $opacity = 0;
+            }
+
+            if ($opacity > 1) {
+                $opacity = 1;
+            }
+
             $vars[] = '--gdh-overlay-opacity: ' . $opacity;
         }
 
         // Font family (raw string)
         if (! empty($opts['font_family'])) {
             // sanitize_text_field already applied at save, but sanitize again
-            $font = sanitize_text_field($opts['font_family']);
+            $font   = sanitize_text_field($opts['font_family']);
             $vars[] = '--gdh-font-family: ' . $font;
         }
 
