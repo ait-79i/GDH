@@ -74,12 +74,6 @@ class EmailTemplatePostType
             'type'         => 'string',
             'auth_callback'=> '__return_true',
         ]);
-        register_post_meta(self::POST_TYPE, '_gdh_email_is_active', [
-            'show_in_rest' => false,
-            'single'       => true,
-            'type'         => 'boolean',
-            'auth_callback'=> '__return_true',
-        ]);
     }
 
     public function addMetaBoxes()
@@ -103,7 +97,6 @@ class EmailTemplatePostType
         $ctype   = get_post_meta($post->ID, '_gdh_email_content_type', true);
         $ctype   = $ctype === 'plain' ? 'plain' : 'html';
         $version = get_post_meta($post->ID, '_gdh_email_version', true);
-        $active  = get_post_meta($post->ID, '_gdh_email_is_active', true) === '1';
 
         echo '<table class="form-table" role="presentation">';
         echo '<tr><th scope="row"><label for="gdh_email_subject">Sujet</label></th><td><input type="text" id="gdh_email_subject" name="gdh_email_subject" class="regular-text" value="' . esc_attr($subject) . '" /></td></tr>';
@@ -112,7 +105,6 @@ class EmailTemplatePostType
         echo '<label><input type="radio" name="gdh_email_content_type" value="plain" ' . checked($ctype, 'plain', false) . '> Texte brut</label>';
         echo '</fieldset></td></tr>';
         echo '<tr><th scope="row"><label for="gdh_email_version">Version</label></th><td><input type="text" id="gdh_email_version" name="gdh_email_version" class="regular-text" value="' . esc_attr($version) . '" /></td></tr>';
-        echo '<tr><th scope="row">Actif</th><td><label><input type="checkbox" name="gdh_email_is_active" value="1" ' . checked($active, true, false) . ' /> Définir ce template comme actif</label></td></tr>';
         echo '<tr><th scope="row"><label for="gdh_email_style">Style CSS</label></th><td><textarea id="gdh_email_style" name="gdh_email_style" rows="6" class="large-text">' . esc_textarea($style) . '</textarea></td></tr>';
         echo '</table>';
     }
@@ -163,22 +155,6 @@ class EmailTemplatePostType
         }
         if (isset($_POST['gdh_email_version'])) {
             update_post_meta($post_id, '_gdh_email_version', sanitize_text_field($_POST['gdh_email_version']));
-        }
-
-        $isActive = isset($_POST['gdh_email_is_active']) && $_POST['gdh_email_is_active'] === '1' ? '1' : '0';
-        update_post_meta($post_id, '_gdh_email_is_active', $isActive);
-
-        if ($isActive === '1') {
-            $others = get_posts([
-                'post_type'   => self::POST_TYPE,
-                'post_status' => 'publish',
-                'numberposts' => -1,
-                'fields'      => 'ids',
-                'exclude'     => [$post_id],
-            ]);
-            foreach ($others as $tid) {
-                update_post_meta($tid, '_gdh_email_is_active', '0');
-            }
         }
     }
 

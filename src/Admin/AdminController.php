@@ -129,11 +129,11 @@ class AdminController
         $submit_button_html = ob_get_clean();
 
         echo $this->twig->render('admin/appointment/design-settings.twig', [
-            'title'               => 'Design du Popup RDV',
-            'form_action'         => 'options.php',
-            'settings_fields_html'=> $settings_fields_html,
-            'sections_html'       => $sections_html,
-            'submit_button_html'  => $submit_button_html,
+            'title'                => 'Design du Popup RDV',
+            'form_action'          => 'options.php',
+            'settings_fields_html' => $settings_fields_html,
+            'sections_html'        => $sections_html,
+            'submit_button_html'   => $submit_button_html,
         ]);
     }
 
@@ -143,36 +143,17 @@ class AdminController
             return;
         }
 
-        $active    = $this->emailService->getActiveTemplate();
-        $templates = get_posts([
-            'post_type'   => EmailTemplatePostType::POST_TYPE,
-            'post_status' => 'publish',
-            'numberposts' => -1,
-            'orderby'     => 'date',
-            'order'       => 'DESC',
-        ]);
-        $vars = $this->emailService->getAvailableVariables();
-
-        // Build templates data for Twig
-        $templatesData = [];
-        if (! empty($templates)) {
-            foreach ($templates as $t) {
-                $templatesData[] = [
-                    'ID'        => intval($t->ID),
-                    'title'     => get_the_title($t),
-                    'version'   => get_post_meta($t->ID, '_gdh_email_version', true),
-                    'is_active' => get_post_meta($t->ID, '_gdh_email_is_active', true) === '1',
-                    'edit_link' => get_edit_post_link($t->ID),
-                ];
-            }
-        }
+        $vars         = $this->emailService->getAvailableVariables();
+        $template      = $this->emailService->getTemplate();
+        $subject_value = $template ? (string) get_post_meta($template->ID, '_gdh_email_subject', true) : '';
+        $body_initial  = $template ? (string) $template->post_content : '';
 
         // Nonce field HTML
         $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
 
-        // Editor HTML capture
+        // Editor HTML capture with initial content (patch current template)
         ob_start();
-        wp_editor('', 'gdh_body', [
+        wp_editor($body_initial, 'gdh_body', [
             'textarea_name' => 'body',
             'media_buttons' => false,
             'textarea_rows' => 12,
@@ -180,13 +161,14 @@ class AdminController
         $editor_html = ob_get_clean();
 
         $html = $this->twig->render('admin/mail/email-settings.twig', [
-            'templates'         => $templatesData,
             'vars'              => $vars,
+            'subject_vars'      => ['client_name', 'appointment_date'],
             'show_saved_notice' => isset($_GET['gdh_email_saved']),
             'last_err'          => get_option('gdh_email_last_error'),
             'admin_post_url'    => esc_url(admin_url('admin-post.php')),
             'nonce_field'       => $nonce_field,
             'editor_html'       => $editor_html,
+            'subject_value'     => $subject_value,
         ]);
         echo $html;
     }
@@ -200,55 +182,28 @@ class AdminController
             wp_die('Nonce invalide');
         }
 
-        // Activation d'un template existant
-        if (! empty($_POST['activate_id'])) {
-            $activate_id = intval($_POST['activate_id']);
-            $all         = get_posts([
-                'post_type'   => EmailTemplatePostType::POST_TYPE,
-                'post_status' => 'publish',
-                'numberposts' => -1,
-                'fields'      => 'ids',
-            ]);
-            if (! empty($all)) {
-                foreach ($all as $tid) {
-                    update_post_meta($tid, '_gdh_email_is_active', $tid === $activate_id ? '1' : '0');
-                }
-            }
-            wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
-            exit;
-        }
-
-        // Création d'un nouveau template
+        // Mise à jour si un template existe, sinon création
         $subject  = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
         $body     = isset($_POST['body']) ? wp_kses_post($_POST['body']) : '';
-        $style    = isset($_POST['style']) ? wp_kses_post($_POST['style']) : '';
-        $ctype    = isset($_POST['content_type']) && $_POST['content_type'] === 'plain' ? 'plain' : 'html';
-        $version  = isset($_POST['version']) && $_POST['version'] !== '' ? sanitize_text_field($_POST['version']) : ('v' . date('YmdHis'));
-        $isActive = ! empty($_POST['is_active']) ? '1' : '0';
-
-        $post_id = wp_insert_post([
-            'post_type'    => EmailTemplatePostType::POST_TYPE,
-            'post_status'  => 'publish',
-            'post_title'   => 'Email Template ' . $version,
-            'post_content' => $body,
-        ]);
-        if (! is_wp_error($post_id)) {
-            update_post_meta($post_id, '_gdh_email_subject', $subject);
-            update_post_meta($post_id, '_gdh_email_style', $style);
-            update_post_meta($post_id, '_gdh_email_content_type', $ctype);
-            update_post_meta($post_id, '_gdh_email_version', $version);
-            update_post_meta($post_id, '_gdh_email_is_active', $isActive);
-            if ($isActive === '1') {
-                $others = get_posts([
-                    'post_type'   => EmailTemplatePostType::POST_TYPE,
-                    'post_status' => 'publish',
-                    'numberposts' => -1,
-                    'fields'      => 'ids',
-                    'exclude'     => [$post_id],
-                ]);
-                foreach ($others as $tid) {
-                    update_post_meta($tid, '_gdh_email_is_active', '0');
-                }
+        $template = $this->emailService->getTemplate();
+        if ($template) {
+            wp_update_post([
+                'ID'           => intval($template->ID),
+                'post_content' => $body,
+            ]);
+            update_post_meta($template->ID, '_gdh_email_subject', $subject);
+        } else {
+            $version = 'v' . date('YmdHis');
+            $post_id = wp_insert_post([
+                'post_type'    => EmailTemplatePostType::POST_TYPE,
+                'post_status'  => 'publish',
+                'post_title'   => 'Email Template ' . $version,
+                'post_content' => $body,
+            ]);
+            if (! is_wp_error($post_id)) {
+                update_post_meta($post_id, '_gdh_email_subject', $subject);
+                update_post_meta($post_id, '_gdh_email_content_type', 'html');
+                update_post_meta($post_id, '_gdh_email_version', $version);
             }
         }
 

@@ -2,68 +2,60 @@
 
 ## Subject
 
-Nouvelle demande de rendez-vous – [service_name] – #[appointment_id] – [artisan_name]
+Nouvelle demande de rendez-vous – {{artisan_name}}
 
 ## Body (HTML)
 
 <div class="container">
   <h1>Nouvelle demande de rendez-vous</h1>
 
-  <p>Bonjour <strong>[artisan_name]</strong>,</p>
+  <p>Bonjour <strong>{{artisan_name}}</strong>,</p>
   <p>Vous avez reçu une nouvelle demande de rendez-vous. Voici les informations du client et son créneau prioritaire.</p>
 
   <h2>Résumé</h2>
   <table class="details">
     <tr>
-      <th>Référence</th>
-      <td>#[appointment_id]</td>
-    </tr>
-    <tr>
-      <th>Service demandé</th>
-      <td>[service_name]</td>
-    </tr>
-    <tr>
       <th>Artisan</th>
-      <td>[artisan_name]</td>
+      <td>{{artisan_name}}</td>
     </tr>
     <tr>
       <th>Créneau prioritaire</th>
-      <td>[appointment_date]</td>
+      <td>{{appointment_date}}</td>
     </tr>
   </table>
 
   <h2>Disponibilités proposées</h2>
-  [appointment_slots]
+  {{appointment_slots}}
 
   <h2>Coordonnées du client</h2>
   <table class="details">
     <tr>
       <th>Nom complet</th>
-      <td>[client_name]</td>
+      <td>{{client_name}}</td>
     </tr>
     <tr>
       <th>Email</th>
-      <td><a href="mailto:[client_email]">[client_email]</a></td>
+      <td><a href="mailto:{{client_email}}">{{client_email}}</a></td>
     </tr>
     <tr>
       <th>Téléphone</th>
-      <td><a href="tel:[phone]">[phone]</a></td>
+      <td><a href="tel:{{phone}}">{{phone}}</a></td>
     </tr>
     <tr>
       <th>Adresse d'intervention</th>
-      <td>[address], [postal_code] [city]</td>
+      <td>{{address}}, {{postal_code}} {{city}}</td>
     </tr>
   </table>
 
   <div class="cta">
-    <a class="btn" href="tel:[phone]">Appeler le client</a>
-    <a class="btn" href="mailto:[client_email]">Répondre par e‑mail</a>
+    <a class="btn" href="tel:{{phone}}">Appeler le client</a>
+    <a class="btn" href="mailto:{{client_email}}">Répondre par e‑mail</a>
   </div>
 
-  <p class="note">Astuce : les autres disponibilités proposées par le client sont visibles dans l’administration du site.</p>
+  <p class="note">Astuce : les autres disponibilités proposées par le client sont visibles dans l'administration du site.</p>
 
   <hr>
-  <p class="footer">Cet e-mail est généré automatiquement par [artisan_name]. Assistance : <a href="mailto:[admin_email]">[admin_email]</a>.</p>
+  <p class="footer">Cet e-mail est généré automatiquement par {{artisan_name}}.</p>
 </div>
 
 ## Style (CSS)
@@ -84,25 +76,23 @@ h2 { color:#1d2327; font-size:18px; margin:24px 0 12px; }
 
 ## Plain text fallback
 
-Bonjour [artisan_name],
+Bonjour {{artisan_name}},
 
 Nouvelle demande de rendez-vous
-Référence: #[appointment_id]
-Service demandé: [service_name]
-Artisan: [artisan_name]
-Créneau prioritaire: [appointment_date]
+Artisan: {{artisan_name}}
+Créneau prioritaire: {{appointment_date}}
 
 Disponibilités proposées:
-[appointment_slots]
+{{appointment_slots}}
 
 Coordonnées du client:
-- Nom complet: [client_name]
-- Email: [client_email]
-- Téléphone: [phone]
-- Adresse d'intervention: [address], [postal_code] [city]
+- Nom complet: {{client_name}}
+- Email: {{client_email}}
+- Téléphone: {{phone}}
+- Adresse d'intervention: {{address}}, {{postal_code}} {{city}}
 
 Actions:
-- Appeler: [phone]
-- Répondre par e-mail: [client_email]
+- Appeler: {{phone}}
+- Répondre par e-mail: {{client_email}}
 
-Cet e-mail est généré automatiquement par [artisan_name]. Assistance: [admin_email]
+Cet e-mail est généré automatiquement par {{artisan_name}}.

@@ -1,113 +1,73 @@
 <div class="wrap">
-  <h1>Email Settings</h1>
+	<h1>Email Settings</h1>
 
-  {% if show_saved_notice %}
-    <div class="notice notice-success is-dismissible"><p>Paramètres e-mail enregistrés.</p></div>
-  {% endif %}
+	{% if show_saved_notice %}
+		<div class="notice notice-success is-dismissible">
+			<p>Paramètres e-mail enregistrés.</p>
+		</div>
+	{% endif %}
 
-  {% if last_err %}
-    <div class="notice notice-error is-dismissible"><p><strong>Dernière erreur d'envoi :</strong> {{ last_err|e }}</p></div>
-  {% endif %}
+	{% if last_err %}
+		<div class="notice notice-error is-dismissible">
+			<p>
+				<strong>Dernière erreur d'envoi :</strong>
+				{{ last_err|e }}</p>
+		</div>
+	{% endif %}
 
-  <h2>Templates existants</h2>
-  {% if templates is not empty %}
-    <table class="widefat fixed striped">
-      <thead>
-        <tr>
-          <th>ID</th>
-          <th>Titre</th>
-          <th>Version</th>
-          <th>Actif</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for t in templates %}
-          <tr>
-            <td>{{ t.ID }}</td>
-            <td>{{ t.title|e }}</td>
-            <td>{{ t.version|e }}</td>
-            <td>{% if t.is_active %}<span class="dashicons dashicons-yes"></span>{% endif %}</td>
-            <td>
-              <a class="button button-secondary" href="{{ t.edit_link }}">Modifier</a>
-              {% if not t.is_active %}
-                <form style="display:inline" method="post" action="{{ admin_post_url }}">
-                  <input type="hidden" name="action" value="gdh_save_email_settings" />
-                  {{ nonce_field|raw }}
-                  <input type="hidden" name="activate_id" value="{{ t.ID }}" />
-                  <button type="submit" class="button">Activer</button>
-                </form>
-              {% endif %}
-            </td>
-          </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <p>Aucun template pour le moment.</p>
-  {% endif %}
+	<h2>Éditer le template</h2>
+	<form method="post" action="{{ admin_post_url }}">
+		<input type="hidden" name="action" value="gdh_save_email_settings"/>
+		{{ nonce_field|raw }}
+		<table class="form-table" role="presentation">
+			<tr>
+				<th scope="row">
+					<label for="gdh_subject">Sujet</label>
+				</th>
+				<td>
+					<div style="margin-bottom:10px;">
+						{% for var in subject_vars %}
+							{% set placeholder = '{{' ~ var ~ '}}' %}
+							<button type="button" class="button button-small copy-var" data-var="{{ placeholder }}" title="Cliquez pour copier" style="margin:2px;">{{ placeholder }}</button>
+						{% endfor %}
+					</div>
+					<input type="text" id="gdh_subject" name="subject" class="regular-text" value="{{ subject_value|e }}" required/>
+				</td>
+			</tr>
+			<tr>
+				<th scope="row">
+					<label for="gdh_body">Corps</label>
+				</th>
+				<td>
+					<div style="margin-bottom:-20px;">
+						{% for var in vars %}
+							{% set placeholder = '{{' ~ var ~ '}}' %}
+							<button type="button" class="button button-small copy-var" data-var="{{ placeholder }}" title="Cliquez pour copier" style="margin:2px;">{{ placeholder }}</button>
+						{% endfor %}
+					</div>
+					{{ editor_html|raw }}
+				</td>
+			</tr>
+		</table>
+		<p class="submit">
+			<button type="submit" class="button button-primary">Enregistrer le template</button>
+		</p>
+	</form>
 
-  <h2>Créer un nouveau template</h2>
-  <form method="post" action="{{ admin_post_url }}">
-    <input type="hidden" name="action" value="gdh_save_email_settings" />
-    {{ nonce_field|raw }}
-    <table class="form-table" role="presentation">
-      <tr>
-        <th scope="row"><label for="gdh_subject">Sujet</label></th>
-        <td><input type="text" id="gdh_subject" name="subject" class="regular-text" required /></td>
-      </tr>
-      <tr>
-        <th scope="row"><label for="gdh_body">Corps</label></th>
-        <td>{{ editor_html|raw }}</td>
-      </tr>
-      <tr>
-        <th scope="row"><label for="gdh_style">Style CSS</label></th>
-        <td><textarea id="gdh_style" name="style" rows="6" class="large-text" placeholder="body{font-family:Arial;} .btn{background:#006847;color:#fff;}"></textarea></td>
-      </tr>
-      <tr>
-        <th scope="row">Format</th>
-        <td>
-          <fieldset>
-            <label><input type="radio" name="content_type" value="html" checked> HTML</label><br />
-            <label><input type="radio" name="content_type" value="plain"> Texte brut</label>
-          </fieldset>
-        </td>
-      </tr>
-      <tr>
-        <th scope="row"><label for="gdh_version">Version</label></th>
-        <td><input type="text" id="gdh_version" name="version" class="regular-text" placeholder="v1.0" /></td>
-      </tr>
-      <tr>
-        <th scope="row">Activer</th>
-        <td><label><input type="checkbox" name="is_active" value="1" /> Définir ce template comme actif</label></td>
-      </tr>
-    </table>
-    <p class="submit"><button type="submit" class="button button-primary">Enregistrer le template</button></p>
-  </form>
-
-  <h2>Variables disponibles</h2>
-  <p>Cliquez pour copier le shortcode.</p>
-  <ul>
-    {% for code, desc in vars %}
-      {% set ph = '[' ~ code ~ ']' %}
-      <li>
-        <button class="button copy-ph" data-ph="{{ ph }}">{{ ph }}</button>
-        {{ desc|e }}
-      </li>
-    {% endfor %}
-  </ul>
-
-  <script>
-    document.addEventListener("click", function(e){
-      if(e.target && e.target.classList.contains("copy-ph")){
-        e.preventDefault();
-        const ph = e.target.getAttribute("data-ph");
-        if (navigator.clipboard && navigator.clipboard.writeText) {
-          navigator.clipboard.writeText(ph);
-          e.target.innerText = "Copié!";
-          setTimeout(()=>{ e.target.innerText = ph; }, 1000);
-        }
-      }
-    });
-  </script>
+	<script>
+		document.addEventListener("click", function (e) {
+if (e.target && e.target.classList.contains("copy-var")) {
+e.preventDefault();
+const varText = e.target.getAttribute("data-var");
+if (navigator.clipboard && navigator.clipboard.writeText) {
+navigator.clipboard.writeText(varText);
+const orig = e.target.innerText;
+e.target.innerText = "Copié!";
+setTimeout(() => {
+e.target.innerText = orig;
+}, 1000);
+}
+}
+});
+	</script>
 </div>

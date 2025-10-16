@@ -54,9 +54,6 @@ class Plugin
         }
 
         new ShortcodeManager($this->logger, $this->twig);
-
-        $this->logger->info('Plugin initialisé' . is_admin() ? 'Admin' : 'Frontend');
-
     }
 
     /**
