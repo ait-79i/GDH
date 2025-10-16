@@ -102,7 +102,7 @@ class AppointmentPostType
     {
         wp_nonce_field('gdh_appointment_meta_box', 'gdh_appointment_meta_box_nonce');
 
-        echo $this->twig->render('admin/appointment-metaboxes/appointment-details-metabox.twig', [
+        echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-details-metabox.twig', [
             'first_name'   => get_post_meta($post->ID, '_gdh_first_name', true),
             'last_name'    => get_post_meta($post->ID, '_gdh_last_name', true),
             'email'        => get_post_meta($post->ID, '_gdh_email', true),
@@ -128,14 +128,14 @@ class AppointmentPostType
             }
         }
 
-        echo $this->twig->render('admin/appointment-metaboxes/appointment-slots-metabox.twig', [
+        echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-slots-metabox.twig', [
             'slots' => $formattedSlots,
         ]);
     }
 
     public function renderAddressMetaBox($post)
     {
-        echo $this->twig->render('admin/appointment-metaboxes/appointment-address-metabox.twig', [
+        echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-address-metabox.twig', [
             'address'     => get_post_meta($post->ID, '_gdh_address', true),
             'postal_code' => get_post_meta($post->ID, '_gdh_postal_code', true),
             'city'        => get_post_meta($post->ID, '_gdh_city', true),
@@ -276,7 +276,7 @@ class AppointmentPostType
                     }
                 }
 
-                echo $this->twig->render('admin/appointment-metaboxes/appointment-availability-column.twig', [
+                echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-availability-column.twig', [
                     'slots' => $formattedSlots,
                 ]);
                 break;
