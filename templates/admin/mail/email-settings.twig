@@ -15,39 +15,100 @@
 		</div>
 	{% endif %}
 
-	<h2>Éditer le template</h2>
 	<form method="post" action="{{ admin_post_url }}">
 		<input type="hidden" name="action" value="gdh_save_email_settings"/>
 		{{ nonce_field|raw }}
-		<table class="form-table" role="presentation">
-			<tr>
-				<th scope="row">
-					<label for="gdh_subject">Sujet</label>
-				</th>
-				<td>
-					<div style="margin-bottom:10px;">
-						{% for var in subject_vars %}
-							{% set placeholder = '{{' ~ var ~ '}}' %}
-							<button type="button" class="button button-small copy-var" data-var="{{ placeholder }}" title="Cliquez pour copier" style="margin:2px;">{{ placeholder }}</button>
-						{% endfor %}
-					</div>
-					<input type="text" id="gdh_subject" name="subject" class="regular-text" value="{{ subject_value|e }}" required/>
-				</td>
-			</tr>
-			<tr>
-				<th scope="row">
-					<label for="gdh_body">Corps</label>
-				</th>
-				<td>
-					<div style="margin-bottom:-20px;">
-						{% for var in vars %}
-							{% set placeholder = '{{' ~ var ~ '}}' %}
-							<button type="button" class="button button-small copy-var" data-var="{{ placeholder }}" title="Cliquez pour copier" style="margin:2px;">{{ placeholder }}</button>
-						{% endfor %}
-					</div>
-					{{ editor_html|raw }}
-				</td>
-			</tr>
+
+		<style>
+			.gdh-two-col {
+				width: 100%;
+			}
+			.gdh-two-col td {
+				vertical-align: top;
+				width: 50%;
+				padding: 0 12px;
+			}
+			/* Vertical divider between columns */
+			.gdh-two-col td + td {
+				border-left: 1px solid #dcdcde;
+				padding-left: 24px;
+			}
+			.gdh-muted {
+				opacity: .5;
+			}
+			.gdh-pe-none {
+				pointer-events: none;
+			}
+
+			.gdh-chip {
+				display: inline-block;
+				background: transparent;
+				border: 1px solid #2271b1;
+				border-radius: 9999px;
+				padding: 3px 8px;
+				font-size: 12px;
+				color: #2271b1;
+				margin: 2px;
+				cursor: pointer;
+				user-select: none;
+			}
+			.gdh-chip:focus {
+				outline: 2px solid #2271b1;
+				outline-offset: 1px;
+			}
+			.gdh-label {
+				display: block;
+				margin: 6px 0 4px;
+				font-weight: 600;
+			}
+			.gdh-section-title {
+				margin: 0 0 10px;
+				font-size: 16px;
+			}
+			/* Make inputs and editors span full column width */
+			.gdh-two-col input.regular-text {
+				width: 100%;
+				max-width: 100%;
+			}
+			.gdh-two-col .wp-editor-wrap,
+			.gdh-two-col .wp-editor-container {
+				max-width: 100%;
+			}
+			.gdh-two-col .mce-tinymce {
+				width: 100% !important;
+			}
+			.gdh-two-col .wp-editor-area {
+				width: 100%;
+			}
+			/* Ensure content cells are wider than labels in nested tables */
+			.gdh-two-col .form-table {
+				width: 100%;
+			}
+			.gdh-two-col .form-table > tbody > tr > th {
+				width: 18%;
+				min-width: 120px;
+				vertical-align: top;
+				padding-right: 10px;
+				white-space: nowrap;
+			}
+			.gdh-two-col .form-table > tbody > tr > td {
+				width: 82%;
+			}
+			/* Spacing between rows inside section tables */
+			.gdh-inner-table { border-collapse: separate; border-spacing: 0 10px; }
+		</style>
+
+		<table class="form-table gdh-two-col" role="presentation">
+			<tbody>
+				<tr>
+					<td>
+						{% include 'admin/mail/partials/artisan-mail.twig' %}
+					</td>
+					<td>
+						{% include 'admin/mail/partials/confirmation-mail.twig' %}
+					</td>
+				</tr>
+			</tbody>
 		</table>
 		<p class="submit">
 			<button type="submit" class="button button-primary">Enregistrer le template</button>
@@ -56,16 +117,36 @@
 
 	<script>
 		document.addEventListener("click", function (e) {
-if (e.target && e.target.classList.contains("copy-var")) {
+const el = e.target;
+if (el && el.hasAttribute('data-var')) {
 e.preventDefault();
-const varText = e.target.getAttribute("data-var");
+const varText = el.getAttribute("data-var");
 if (navigator.clipboard && navigator.clipboard.writeText) {
 navigator.clipboard.writeText(varText);
-const orig = e.target.innerText;
-e.target.innerText = "Copié!";
+const orig = el.innerText;
+el.innerText = "Copié!";
 setTimeout(() => {
-e.target.innerText = orig;
+el.innerText = orig;
 }, 1000);
+}
+}
+});
+
+// Live toggle for confirmation panel
+document.addEventListener('change', function (e) {
+if (e.target && e.target.id === 'gdh_confirm_enabled') {
+const wrap = document.getElementById('gdh_confirm_wrap');
+const block = document.getElementById('gdh_confirm_block');
+const subj = document.getElementById('gdh_confirm_subject');
+const on = e.target.checked;
+if (wrap) {
+wrap.classList.toggle('gdh-muted', ! on);
+}
+if (block) {
+block.classList.toggle('gdh-pe-none', ! on);
+}
+if (subj) {
+subj.disabled = ! on;
 }
 }
 });

@@ -148,6 +148,11 @@ class AdminController
         $subject_value = $template ? (string) get_post_meta($template->ID, '_gdh_email_subject', true) : '';
         $body_initial  = $template ? (string) $template->post_content : '';
 
+        // Confirmation email settings (stored as options)
+        $confirm_enabled        = get_option('gdh_email_confirm_enabled', '0') === '1';
+        $confirm_subject_value  = (string) get_option('gdh_email_confirm_subject', '');
+        $confirm_body_initial   = (string) get_option('gdh_email_confirm_body', '');
+
         // Nonce field HTML
         $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
 
@@ -156,19 +161,35 @@ class AdminController
         wp_editor($body_initial, 'gdh_body', [
             'textarea_name' => 'body',
             'media_buttons' => false,
-            'textarea_rows' => 12,
+            'textarea_rows' => 16,
+            'editor_height' => 380,
         ]);
         $editor_html = ob_get_clean();
 
+        // Confirmation body editor
+        ob_start();
+        wp_editor($confirm_body_initial, 'gdh_confirm_body', [
+            'textarea_name' => 'confirm_body',
+            'media_buttons' => false,
+            'textarea_rows' => 14,
+            'editor_height' => 340,
+        ]);
+        $confirm_editor_html = ob_get_clean();
+
         $html = $this->twig->render('admin/mail/email-settings.twig', [
-            'vars'              => $vars,
-            'subject_vars'      => ['client_name', 'appointment_date'],
-            'show_saved_notice' => isset($_GET['gdh_email_saved']),
-            'last_err'          => get_option('gdh_email_last_error'),
-            'admin_post_url'    => esc_url(admin_url('admin-post.php')),
-            'nonce_field'       => $nonce_field,
-            'editor_html'       => $editor_html,
-            'subject_value'     => $subject_value,
+            'vars'                  => $vars,
+            'subject_vars_left'     => ['client_name', 'appointment_date'],
+            'confirm_subject_vars'  => ['artisan_name', 'appointment_date'],
+            'show_saved_notice'     => isset($_GET['gdh_email_saved']),
+            'last_err'              => get_option('gdh_email_last_error'),
+            'admin_post_url'        => esc_url(admin_url('admin-post.php')),
+            'nonce_field'           => $nonce_field,
+            'editor_html'           => $editor_html,
+            'subject_value'         => $subject_value,
+            // Confirmation props
+            'confirm_enabled'       => $confirm_enabled,
+            'confirm_subject_value' => $confirm_subject_value,
+            'confirm_editor_html'   => $confirm_editor_html,
         ]);
         echo $html;
     }
@@ -206,6 +227,14 @@ class AdminController
                 update_post_meta($post_id, '_gdh_email_version', $version);
             }
         }
+
+        // Save confirmation email settings
+        $confirm_enabled_post = isset($_POST['confirm_enabled']) && $_POST['confirm_enabled'] === '1' ? '1' : '0';
+        $confirm_subject_post = isset($_POST['confirm_subject']) ? sanitize_text_field($_POST['confirm_subject']) : '';
+        $confirm_body_post    = isset($_POST['confirm_body']) ? wp_kses_post($_POST['confirm_body']) : '';
+        update_option('gdh_email_confirm_enabled', $confirm_enabled_post);
+        update_option('gdh_email_confirm_subject', $confirm_subject_post);
+        update_option('gdh_email_confirm_body', $confirm_body_post);
 
         wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
         exit;
