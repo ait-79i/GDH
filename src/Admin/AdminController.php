@@ -19,6 +19,7 @@ class AdminController
         $this->emailService = new EmailTemplateService(new Logger());
         add_action('admin_menu', [$this, 'addSettingsSubmenu']);
         add_action('admin_menu', [$this, 'addEmailSettingsSubmenu']);
+        add_action('admin_menu', [$this, 'removeEmailTemplateSubmenus'], 999);
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_post_gdh_save_email_settings', [$this, 'handleEmailSettingsSave']);
@@ -152,6 +153,40 @@ class AdminController
             echo '<div class="notice notice-error is-dismissible"><p><strong>Dernière erreur d\'envoi :</strong> ' . esc_html($last_err) . '</p></div>';
         }
 
+        // Formulaire de création déplacé sous la liste des templates
+
+        echo '<h2>Templates existants</h2>';
+        if (! empty($templates)) {
+            echo '<table class="widefat fixed striped">';
+            echo '<thead><tr><th>ID</th><th>Titre</th><th>Version</th><th>Actif</th><th>Actions</th></tr></thead><tbody>';
+            foreach ($templates as $t) {
+                $ver = get_post_meta($t->ID, '_gdh_email_version', true);
+                $is_active = get_post_meta($t->ID, '_gdh_email_is_active', true) === '1';
+                $edit_link = get_edit_post_link($t->ID);
+                echo '<tr>';
+                echo '<td>' . intval($t->ID) . '</td>';
+                echo '<td>' . esc_html(get_the_title($t)) . '</td>';
+                echo '<td>' . esc_html($ver) . '</td>';
+                echo '<td>' . ($is_active ? '<span class="dashicons dashicons-yes"></span>' : '') . '</td>';
+                echo '<td>';
+                echo '<a class="button button-secondary" href="' . esc_url($edit_link) . '">Modifier</a> ';
+                if (! $is_active) {
+                    echo '<form style="display:inline" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
+                    echo '<input type="hidden" name="action" value="gdh_save_email_settings" />';
+                    wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce');
+                    echo '<input type="hidden" name="activate_id" value="' . intval($t->ID) . '" />';
+                    echo '<button type="submit" class="button">Activer</button>';
+                    echo '</form>';
+                }
+                echo '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody></table>';
+        } else {
+            echo '<p>Aucun template pour le moment.</p>';
+        }
+
+        // Création d'un nouveau template (déplacée après la liste)
         echo '<h2>Créer un nouveau template</h2>';
         echo '<form method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
         echo '<input type="hidden" name="action" value="gdh_save_email_settings" />';
@@ -175,35 +210,6 @@ class AdminController
         echo '</table>';
         submit_button('Enregistrer le template');
         echo '</form>';
-
-        echo '<h2>Templates existants</h2>';
-        if (! empty($templates)) {
-            echo '<table class="widefat fixed striped">';
-            echo '<thead><tr><th>ID</th><th>Titre</th><th>Version</th><th>Actif</th><th>Actions</th></tr></thead><tbody>';
-            foreach ($templates as $t) {
-                $ver = get_post_meta($t->ID, '_gdh_email_version', true);
-                $is_active = get_post_meta($t->ID, '_gdh_email_is_active', true) === '1';
-                $edit_link = get_edit_post_link($t->ID);
-                echo '<tr>';
-                echo '<td>' . intval($t->ID) . '</td>';
-                echo '<td>' . esc_html(get_the_title($t)) . '</td>';
-                echo '<td>' . esc_html($ver) . '</td>';
-                echo '<td>' . ($is_active ? '<span class="dashicons dashicons-yes"></span>' : '') . '</td>';
-                echo '<td>';
-                echo '<a class="button button-secondary" href="' . esc_url($edit_link) . '">Modifier</a> ';
-                echo '<form style="display:inline" method="post" action="' . esc_url(admin_url('admin-post.php')) . '">';
-                echo '<input type="hidden" name="action" value="gdh_save_email_settings" />';
-                wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce');
-                echo '<input type="hidden" name="activate_id" value="' . intval($t->ID) . '" />';
-                echo '<button type="submit" class="button">' . ($is_active ? 'Actif' : 'Activer') . '</button>';
-                echo '</form>';
-                echo '</td>';
-                echo '</tr>';
-            }
-            echo '</tbody></table>';
-        } else {
-            echo '<p>Aucun template pour le moment.</p>';
-        }
 
         echo '<h2>Variables disponibles</h2>';
         echo '<p>Cliquez pour copier le shortcode.</p>';
@@ -241,7 +247,7 @@ class AdminController
                     update_post_meta($tid, '_gdh_email_is_active', $tid === $activate_id ? '1' : '0');
                 }
             }
-            wp_safe_redirect(add_query_arg('gdh_email_saved', '1', menu_page_url('gdh_email_settings', false)));
+            wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
             exit;
         }
 
@@ -279,8 +285,15 @@ class AdminController
             }
         }
 
-        wp_safe_redirect(add_query_arg('gdh_email_saved', '1', menu_page_url('gdh_email_settings', false)));
+        wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
         exit;
+    }
+
+    public function removeEmailTemplateSubmenus()
+    {
+        // Remove the CPT submenus under Rendez-vous
+        remove_submenu_page('edit.php?post_type=gdh_appointment', 'edit.php?post_type=gdh_email_template');
+        remove_submenu_page('edit.php?post_type=gdh_appointment', 'post-new.php?post_type=gdh_email_template');
     }
 
     public function fieldColor($args)

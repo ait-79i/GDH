@@ -33,7 +33,7 @@ class EmailTemplateService
         return [
             'client_name' => 'Nom complet du client',
             'appointment_date' => 'Date et heure du rendez-vous (priorité 1)',
-            '.' => 'Nom du service',
+            'service_name' => 'Nom du service',
             'admin_email' => 'Email de l\'administrateur',
             'appointment_id' => 'Identifiant du rendez-vous',
             'client_email' => 'Email du client',
@@ -42,10 +42,12 @@ class EmailTemplateService
             'city' => 'Ville',
             'postal_code' => 'Code postal',
             'site_name' => 'Nom du site',
+            'artisan_name' => 'Nom de l\'artisan (alias du nom du site)',
+            'appointment_slots' => 'Toutes les disponibilités proposées (formaté selon HTML ou texte)'
         ];
     }
 
-    private function buildContextFromData($post_id, array $formData)
+    private function buildContextFromData($post_id, array $formData, $isHtml = false)
     {
         $first = isset($formData['first_name']) ? $formData['first_name'] : get_post_meta($post_id, '_gdh_first_name', true);
         $last = isset($formData['last_name']) ? $formData['last_name'] : get_post_meta($post_id, '_gdh_last_name', true);
@@ -57,6 +59,7 @@ class EmailTemplateService
         $service = isset($formData['service_name']) ? $formData['service_name'] : '';
         $slots = get_post_meta($post_id, '_gdh_slots', true);
         $aptDate = '';
+        $slotsFormatted = '';
         if (is_array($slots) && !empty($slots)) {
             $firstSlot = reset($slots);
             if (isset($firstSlot['date'])) {
@@ -65,10 +68,50 @@ class EmailTemplateService
                 $aptDate = date_i18n('d/m/Y', strtotime($dateStr));
                 if (!empty($times) && !in_array('all-day', $times, true)) {
                     $aptDate .= ' ' . implode(', ', $times);
+                } elseif (!empty($times) && in_array('all-day', $times, true)) {
+                    $aptDate .= ' – Toute la journée';
+                }
+            }
+
+            // Build full slots list
+            $all = [];
+            foreach ($slots as $slot) {
+                if (empty($slot['date'])) { continue; }
+                $dateStr = $slot['date'];
+                $times = isset($slot['times']) && is_array($slot['times']) ? $slot['times'] : [];
+                $label = date_i18n('d/m/Y', strtotime($dateStr));
+                if (!empty($times)) {
+                    if (in_array('all-day', $times, true)) {
+                        $label .= ' – Toute la journée';
+                    } else {
+                        // sanitize times entries
+                        $cleanTimes = array_map('sanitize_text_field', $times);
+                        $label .= ' – ' . implode(', ', $cleanTimes);
+                    }
+                }
+                $all[] = $label;
+            }
+            if (!empty($all)) {
+                if ($isHtml) {
+                    if (count($all) === 1) {
+                        $slotsFormatted = '<div class="gdh-slot">' . esc_html($all[0]) . '</div>';
+                    } else {
+                        $items = '';
+                        foreach ($all as $it) { $items .= '<li>' . esc_html($it) . '</li>'; }
+                        $slotsFormatted = '<ul class="gdh-slots">' . $items . '</ul>';
+                    }
+                } else {
+                    if (count($all) === 1) {
+                        $slotsFormatted = $all[0];
+                    } else {
+                        $slotsFormatted = '- ' . implode("\n- ", $all);
+                    }
                 }
             }
         }
         $adminEmail = get_option('admin_email');
+        $siteName = get_bloginfo('name');
+        $artisanName = $siteName; // alias; peut être remplacé par une option dédiée si nécessaire
         return [
             'client_name' => trim($first . ' ' . $last),
             'appointment_date' => $aptDate,
@@ -80,7 +123,9 @@ class EmailTemplateService
             'address' => (string)$address,
             'city' => (string)$city,
             'postal_code' => (string)$postal,
-            'site_name' => get_bloginfo('name'),
+            'site_name' => $siteName,
+            'artisan_name' => $artisanName,
+            'appointment_slots' => $slotsFormatted,
         ];
     }
 
@@ -135,7 +180,8 @@ class EmailTemplateService
         $contentType = $contentType === 'html' ? 'html' : 'plain';
         $body = (string)$template->post_content;
         $available = $this->getAvailableVariables();
-        $context = $this->buildContextFromData($post_id, $formData);
+        $isHtml = ($contentType === 'html');
+        $context = $this->buildContextFromData($post_id, $formData, $isHtml);
         $placeholders = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
         list($unknown, $missing) = $this->validatePlaceholders($placeholders, $available, $context);
         if (!empty($unknown) || !empty($missing)) {
