@@ -197,6 +197,9 @@ class AdminController
             $all_post_types[$pt->name] = $label;
         }
 
+        // Derive current receiver mode for radio UI (legacy-compatible)
+        $recv_mode = $recv_static_enabled ? 'static' : ($recv_dyn_enabled ? 'dynamic' : '');
+
         // Nonce field HTML
         $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
 
@@ -234,6 +237,7 @@ class AdminController
             'confirm_subject_value'        => $confirm_subject_value,
             'confirm_editor_html'          => $confirm_editor_html,
             // Receiver props
+            'recv_mode'                    => $recv_mode,
             'recv_static_enabled'          => $recv_static_enabled,
             'recv_static_email'            => $recv_static_email,
             'recv_static_name'             => $recv_static_name,
@@ -270,10 +274,11 @@ class AdminController
         update_option('gdh_email_confirm_body', $confirm_body_post);
 
         // Save receiver settings (combined array option)
-        $recv_static_enabled_post = isset($_POST['receiver_static_enabled']) && $_POST['receiver_static_enabled'] === '1' ? '1' : '0';
+        $recv_mode_post = isset($_POST['receiver_mode']) ? sanitize_key($_POST['receiver_mode']) : '';
+        $recv_static_enabled_post = ($recv_mode_post === 'static') ? '1' : '0';
         $recv_static_email_post   = isset($_POST['receiver_static_email']) ? sanitize_email($_POST['receiver_static_email']) : '';
         $recv_static_name_post    = isset($_POST['receiver_static_name']) ? sanitize_text_field($_POST['receiver_static_name']) : '';
-        $recv_dyn_enabled_post    = isset($_POST['receiver_dynamic_enabled']) && $_POST['receiver_dynamic_enabled'] === '1' ? '1' : '0';
+        $recv_dyn_enabled_post    = ($recv_mode_post === 'dynamic') ? '1' : '0';
         $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_text_field($_POST['receiver_dynamic_email']) : '';
         $recv_dyn_name_post       = isset($_POST['receiver_dynamic_name']) ? sanitize_text_field($_POST['receiver_dynamic_name']) : '';
         $recv_dyn_post_type_post  = isset($_POST['receiver_dynamic_post_type']) ? sanitize_key($_POST['receiver_dynamic_post_type']) : '';
