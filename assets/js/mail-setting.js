@@ -21,11 +21,41 @@
   });
 
   // Live toggle for confirmation panel
-  $(document).on('change', '#gdh_confirm_enabled', function () {
+  $(document).on('change', '#gdh_confirm_enabled', function(){
     const on = this.checked;
     $('#gdh_confirm_wrap').toggleClass('gdh-muted', !on);
     $('#gdh_confirm_block').toggleClass('gdh-pe-none', !on);
     $('#gdh_confirm_subject').prop('disabled', !on);
+  });
+
+  // Toggle: static receiver fields
+  $(document).on('change', '#gdh_recv_static_enabled', function(){
+    const on = this.checked;
+    $('#gdh_recv_static_wrap').toggleClass('gdh-muted', !on);
+    $('#gdh_recv_static_block').toggleClass('gdh-pe-none', !on);
+    $('#receiver_static_email, #receiver_static_name').prop('disabled', !on);
+    // If static is enabled, disable dynamic
+    if (on) {
+      const $dyn = $('#gdh_recv_dyn_enabled');
+      if ($dyn.prop('checked')) {
+        $dyn.prop('checked', false).trigger('change');
+      }
+    }
+  });
+
+  // Toggle: dynamic receiver fields
+  $(document).on('change', '#gdh_recv_dyn_enabled', function(){
+    const on = this.checked;
+    $('#gdh_recv_dyn_wrap').toggleClass('gdh-muted', !on);
+    $('#gdh_recv_dyn_block').toggleClass('gdh-pe-none', !on);
+    $('#receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !on);
+    // If dynamic is enabled, disable static
+    if (on) {
+      const $stat = $('#gdh_recv_static_enabled');
+      if ($stat.prop('checked')) {
+        $stat.prop('checked', false).trigger('change');
+      }
+    }
   });
 
   // Prevent submit if confirmation is enabled but subject/body is empty

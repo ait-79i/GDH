@@ -122,7 +122,7 @@ class AdminController
             wp_enqueue_script(
                 'gdh-mail-settings',
                 GDH_PLUGIN_URL . 'assets/js/mail-setting.js',
-                ['wp-editor'],
+                ['jquery','wp-editor'],
                 $js_ver,
                 true
             );
@@ -172,6 +172,15 @@ class AdminController
         $confirm_subject_value = (string) get_option('gdh_email_confirm_subject', '');
         $confirm_body_initial  = (string) get_option('gdh_email_confirm_body', '');
 
+        // Receiver settings (static and dynamic) - combined option with legacy fallback
+        $receivers_opt       = get_option('gdh_receivers', []);
+        $recv_static_enabled = isset($receivers_opt['static']['enabled']) ? ($receivers_opt['static']['enabled'] === '1') : (get_option('gdh_receiver_static_enabled', '0') === '1');
+        $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : (string) get_option('gdh_receiver_static_email', '');
+        $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : (string) get_option('gdh_receiver_static_name', '');
+        $recv_dyn_enabled    = isset($receivers_opt['dynamic']['enabled']) ? ($receivers_opt['dynamic']['enabled'] === '1') : (get_option('gdh_receiver_dynamic_enabled', '0') === '1');
+        $recv_dyn_email      = isset($receivers_opt['dynamic']['email']) ? (string) $receivers_opt['dynamic']['email'] : (string) get_option('gdh_receiver_dynamic_email', '');
+        $recv_dyn_name       = isset($receivers_opt['dynamic']['name']) ? (string) $receivers_opt['dynamic']['name'] : (string) get_option('gdh_receiver_dynamic_name', '');
+
         // Nonce field HTML
         $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
 
@@ -208,6 +217,13 @@ class AdminController
             'confirm_enabled'              => $confirm_enabled,
             'confirm_subject_value'        => $confirm_subject_value,
             'confirm_editor_html'          => $confirm_editor_html,
+            // Receiver props
+            'recv_static_enabled'          => $recv_static_enabled,
+            'recv_static_email'            => $recv_static_email,
+            'recv_static_name'             => $recv_static_name,
+            'recv_dyn_enabled'             => $recv_dyn_enabled,
+            'recv_dyn_email'               => $recv_dyn_email,
+            'recv_dyn_name'                => $recv_dyn_name,
         ]);
         echo $html;
     }
@@ -253,6 +269,28 @@ class AdminController
         update_option('gdh_email_confirm_enabled', $confirm_enabled_post);
         update_option('gdh_email_confirm_subject', $confirm_subject_post);
         update_option('gdh_email_confirm_body', $confirm_body_post);
+
+        // Save receiver settings (combined array option)
+        $recv_static_enabled_post = isset($_POST['receiver_static_enabled']) && $_POST['receiver_static_enabled'] === '1' ? '1' : '0';
+        $recv_static_email_post   = isset($_POST['receiver_static_email']) ? sanitize_email($_POST['receiver_static_email']) : '';
+        $recv_static_name_post    = isset($_POST['receiver_static_name']) ? sanitize_text_field($_POST['receiver_static_name']) : '';
+        $recv_dyn_enabled_post    = isset($_POST['receiver_dynamic_enabled']) && $_POST['receiver_dynamic_enabled'] === '1' ? '1' : '0';
+        $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_email($_POST['receiver_dynamic_email']) : '';
+        $recv_dyn_name_post       = isset($_POST['receiver_dynamic_name']) ? sanitize_text_field($_POST['receiver_dynamic_name']) : '';
+
+        $receivers_new = [
+            'static'  => [
+                'enabled' => $recv_static_enabled_post,
+                'email'   => $recv_static_email_post,
+                'name'    => $recv_static_name_post,
+            ],
+            'dynamic' => [
+                'enabled' => $recv_dyn_enabled_post,
+                'email'   => $recv_dyn_email_post,
+                'name'    => $recv_dyn_name_post,
+            ],
+        ];
+        update_option('gdh_receivers', $receivers_new);
 
         wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
         exit;
