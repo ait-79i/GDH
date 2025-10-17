@@ -48,7 +48,7 @@
     const on = this.checked;
     $('#gdh_recv_dyn_wrap').toggleClass('gdh-muted', !on);
     $('#gdh_recv_dyn_block').toggleClass('gdh-pe-none', !on);
-    $('#receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !on);
+    $('#receiver_dynamic_post_type, #receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !on);
     // If dynamic is enabled, disable static
     if (on) {
       const $stat = $('#gdh_recv_static_enabled');

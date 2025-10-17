@@ -180,6 +180,15 @@ class AdminController
         $recv_dyn_enabled    = isset($receivers_opt['dynamic']['enabled']) ? ($receivers_opt['dynamic']['enabled'] === '1') : (get_option('gdh_receiver_dynamic_enabled', '0') === '1');
         $recv_dyn_email      = isset($receivers_opt['dynamic']['email']) ? (string) $receivers_opt['dynamic']['email'] : (string) get_option('gdh_receiver_dynamic_email', '');
         $recv_dyn_name       = isset($receivers_opt['dynamic']['name']) ? (string) $receivers_opt['dynamic']['name'] : (string) get_option('gdh_receiver_dynamic_name', '');
+        $recv_dyn_post_type  = isset($receivers_opt['dynamic']['post_type']) ? (string) $receivers_opt['dynamic']['post_type'] : '';
+
+        // Build list of available post types (UI-visible)
+        $pts            = get_post_types(['show_ui' => true], 'objects');
+        $all_post_types = [];
+        foreach ($pts as $pt) {
+            $label                = isset($pt->labels->singular_name) && $pt->labels->singular_name ? $pt->labels->singular_name : $pt->label;
+            $all_post_types[$pt->name] = $label;
+        }
 
         // Nonce field HTML
         $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
@@ -224,6 +233,8 @@ class AdminController
             'recv_dyn_enabled'             => $recv_dyn_enabled,
             'recv_dyn_email'               => $recv_dyn_email,
             'recv_dyn_name'                => $recv_dyn_name,
+            'recv_dyn_post_type'           => $recv_dyn_post_type,
+            'all_post_types'               => $all_post_types,
         ]);
         echo $html;
     }
@@ -277,6 +288,7 @@ class AdminController
         $recv_dyn_enabled_post    = isset($_POST['receiver_dynamic_enabled']) && $_POST['receiver_dynamic_enabled'] === '1' ? '1' : '0';
         $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_email($_POST['receiver_dynamic_email']) : '';
         $recv_dyn_name_post       = isset($_POST['receiver_dynamic_name']) ? sanitize_text_field($_POST['receiver_dynamic_name']) : '';
+        $recv_dyn_post_type_post  = isset($_POST['receiver_dynamic_post_type']) ? sanitize_key($_POST['receiver_dynamic_post_type']) : '';
 
         $receivers_new = [
             'static'  => [
@@ -288,6 +300,7 @@ class AdminController
                 'enabled' => $recv_dyn_enabled_post,
                 'email'   => $recv_dyn_email_post,
                 'name'    => $recv_dyn_name_post,
+                'post_type' => $recv_dyn_post_type_post,
             ],
         ];
         update_option('gdh_receivers', $receivers_new);

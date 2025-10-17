@@ -49,6 +49,17 @@
 							<table class="form-table gdh-inner-table" role="presentation">
 								<tbody id="gdh_recv_dyn_block" class="{% if not recv_dyn_enabled %}gdh-pe-none{% endif %}">
 									<tr>
+										<th scope="row"><label for="receiver_dynamic_post_type">Type de contenu</label></th>
+										<td>
+											<select id="receiver_dynamic_post_type" name="receiver_dynamic_post_type" {% if not recv_dyn_enabled %}disabled{% endif %}>
+												<option value="">— Sélectionner —</option>
+												{% for key, label in all_post_types %}
+													<option value="{{ key|e }}" {% if recv_dyn_post_type == key %}selected{% endif %}>{{ label }}</option>
+												{% endfor %}
+											</select>
+										</td>
+									</tr>
+									<tr>
 										<th scope="row"><label for="receiver_dynamic_email">E-mail du destinataire</label></th>
 										<td>
 											<input type="email" id="receiver_dynamic_email" name="receiver_dynamic_email" class="regular-text" value="{{ recv_dyn_email|e }}" {% if not recv_dyn_enabled %}disabled{% endif %}>
