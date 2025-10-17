@@ -116,6 +116,16 @@ class AdminController
                 ['wp-editor'],
                 $css_ver
             );
+            // Enqueue page-specific JS
+            $js_path = GDH_PLUGIN_PATH . 'assets/js/mail-setting.js';
+            $js_ver  = file_exists($js_path) ? filemtime($js_path) : null;
+            wp_enqueue_script(
+                'gdh-mail-settings',
+                GDH_PLUGIN_URL . 'assets/js/mail-setting.js',
+                ['wp-editor'],
+                $js_ver,
+                true
+            );
         }
     }
 
