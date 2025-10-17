@@ -30,8 +30,8 @@ class AdminController
         $parent_slug     = 'edit.php?post_type=gdh_appointment';
         $this->page_hook = add_submenu_page(
             $parent_slug,
-            'Design du Popup',
-            'Design du Popup',
+            'Apparence de la popup',
+            'Apparence de la popup',
             'manage_options',
             'gdh_rdv_design',
             [$this, 'renderSettingsPage']
@@ -43,8 +43,8 @@ class AdminController
         $parent_slug           = 'edit.php?post_type=gdh_appointment';
         $this->email_page_hook = add_submenu_page(
             $parent_slug,
-            'Email Settings',
-            'Email Settings',
+            'Paramètres des e-mails',
+            'Paramètres des e-mails',
             'manage_options',
             'gdh_email_settings',
             [$this, 'renderEmailSettingsPage']
@@ -138,7 +138,7 @@ class AdminController
         $submit_button_html = ob_get_clean();
 
         echo $this->twig->render('admin/appointment/design-settings.twig', [
-            'title'                => 'Design du Popup RDV',
+            'title'                => 'Apparence de la popup RDV',
             'form_action'          => 'options.php',
             'settings_fields_html' => $settings_fields_html,
             'sections_html'        => $sections_html,
@@ -186,18 +186,18 @@ class AdminController
         $confirm_editor_html = ob_get_clean();
 
         $html = $this->twig->render('admin/mail/email-settings.twig', [
-            'variables'                      => $vars,
-            'variables_sujet_gauche'         => ['nom_lead', 'date_rdv'],
-            'variables_confirmation_sujet'   => ['nom_destinataire', 'date_rdv'],
-            'show_saved_notice'              => isset($_GET['gdh_email_saved']),
-            'admin_post_url'                 => esc_url(admin_url('admin-post.php')),
-            'nonce_field'                    => $nonce_field,
-            'editor_html'                    => $editor_html,
-            'subject_value'                  => $subject_value,
+            'variables'                    => $vars,
+            'variables_sujet_gauche'       => ['nom_lead', 'date_rdv'],
+            'variables_confirmation_sujet' => ['nom_destinataire', 'date_rdv'],
+            'show_saved_notice'            => isset($_GET['gdh_email_saved']),
+            'admin_post_url'               => esc_url(admin_url('admin-post.php')),
+            'nonce_field'                  => $nonce_field,
+            'editor_html'                  => $editor_html,
+            'subject_value'                => $subject_value,
             // Confirmation props
-            'confirm_enabled'                => $confirm_enabled,
-            'confirm_subject_value'          => $confirm_subject_value,
-            'confirm_editor_html'            => $confirm_editor_html,
+            'confirm_enabled'              => $confirm_enabled,
+            'confirm_subject_value'        => $confirm_subject_value,
+            'confirm_editor_html'          => $confirm_editor_html,
         ]);
         echo $html;
     }
