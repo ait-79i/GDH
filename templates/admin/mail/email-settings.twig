@@ -1,4 +1,4 @@
-<div class="wrap">
+<div class="wrap gdh-email-settings">
 	<h1>Email Settings</h1>
 
 	{% if show_saved_notice %}
@@ -7,96 +7,10 @@
 		</div>
 	{% endif %}
 
-	{% if last_err %}
-		<div class="notice notice-error is-dismissible">
-			<p>
-				<strong>Dernière erreur d'envoi :</strong>
-				{{ last_err|e }}</p>
-		</div>
-	{% endif %}
 
 	<form method="post" action="{{ admin_post_url }}">
 		<input type="hidden" name="action" value="gdh_save_email_settings"/>
 		{{ nonce_field|raw }}
-
-		<style>
-			.gdh-two-col {
-				width: 100%;
-			}
-			.gdh-two-col td {
-				vertical-align: top;
-				width: 50%;
-				padding: 0 12px;
-			}
-			/* Vertical divider between columns */
-			.gdh-two-col td + td {
-				border-left: 1px solid #dcdcde;
-				padding-left: 24px;
-			}
-			.gdh-muted {
-				opacity: .5;
-			}
-			.gdh-pe-none {
-				pointer-events: none;
-			}
-
-			.gdh-chip {
-				display: inline-block;
-				background: transparent;
-				border: 1px solid #2271b1;
-				border-radius: 9999px;
-				padding: 3px 8px;
-				font-size: 12px;
-				color: #2271b1;
-				margin: 2px;
-				cursor: pointer;
-				user-select: none;
-			}
-			.gdh-chip:focus {
-				outline: 2px solid #2271b1;
-				outline-offset: 1px;
-			}
-			.gdh-label {
-				display: block;
-				margin: 6px 0 4px;
-				font-weight: 600;
-			}
-			.gdh-section-title {
-				margin: 0 0 10px;
-				font-size: 16px;
-			}
-			/* Make inputs and editors span full column width */
-			.gdh-two-col input.regular-text {
-				width: 100%;
-				max-width: 100%;
-			}
-			.gdh-two-col .wp-editor-wrap,
-			.gdh-two-col .wp-editor-container {
-				max-width: 100%;
-			}
-			.gdh-two-col .mce-tinymce {
-				width: 100% !important;
-			}
-			.gdh-two-col .wp-editor-area {
-				width: 100%;
-			}
-			/* Ensure content cells are wider than labels in nested tables */
-			.gdh-two-col .form-table {
-				width: 100%;
-			}
-			.gdh-two-col .form-table > tbody > tr > th {
-				width: 18%;
-				min-width: 120px;
-				vertical-align: top;
-				padding-right: 10px;
-				white-space: nowrap;
-			}
-			.gdh-two-col .form-table > tbody > tr > td {
-				width: 82%;
-			}
-			/* Spacing between rows inside section tables */
-			.gdh-inner-table { border-collapse: separate; border-spacing: 0 10px; }
-		</style>
 
 		<table class="form-table gdh-two-col" role="presentation">
 			<tbody>

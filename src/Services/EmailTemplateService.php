@@ -31,15 +31,15 @@ class EmailTemplateService
     public function getAvailableVariables()
     {
         return [
-            'client_name',
-            'appointment_date',
-            'client_email',
+            'nom_lead',
+            'date_rdv',
+            'email_lead',
             'phone',
             'address',
             'city',
             'postal_code',
-            'artisan_name',
-            'appointment_slots',
+            'nom_destinataire',
+            'creneaux_rdv',
         ];
     }
 
@@ -108,15 +108,26 @@ class EmailTemplateService
         $siteName    = get_bloginfo('name');
         $artisanName = $siteName; // alias; peut être remplacé par une option dédiée si nécessaire
         return [
-            'client_name'       => trim($first . ' ' . $last),
-            'appointment_date'  => $aptDate,
-            'client_email'      => (string) $email,
+            'nom_lead'          => trim($first . ' ' . $last),
+            'date_rdv'          => $aptDate,
+            'email_lead'        => (string) $email,
             'phone'             => (string) $phone,
             'address'           => (string) $address,
             'city'              => (string) $city,
             'postal_code'       => (string) $postal,
-            'artisan_name'      => $artisanName,
-            'appointment_slots' => $slotsFormatted,
+            'nom_destinataire'  => $artisanName,
+            'creneaux_rdv'      => $slotsFormatted,
+        ];
+    }
+
+    private function getPlaceholderAliases()
+    {
+        return [
+            'artisan_name' => 'nom_destinataire',
+            'client_name'  => 'nom_lead',
+            'client_email' => 'email_lead',
+            'appointment_date'  => 'date_rdv',
+            'appointment_slots' => 'creneaux_rdv',
         ];
     }
 
@@ -145,9 +156,11 @@ class EmailTemplateService
 
     private function replacePlaceholders($text, array $context)
     {
-        return preg_replace_callback('/\{\{([a-zA-Z0-9_]+)\}\}/', function ($m) use ($context) {
-            $k = $m[1];
-            return array_key_exists($k, $context) ? (string) $context[$k] : $m[0];
+        $aliases = $this->getPlaceholderAliases();
+        return preg_replace_callback('/\{\{([a-zA-Z0-9_]+)\}\}/', function ($m) use ($context, $aliases) {
+            $k   = $m[1];
+            $key = array_key_exists($k, $context) ? $k : (isset($aliases[$k]) ? $aliases[$k] : $k);
+            return array_key_exists($key, $context) ? (string) $context[$key] : $m[0];
         }, (string) $text);
     }
 
@@ -162,7 +175,6 @@ class EmailTemplateService
         $template = $this->getTemplate();
         if (! $template) {
             $this->logger->error('GDH Email: aucun template disponible');
-            update_option('gdh_email_last_error', 'Aucun template e-mail disponible.');
             return false;
         }
         $subject                 = get_post_meta($template->ID, '_gdh_email_subject', true);
@@ -173,20 +185,20 @@ class EmailTemplateService
         $available               = $this->getAvailableVariables();
         $isHtml                  = ($contentType === 'html');
         $context                 = $this->buildContextFromData($post_id, $formData, $isHtml);
-        $placeholders            = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
+        $aliases                 = $this->getPlaceholderAliases();
+        $placeholdersRaw         = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
+        $placeholders            = array_map(function ($k) use ($aliases) { return isset($aliases[$k]) ? $aliases[$k] : $k; }, $placeholdersRaw);
         list($unknown, $missing) = $this->validatePlaceholders($placeholders, $available, $context);
         if (! empty($unknown) || ! empty($missing)) {
             $msg = 'Template invalide; inconnus=[' . implode(',', $unknown) . '], manquants=[' . implode(',', $missing) . ']';
             $this->logger->error('GDH Email: ' . $msg);
-            update_option('gdh_email_last_error', $msg);
             return false;
         }
         $renderedSubject = $this->replacePlaceholders($subject, $context);
         $renderedBody    = $this->replacePlaceholders($body, $context);
-        $to              = $context['client_email'];
+        $to              = $context['email_lead'];
         if (! is_email($to)) {
             $this->logger->error('GDH Email: email client invalide');
-            update_option('gdh_email_last_error', 'Adresse e-mail client invalide.');
             return false;
         }
         $headers = [];
@@ -207,11 +219,9 @@ class EmailTemplateService
         }
         if (! $sent) {
             $this->logger->error('GDH Email: envoi échoué');
-            update_option('gdh_email_last_error', 'Échec d\'envoi de l\'e-mail.');
             return false;
         }
         $this->logger->info('GDH Email: envoi réussi au client');
-        delete_option('gdh_email_last_error');
         return true;
     }
 }

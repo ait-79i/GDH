@@ -2,40 +2,40 @@
 
 ## Subject
 
-Nouvelle demande de rendez-vous – {{artisan_name}}
+Nouvelle demande de rendez-vous – {{date_rdv}} – {{nom_lead}}
 
 ## Body (HTML)
 
 <div class="container">
   <h1>Nouvelle demande de rendez-vous</h1>
 
-  <p>Bonjour <strong>{{artisan_name}}</strong>,</p>
-  <p>Vous avez reçu une nouvelle demande de rendez-vous. Voici les informations du client et son créneau prioritaire.</p>
+  <p>Bonjour <strong>{{nom_destinataire}}</strong>,</p>
+  <p>Vous avez reçu une nouvelle demande de rendez-vous. Veuillez trouver ci‑dessous les informations du lead et son créneau prioritaire.</p>
 
   <h2>Résumé</h2>
   <table class="details">
     <tr>
-      <th>Artisan</th>
-      <td>{{artisan_name}}</td>
+      <th>Destinataire</th>
+      <td>{{nom_destinataire}}</td>
     </tr>
     <tr>
       <th>Créneau prioritaire</th>
-      <td>{{appointment_date}}</td>
+      <td>{{date_rdv}}</td>
     </tr>
   </table>
 
   <h2>Disponibilités proposées</h2>
-  {{appointment_slots}}
+  {{creneaux_rdv}}
 
-  <h2>Coordonnées du client</h2>
+  <h2>Coordonnées du lead</h2>
   <table class="details">
     <tr>
       <th>Nom complet</th>
-      <td>{{client_name}}</td>
+      <td>{{nom_lead}}</td>
     </tr>
     <tr>
       <th>Email</th>
-      <td><a href="mailto:{{client_email}}">{{client_email}}</a></td>
+      <td><a href="mailto:{{email_lead}}">{{email_lead}}</a></td>
     </tr>
     <tr>
       <th>Téléphone</th>
@@ -48,14 +48,14 @@ Nouvelle demande de rendez-vous – {{artisan_name}}
   </table>
 
   <div class="cta">
-    <a class="btn" href="tel:{{phone}}">Appeler le client</a>
-    <a class="btn" href="mailto:{{client_email}}">Répondre par e‑mail</a>
+    <a class="btn" href="tel:{{phone}}">Appeler le lead</a>
+    <a class="btn" href="mailto:{{email_lead}}">Répondre par e‑mail</a>
   </div>
 
   <p class="note">Astuce : les autres disponibilités proposées par le client sont visibles dans l'administration du site.</p>
 
   <hr>
-  <p class="footer">Cet e-mail est généré automatiquement par {{artisan_name}}.</p>
+  <p class="footer">Cet e‑mail a été généré automatiquement par {{nom_destinataire}}.</p>
 </div>
 
 ## Style (CSS)
@@ -76,23 +76,68 @@ h2 { color:#1d2327; font-size:18px; margin:24px 0 12px; }
 
 ## Plain text fallback
 
-Bonjour {{artisan_name}},
+Bonjour {{nom_destinataire}},
 
 Nouvelle demande de rendez-vous
-Artisan: {{artisan_name}}
-Créneau prioritaire: {{appointment_date}}
+Destinataire: {{nom_destinataire}}
+Créneau prioritaire: {{date_rdv}}
 
 Disponibilités proposées:
-{{appointment_slots}}
+{{creneaux_rdv}}
 
-Coordonnées du client:
-- Nom complet: {{client_name}}
-- Email: {{client_email}}
+Coordonnées du lead:
+- Nom complet: {{nom_lead}}
+- Email: {{email_lead}}
 - Téléphone: {{phone}}
 - Adresse d'intervention: {{address}}, {{postal_code}} {{city}}
 
 Actions:
 - Appeler: {{phone}}
-- Répondre par e-mail: {{client_email}}
+- Répondre par e‑mail: {{email_lead}}
 
-Cet e-mail est généré automatiquement par {{artisan_name}}.
+Cet e‑mail a été généré automatiquement par {{nom_destinataire}}.
+
+## Confirmation Email – Subject
+
+Confirmation de votre demande de rendez-vous – {{date_rdv}}
+
+## Confirmation Email – Body (HTML)
+
+<div class="container">
+  <h1>Confirmation de votre demande</h1>
+
+  <p>Bonjour <strong>{{nom_lead}}</strong>,</p>
+  <p>Nous accusons réception de votre demande de rendez-vous. Voici votre récapitulatif.</p>
+
+  <h2>Détail de votre demande</h2>
+  <table class="details">
+    <tr>
+      <th>Date prioritaire</th>
+      <td>{{date_rdv}}</td>
+    </tr>
+    <tr>
+      <th>Adresse d'intervention</th>
+      <td>{{address}}, {{postal_code}} {{city}}</td>
+    </tr>
+  </table>
+
+  <h2>Autres disponibilités proposées</h2>
+  {{creneaux_rdv}}
+
+  <p><strong>{{nom_destinataire}}</strong> vous contactera prochainement afin de confirmer un créneau.</p>
+
+  <p class="footer">Cet e‑mail a été envoyé automatiquement. Si ces informations ne sont pas correctes, répondez directement à ce message.</p>
+</div>
+
+## Plain text fallback (confirmation)
+
+Bonjour {{nom_lead}},
+
+Nous accusons réception de votre demande de rendez-vous.
+
+- Date prioritaire: {{date_rdv}}
+- Adresse d'intervention: {{address}}, {{postal_code}} {{city}}
+- Autres disponibilités:
+{{creneaux_rdv}}
+
+{{nom_destinataire}} vous contactera pour confirmer un créneau.
