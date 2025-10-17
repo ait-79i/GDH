@@ -1,7 +1,6 @@
 <?php
 namespace GDH\Admin;
 
-use GDH\PostTypes\EmailTemplatePostType;
 use GDH\Services\EmailTemplateService;
 use GDH\Services\Logger;
 use GDH\Services\TwigService;
@@ -23,6 +22,7 @@ class AdminController
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_post_gdh_save_email_settings', [$this, 'handleEmailSettingsSave']);
+        add_action('wp_ajax_gdh_get_meta_keys', [$this, 'ajaxGetMetaKeys']);
     }
 
     public function addSettingsSubmenu()
@@ -122,9 +122,17 @@ class AdminController
             wp_enqueue_script(
                 'gdh-mail-settings',
                 GDH_PLUGIN_URL . 'assets/js/mail-setting.js',
-                ['jquery','wp-editor'],
+                ['jquery', 'wp-editor'],
                 $js_ver,
                 true
+            );
+            wp_localize_script(
+                'gdh-mail-settings',
+                'gdhMailSettings',
+                [
+                    'ajax_url' => admin_url('admin-ajax.php'),
+                    'nonce'    => wp_create_nonce('gdh_meta_keys'),
+                ]
             );
         }
     }
@@ -163,9 +171,8 @@ class AdminController
         }
 
         $vars          = $this->emailService->getAvailableVariables();
-        $template      = $this->emailService->getTemplate();
-        $subject_value = $template ? (string) get_post_meta($template->ID, '_gdh_email_subject', true) : '';
-        $body_initial  = $template ? (string) $template->post_content : '';
+        $subject_value = (string) get_option('gdh_email_subject', '');
+        $body_initial  = (string) get_option('gdh_email_body', '');
 
         // Confirmation email settings (stored as options)
         $confirm_enabled       = get_option('gdh_email_confirm_enabled', '0') === '1';
@@ -186,7 +193,7 @@ class AdminController
         $pts            = get_post_types(['show_ui' => true], 'objects');
         $all_post_types = [];
         foreach ($pts as $pt) {
-            $label                = isset($pt->labels->singular_name) && $pt->labels->singular_name ? $pt->labels->singular_name : $pt->label;
+            $label                     = isset($pt->labels->singular_name) && $pt->labels->singular_name ? $pt->labels->singular_name : $pt->label;
             $all_post_types[$pt->name] = $label;
         }
 
@@ -213,7 +220,7 @@ class AdminController
         ]);
         $confirm_editor_html = ob_get_clean();
 
-        $html = $this->twig->render('admin/mail/email-settings.twig', [
+        $view = $this->twig->render('admin/mail/email-settings.twig', [
             'variables'                    => $vars,
             'variables_sujet_gauche'       => ['nom_lead', 'date_rdv'],
             'variables_confirmation_sujet' => ['nom_destinataire', 'date_rdv'],
@@ -236,7 +243,7 @@ class AdminController
             'recv_dyn_post_type'           => $recv_dyn_post_type,
             'all_post_types'               => $all_post_types,
         ]);
-        echo $html;
+        echo $view;
     }
 
     public function handleEmailSettingsSave()
@@ -248,30 +255,11 @@ class AdminController
             wp_die('Nonce invalide');
         }
 
-        // Mise à jour si un template existe, sinon création
-        $subject  = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
-        $body     = isset($_POST['body']) ? wp_kses_post($_POST['body']) : '';
-        $template = $this->emailService->getTemplate();
-        if ($template) {
-            wp_update_post([
-                'ID'           => intval($template->ID),
-                'post_content' => $body,
-            ]);
-            update_post_meta($template->ID, '_gdh_email_subject', $subject);
-        } else {
-            $version = 'v' . date('YmdHis');
-            $post_id = wp_insert_post([
-                'post_type'    => EmailTemplatePostType::POST_TYPE,
-                'post_status'  => 'publish',
-                'post_title'   => 'Email Template ' . $version,
-                'post_content' => $body,
-            ]);
-            if (! is_wp_error($post_id)) {
-                update_post_meta($post_id, '_gdh_email_subject', $subject);
-                update_post_meta($post_id, '_gdh_email_content_type', 'html');
-                update_post_meta($post_id, '_gdh_email_version', $version);
-            }
-        }
+        // Save main template subject/body as options (single template storage)
+        $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
+        $body    = isset($_POST['body']) ? wp_kses_post($_POST['body']) : '';
+        update_option('gdh_email_subject', $subject);
+        update_option('gdh_email_body', $body);
 
         // Save confirmation email settings
         $confirm_enabled_post = isset($_POST['confirm_enabled']) && $_POST['confirm_enabled'] === '1' ? '1' : '0';
@@ -286,7 +274,7 @@ class AdminController
         $recv_static_email_post   = isset($_POST['receiver_static_email']) ? sanitize_email($_POST['receiver_static_email']) : '';
         $recv_static_name_post    = isset($_POST['receiver_static_name']) ? sanitize_text_field($_POST['receiver_static_name']) : '';
         $recv_dyn_enabled_post    = isset($_POST['receiver_dynamic_enabled']) && $_POST['receiver_dynamic_enabled'] === '1' ? '1' : '0';
-        $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_email($_POST['receiver_dynamic_email']) : '';
+        $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_text_field($_POST['receiver_dynamic_email']) : '';
         $recv_dyn_name_post       = isset($_POST['receiver_dynamic_name']) ? sanitize_text_field($_POST['receiver_dynamic_name']) : '';
         $recv_dyn_post_type_post  = isset($_POST['receiver_dynamic_post_type']) ? sanitize_key($_POST['receiver_dynamic_post_type']) : '';
 
@@ -297,9 +285,9 @@ class AdminController
                 'name'    => $recv_static_name_post,
             ],
             'dynamic' => [
-                'enabled' => $recv_dyn_enabled_post,
-                'email'   => $recv_dyn_email_post,
-                'name'    => $recv_dyn_name_post,
+                'enabled'   => $recv_dyn_enabled_post,
+                'email'     => $recv_dyn_email_post,
+                'name'      => $recv_dyn_name_post,
                 'post_type' => $recv_dyn_post_type_post,
             ],
         ];
@@ -307,6 +295,37 @@ class AdminController
 
         wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
         exit;
+    }
+
+    public function ajaxGetMetaKeys()
+    {
+        if (! current_user_can('manage_options')) {
+            wp_send_json_error(['message' => 'forbidden'], 403);
+        }
+        if (! isset($_POST['nonce']) || ! wp_verify_nonce($_POST['nonce'], 'gdh_meta_keys')) {
+            wp_send_json_error(['message' => 'invalid_nonce'], 400);
+        }
+        $post_type = isset($_POST['post_type']) ? sanitize_key($_POST['post_type']) : '';
+        if (! $post_type) {
+            wp_send_json_error(['message' => 'missing_post_type'], 400);
+        }
+        global $wpdb;
+        $keys = $wpdb->get_col(
+            $wpdb->prepare(
+                "SELECT DISTINCT pm.meta_key
+                 FROM {$wpdb->postmeta} pm
+                 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
+                 WHERE p.post_type = %s
+                   AND pm.meta_key IS NOT NULL
+                   AND pm.meta_key <> ''
+                 ORDER BY pm.meta_key ASC",
+                $post_type
+            )
+        );
+        if (! is_array($keys)) {
+            $keys = [];
+        }
+        wp_send_json_success(['meta_keys' => array_values($keys)]);
     }
 
     public function removeEmailTemplateSubmenus()

@@ -58,6 +58,87 @@
     }
   });
 
+  // Helpers to populate dynamic meta key selects
+  function gdhResetMetaSelect($sel) {
+    if (!$sel || !$sel.length) return;
+    $sel.empty();
+    $sel.append($('<option/>', { value: '', text: '— Sélectionner une meta —' }));
+  }
+
+  function gdhPopulateMetaSelect($sel, keys, selected) {
+    if (!$sel || !$sel.length) return;
+    gdhResetMetaSelect($sel);
+    if (Array.isArray(keys)) {
+      keys.forEach(function (k) {
+        $sel.append($('<option/>', { value: k, text: k }));
+      });
+    }
+    if (selected && keys && keys.indexOf(selected) !== -1) {
+      $sel.val(selected);
+    } else {
+      $sel.val('');
+    }
+  }
+
+  function gdhFetchAndPopulateMeta(postType) {
+    const $emailSel = $('#receiver_dynamic_email');
+    const $nameSel  = $('#receiver_dynamic_name');
+    if (!postType) {
+      gdhResetMetaSelect($emailSel);
+      gdhResetMetaSelect($nameSel);
+      return;
+    }
+    // Show loading state
+    if ($emailSel.length) { $emailSel.prop('disabled', true); }
+    if ($nameSel.length)  { $nameSel.prop('disabled', true); }
+
+    const selectedEmail = ($emailSel.attr('data-selected') || '').trim();
+    const selectedName  = ($nameSel.attr('data-selected') || '').trim();
+
+    $.ajax({
+      url: (window.gdhMailSettings ? gdhMailSettings.ajax_url : ''),
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        action: 'gdh_get_meta_keys',
+        nonce: (window.gdhMailSettings ? gdhMailSettings.nonce : ''),
+        post_type: postType
+      }
+    }).done(function (res) {
+      const keys = (res && res.success && res.data && Array.isArray(res.data.meta_keys)) ? res.data.meta_keys : [];
+      gdhPopulateMetaSelect($emailSel, keys, selectedEmail);
+      gdhPopulateMetaSelect($nameSel,  keys, selectedName);
+    }).fail(function () {
+      gdhResetMetaSelect($emailSel);
+      gdhResetMetaSelect($nameSel);
+    }).always(function () {
+      if ($emailSel.length) { $emailSel.prop('disabled', !$('#gdh_recv_dyn_enabled').prop('checked')); }
+      if ($nameSel.length)  { $nameSel.prop('disabled', !$('#gdh_recv_dyn_enabled').prop('checked')); }
+    });
+  }
+
+  // Change handler: fetch meta keys when post type changes
+  $(document).on('change', '#receiver_dynamic_post_type', function(){
+    if (!$('#gdh_recv_dyn_enabled').prop('checked')) return;
+    const postType = this.value;
+    if (postType) {
+      gdhFetchAndPopulateMeta(postType);
+    } else {
+      gdhFetchAndPopulateMeta('');
+    }
+  });
+
+  // Initial population on load if dynamic enabled and post type already chosen
+  $(function(){
+    try {
+      const dynEnabled = $('#gdh_recv_dyn_enabled').prop('checked');
+      const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
+      if (dynEnabled && postType) {
+        gdhFetchAndPopulateMeta(postType);
+      }
+    } catch (_) {}
+  });
+
   // Prevent submit if confirmation is enabled but subject/body is empty
   $(document).on('submit', 'form', function (e) {
     const $form = $(this);

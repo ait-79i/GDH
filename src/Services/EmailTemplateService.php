@@ -1,8 +1,6 @@
 <?php
 namespace GDH\Services;
 
-use GDH\PostTypes\EmailTemplatePostType;
-
 class EmailTemplateService
 {
     private $logger;
@@ -12,21 +10,7 @@ class EmailTemplateService
         $this->logger = $logger;
     }
 
-    public function getTemplate()
-    {
-        $args = [
-            'post_type'      => EmailTemplatePostType::POST_TYPE,
-            'post_status'    => 'publish',
-            'posts_per_page' => 1,
-            'orderby'        => 'date',
-            'order'          => 'DESC',
-        ];
-        $q = new \WP_Query($args);
-        if (! $q->have_posts()) {
-            return null;
-        }
-        return $q->posts[0];
-    }
+    // Post type removed: template is now stored in options via Admin page
 
     public function getAvailableVariables()
     {
@@ -172,16 +156,15 @@ class EmailTemplateService
 
     public function sendOnAppointment($post_id, array $formData)
     {
-        $template = $this->getTemplate();
-        if (! $template) {
-            $this->logger->error('GDH Email: aucun template disponible');
+        // Load template from options
+        $subject                 = (string) get_option('gdh_email_subject', '');
+        $body                    = (string) get_option('gdh_email_body', '');
+        $style                   = '';
+        $contentType             = 'html';
+        if ($subject === '' || $body === '') {
+            $this->logger->error('GDH Email: sujet ou corps du modèle manquant');
             return false;
         }
-        $subject                 = get_post_meta($template->ID, '_gdh_email_subject', true);
-        $style                   = get_post_meta($template->ID, '_gdh_email_style', true);
-        $ctypeRaw                = get_post_meta($template->ID, '_gdh_email_content_type', true);
-        $contentType             = ($ctypeRaw === 'plain') ? 'plain' : 'html';
-        $body                    = (string) $template->post_content;
         $available               = $this->getAvailableVariables();
         $isHtml                  = ($contentType === 'html');
         $context                 = $this->buildContextFromData($post_id, $formData, $isHtml);

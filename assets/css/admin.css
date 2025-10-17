@@ -254,3 +254,7 @@
     margin-bottom: 0 !important;
     border-bottom: 0 !important;
 }
+
+hr {
+    margin: 1.5em 0 1.5em 0;
+}
