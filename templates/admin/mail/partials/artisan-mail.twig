@@ -1,0 +1,33 @@
+<h3 class="gdh-section-title">Modèle d’e-mail à envoyer au destinataire</h3>
+<table class="form-table gdh-inner-table" role="presentation">
+	<tr>
+		<th scope="row">
+			<label for="gdh_subject">Sujet</label>
+		</th>
+		<td>
+			<div class="gdh-varbar" style="margin-bottom: 5px;">
+				{% for var in variables_sujet_gauche %}
+					{% set placeholder = '{{' ~ var ~ '}}' %}
+					{% set label = var_labels[var]|default(var) %}
+					<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
+				{% endfor %}
+			</div>
+			<input type="text" id="gdh_subject" name="subject" class="regular-text" value="{{ subject_value|e }}" required/>
+		</td>
+	</tr>
+	<tr>
+		<th scope="row">
+			<label for="gdh_body">Corps</label>
+		</th>
+		<td>
+			<div class="gdh-varbar">
+				{% for var in variables %}
+					{% set placeholder = '{{' ~ var ~ '}}' %}
+					{% set label = var_labels[var]|default(var) %}
+					<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
+				{% endfor %}
+			</div>
+		</td>
+	</tr>
+</table>
+{{ editor_html|raw }}

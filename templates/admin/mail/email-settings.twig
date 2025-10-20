@@ -1,0 +1,114 @@
+<div class="wrap gdh-email-settings">
+	<h1>Paramètres des e-mails</h1>
+
+	{% if show_saved_notice %}
+		<div class="notice notice-success is-dismissible">
+			<p>Paramètres e-mail enregistrés.</p>
+		</div>
+	{% endif %}
+
+
+	<form method="post" action="{{ admin_post_url }}">
+		<input type="hidden" name="action" value="gdh_save_email_settings"/>
+		{{ nonce_field|raw }}
+
+		<table class="form-table gdh-two-col" role="presentation">
+			<tbody>
+				<tr>
+					<td>
+						<label for="gdh_recv_mode_static" class="gdh-label">
+							<input type="radio" id="gdh_recv_mode_static" name="receiver_mode" value="static" {% if recv_mode == 'static' %} checked {% endif %}>
+							Activer le destinataire statique
+						</label>
+						<div id="gdh_recv_static_wrap" class="{% if recv_mode != 'static' %}gdh-muted{% endif %}">
+							<table class="form-table gdh-inner-table" role="presentation">
+								<tbody id="gdh_recv_static_block" class="{% if recv_mode != 'static' %}gdh-pe-none{% endif %}">
+									<tr>
+										<th scope="row">
+											<label for="receiver_static_email">E-mail du destinataire</label>
+										</th>
+										<td>
+											<input type="email" id="receiver_static_email" name="receiver_static_email" class="regular-text" value="{{ recv_static_email|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">
+											<label for="receiver_static_name">Nom complet</label>
+										</th>
+										<td>
+											<input type="text" id="receiver_static_name" name="receiver_static_name" class="regular-text" value="{{ recv_static_name|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</td>
+					<td>
+						<label for="gdh_recv_mode_dynamic" class="gdh-label">
+							<input type="radio" id="gdh_recv_mode_dynamic" name="receiver_mode" value="dynamic" {% if recv_mode == 'dynamic' %} checked {% endif %}>
+							Activer le destinataire dynamique
+						</label>
+						<div id="gdh_recv_dyn_wrap" class="{% if recv_mode != 'dynamic' %}gdh-muted{% endif %}">
+							<table class="form-table gdh-inner-table" role="presentation">
+								<tbody id="gdh_recv_dyn_block" class="{% if recv_mode != 'dynamic' %}gdh-pe-none{% endif %}">
+									<tr>
+										<th scope="row">
+											<label for="receiver_dynamic_post_type">Type de contenu</label>
+										</th>
+										<td>
+											<select id="receiver_dynamic_post_type" name="receiver_dynamic_post_type" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+												<option value="">— Sélectionner —</option>
+												{% for key, label in all_post_types %}
+													<option value="{{ key|e }}" {% if recv_dyn_post_type == key %} selected {% endif %}>{{ label }}</option>
+												{% endfor %}
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">
+											<label for="receiver_dynamic_email">E-mail du destinataire</label>
+										</th>
+										<td>
+											<select id="receiver_dynamic_email" name="receiver_dynamic_email" data-selected="{{ recv_dyn_email|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+												<option value="">— Sélectionner une meta —</option>
+											</select>
+										</td>
+									</tr>
+									<tr>
+										<th scope="row">
+											<label for="receiver_dynamic_name">Nom complet</label>
+										</th>
+										<td>
+											<select id="receiver_dynamic_name" name="receiver_dynamic_name" data-selected="{{ recv_dyn_name|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+												<option value="">— Sélectionner une meta —</option>
+											</select>
+										</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+
+		<hr/>
+
+			<table class="form-table gdh-two-col" role="presentation"> <tbody>
+				<tr>
+					<td>
+						{% include 'admin/mail/partials/artisan-mail.twig' %}
+					</td>
+					<td>
+						{% include 'admin/mail/partials/confirmation-mail.twig' %}
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		<p class="submit">
+			<button type="submit" class="button button-primary">Enregistrer le template</button>
+		</p>
+	</form>
+
+
+</div>

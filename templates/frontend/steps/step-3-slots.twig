@@ -1,0 +1,65 @@
+<div class="gdh-rdv-step-content" data-step="3">
+	<div class="gdh-rdv-step-header">
+		<h3>
+			<span class="dashicons dashicons-admin-users"></span>
+			Vos informations</h3>
+		<p class="gdh-rdv-step-description">Complétez vos coordonnées pour finaliser votre demande</p>
+	</div>
+
+	<div class="gdh-rdv-form-section">
+		<div class="gdh-rdv-field-group gdh-rdv-field-row">
+			<div class="gdh-rdv-field gdh-rdv-field-half">
+				<label for="first_name">
+					<span class="gdh-rdv-label-icon dashicons dashicons-admin-users"></span>
+					<span class="gdh-rdv-label-text">Prénom</span>
+					<span class="gdh-rdv-required">*</span>
+				</label>
+				<input type="text" id="first_name" name="first_name" placeholder="Jean" data-error-message="Veuillez saisir votre prénom" minlength="2" required>
+				<div class="gdh-rdv-error-message" style="display: none;"></div>
+			</div>
+			<div class="gdh-rdv-field gdh-rdv-field-half">
+				<label for="last_name">
+					<span class="gdh-rdv-label-icon dashicons dashicons-groups"></span>
+					<span class="gdh-rdv-label-text">Nom</span>
+					<span class="gdh-rdv-required">*</span>
+				</label>
+				<input type="text" id="last_name" name="last_name" placeholder="Dupont" data-error-message="Veuillez saisir votre nom" minlength="2" required>
+				<div class="gdh-rdv-error-message" style="display: none;"></div>
+			</div>
+		</div>
+
+		<div class="gdh-rdv-field-group gdh-rdv-field-row">
+			<div class="gdh-rdv-field gdh-rdv-field-half">
+				<label for="email">
+					<span class="gdh-rdv-label-icon dashicons dashicons-email"></span>
+					<span class="gdh-rdv-label-text">Email</span>
+					<span class="gdh-rdv-required">*</span>
+				</label>
+				<input type="email" id="email" name="email" placeholder="jean.dupont@exemple.fr" data-error-message="Veuillez saisir une adresse email valide" required>
+				<div class="gdh-rdv-error-message" style="display: none;"></div>
+			</div>
+			<div class="gdh-rdv-field gdh-rdv-field-half">
+				<label for="phone">
+					<span class="gdh-rdv-label-icon dashicons dashicons-phone"></span>
+					<span class="gdh-rdv-label-text">Téléphone</span>
+					<span class="gdh-rdv-required">*</span>
+				</label>
+				<input type="tel" id="phone" name="phone" placeholder="06 12 34 56 78" data-error-message="Veuillez saisir un numéro de téléphone valide" pattern="[0-9\s\.\-\+]{10,}" required>
+				<div class="gdh-rdv-error-message" style="display: none;"></div>
+			</div>
+		</div>
+
+		<div class="gdh-rdv-field gdh-rdv-field-checkbox">
+			<label class="gdh-rdv-checkbox-modern">
+				<input type="checkbox" name="accept_terms" data-error-message="Vous devez accepter les conditions générales" required>
+				<span class="gdh-rdv-checkmark"></span>
+				<span class="gdh-rdv-checkbox-label">
+					J'accepte les
+					<a href="#" target="_blank">conditions générales de vente</a>
+					<span class="gdh-rdv-required">*</span>
+				</span>
+			</label>
+			<div class="gdh-rdv-error-message" style="display: none;"></div>
+		</div>
+	</div>
+</div>

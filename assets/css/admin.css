@@ -1,0 +1,260 @@
+/* GDH Admin Styles: Paramètres des e-mailss */
+.gdh-email-settings .gdh-two-col {
+    width: 100%;
+}
+
+.gdh-email-settings .gdh-two-col td {
+    vertical-align: top;
+    width: 50%;
+    padding: 0 12px;
+}
+
+/* Vertical divider between columns */
+.gdh-email-settings .gdh-two-col td+td {
+    border-left: 1px solid #dcdcde;
+    padding-left: 24px;
+}
+
+.gdh-email-settings .gdh-muted {
+    opacity: .5;
+}
+
+.gdh-email-settings .gdh-pe-none {
+    pointer-events: none;
+}
+
+.gdh-email-settings .gdh-chip {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid #2271b1;
+    border-radius: 9999px;
+    padding: 3px 8px;
+    font-size: 12px;
+    color: #2271b1;
+    margin: 2px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gdh-email-settings .gdh-chip:focus {
+    outline: 2px solid #2271b1;
+    outline-offset: 1px;
+}
+
+.gdh-email-settings .gdh-label {
+    display: block;
+    margin: 6px 0 4px;
+    font-weight: 600;
+}
+
+.gdh-email-settings .gdh-section-title {
+    margin: 0 0 10px;
+    font-size: 16px;
+}
+
+/* Make inputs and editors span full column width */
+.gdh-email-settings .gdh-two-col input.regular-text {
+    width: 100%;
+    max-width: 100%;
+}
+
+.gdh-email-settings .gdh-two-col .wp-editor-wrap,
+.gdh-email-settings .gdh-two-col .wp-editor-container {
+    max-width: 100%;
+}
+
+.gdh-email-settings .gdh-two-col .mce-tinymce {
+    width: 100% !important;
+}
+
+.gdh-email-settings .gdh-two-col .wp-editor-area {
+    width: 100%;
+}
+
+/* Ensure content cells are wider than labels in nested tables */
+.gdh-email-settings .gdh-two-col .form-table {
+    width: 100%;
+}
+
+.gdh-email-settings .gdh-two-col .form-table>tbody>tr>th {
+    width: 18%;
+    min-width: 120px;
+    vertical-align: top;
+    padding-right: 10px;
+    white-space: nowrap;
+}
+
+.gdh-email-settings .gdh-two-col .form-table>tbody>tr>td {
+    width: 82%;
+}
+
+/* Spacing between rows inside section tables */
+.gdh-email-settings .gdh-inner-table {
+    border-collapse: separate;
+    border-spacing: 0 15px;
+}
+
+/* Remove gap between Visuel/Code tabs and the editor */
+.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-tools,
+.gdh-email-settings .wp-editor-wrap .wp-editor-tools {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-tabs,
+.gdh-email-settings .wp-editor-wrap .wp-editor-tabs {
+    margin-bottom: 0 !important;
+}
+
+.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-container,
+.gdh-email-settings .wp-editor-wrap .wp-editor-container {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings .gdh-two-col .mce-tinymce,
+.gdh-email-settings .wp-editor-wrap .mce-tinymce {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings .gdh-two-col .quicktags-toolbar,
+.gdh-email-settings .wp-editor-wrap .quicktags-toolbar {
+    margin-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+
+/* Tighten tabs and remove any residual borders/margins */
+.gdh-email-settings .wp-editor-wrap .wp-editor-tools {
+    border-bottom: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-switch-editor {
+    margin: 0 !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tabs .wp-switch-editor {
+    margin: 0 !important;
+}
+
+/* Also normalize WP editor internal spacing */
+.gdh-email-settings .wp-editor-wrap .wp-media-buttons {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tabs {
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tabs+.wp-editor-container {
+    margin-top: -10px !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tools+.wp-editor-container {
+    margin-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .mce-toolbar-grp {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .mce-top-part {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-container .wp-editor-area {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .mce-panel {
+    border-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .mce-container-body {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-container textarea.wp-editor-area {
+    margin-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tools::after {
+    display: none !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-area {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+/* Collapse any hairline between tabs and editor */
+.gdh-email-settings .wp-editor-wrap .wp-editor-container {
+    margin-top: -6px !important;
+    padding-top: 0 !important;
+}
+
+.gdh-email-settings .wp-editor-wrap .wp-editor-tabs::after {
+    display: none !important;
+}
+
+.gdh-email-settings .gdh-two-col .wp-editor-wrap {
+    margin-top: -25px !important;
+    padding-top: 0 !important;
+}
+
+/* Ensure chips bar doesn't add extra spacing in this layout */
+.gdh-email-settings .gdh-two-col .gdh-varbar {
+    margin-bottom: -4px;
+}
+
+/* Confirmation editor specific hard overrides */
+.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tools {
+    margin-bottom: 0 !important;
+    padding-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tabs {
+    margin-bottom: 0 !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tabs::after {
+    display: none !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-container {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-tinymce {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-top-part,
+.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-toolbar-grp {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdh-email-settings #wp-gdh_confirm_body-wrap .quicktags-toolbar {
+    margin-bottom: 0 !important;
+    border-bottom: 0 !important;
+}
+
+hr {
+    margin: 1.5em 0 1.5em 0;
+}

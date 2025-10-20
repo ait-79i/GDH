@@ -1,0 +1,2366 @@
+/* ============================================
+   GDH Plugin - Modern Professional Styles
+   ============================================ */
+
+/* CSS Variables for Brand Colors */
+:root {
+  --gdh-primary-green: #006847;
+  --gdh-primary-green-dark: #004d35;
+  --gdh-primary-green-light: #00855e;
+  --gdh-accent-yellow: #FFB81c;
+  --gdh-accent-yellow-dark: #F5A623;
+  --gdh-accent-blue: #4285f4;
+  --gdh-accent-blue-dark: #1a73e8;
+  --gdh-text-dark: #1a1a1a;
+  --gdh-text-medium: #4a4a4a;
+  --gdh-text-light: #777;
+  --gdh-border-light: #e0e0e0;
+  --gdh-bg-light: #f8f9fa;
+  --gdh-bg-card: #ffffff;
+  --gdh-error: #ef4444;
+  --gdh-success: #10b981;
+  --gdh-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --gdh-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --gdh-shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.15);
+  --gdh-shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.2);
+  --gdh-radius-sm: 6px;
+  --gdh-radius-md: 10px;
+  --gdh-radius-lg: 16px;
+  --gdh-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Base Button Styles */
+.gdh-rdv-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border: none;
+  border-radius: var(--gdh-radius-md);
+  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-weight: 600;
+  font-size: 15px;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+  transition: var(--gdh-transition);
+  box-sizing: border-box;
+  outline: none;
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.3px;
+}
+
+.gdh-rdv-button::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.gdh-rdv-button:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.gdh-rdv-button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--gdh-shadow-lg);
+}
+
+.gdh-rdv-button:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
+  color: #000000;
+  border: none;
+  font-weight: 700;
+  box-shadow: var(--gdh-shadow-md);
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, var(--gdh-accent-yellow-dark) 0%, #e09616 100%);
+  box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+}
+
+
+/* === Popup Modal === */
+.gdh-rdv-popup {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  padding: 20px;
+}
+
+.gdh-rdv-popup-overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--gdh-overlay-rgb, 0, 0, 0), var(--gdh-overlay-opacity, 0.4));
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  animation: overlayFadeIn 0.4s ease;
+}
+
+@keyframes overlayFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.gdh-rdv-popup-content {
+  position: relative;
+  background: var(--gdh-bg-card);
+  border-radius: var(--gdh-radius-lg);
+  box-shadow: var(--gdh-shadow-xl);
+  width: 95%;
+  max-width: 1100px;
+  max-height: 92vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  z-index: 10000;
+  animation: popupSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  padding: 24px;
+  border: 1px solid rgba(0, 104, 71, 0.1);
+}
+
+@keyframes popupSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+
+.gdh-rdv-popup-content::-webkit-scrollbar-track {
+  background: var(--gdh-bg-light);
+  border-radius: 4px;
+}
+
+.gdh-rdv-popup-content::-webkit-scrollbar-thumb {
+  background: var(--gdh-primary-green);
+  border-radius: 4px;
+}
+
+.gdh-rdv-popup-content::-webkit-scrollbar-thumb:hover {
+  background: var(--gdh-primary-green-dark);
+}
+
+/* === Popup Header === */
+.gdh-rdv-popup-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--gdh-border-light);
+  padding-bottom: 12px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.gdh-rdv-popup-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 80px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gdh-primary-green) 0%, var(--gdh-accent-yellow) 100%);
+  border-radius: 2px;
+}
+
+.gdh-rdv-popup-header h2 {
+  font-size: 1.35rem;
+  margin: 0;
+  color: var(--gdh-primary-green);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.2;
+  flex: 1;
+}
+
+.gdh-rdv-popup-header.align-left h2 {
+  text-align: left;
+}
+
+.gdh-rdv-popup-header.align-center h2 {
+  text-align: center;
+}
+
+.gdh-rdv-popup-header.align-right h2 {
+  text-align: right;
+}
+
+.gdh-rdv-close {
+  background: var(--gdh-bg-light);
+  border: none;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  color: var(--gdh-text-medium);
+  cursor: pointer;
+  transition: var(--gdh-transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.gdh-rdv-close:hover {
+  background: var(--gdh-error);
+  color: white;
+  transform: rotate(90deg);
+}
+
+/* === Modern Progress Bar === */
+.gdh-rdv-progress-wrapper {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
+  border-radius: var(--gdh-radius-lg);
+  box-shadow: 0 4px 20px rgba(0, 104, 71, 0.08);
+  border: 1px solid rgba(0, 104, 71, 0.1);
+}
+
+.gdh-rdv-progress-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Steps Track */
+.gdh-rdv-steps-track {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  position: relative;
+}
+
+/* Step Item */
+.gdh-rdv-step-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 2;
+}
+
+/* Step Circle */
+.gdh-rdv-step-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--gdh-bg-light);
+  border: 2px solid var(--gdh-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.gdh-rdv-step-circle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 16px rgba(0, 104, 71, 0.15);
+}
+
+/* Step Icon */
+.gdh-rdv-step-icon {
+  font-size: 20px;
+  color: var(--gdh-text-light);
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.gdh-rdv-step-number {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gdh-text-light);
+  transition: all 0.3s ease;
+}
+
+/* Step Pulse Animation */
+.gdh-rdv-step-pulse {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  border: 2px solid var(--gdh-primary-green);
+  opacity: 0;
+}
+
+.gdh-rdv-step-item.active .gdh-rdv-step-pulse {
+  animation: pulse-ring 2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes pulse-ring {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 0.8;
+  }
+
+  100% {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0;
+  }
+}
+
+/* Active Step */
+.gdh-rdv-step-item.active .gdh-rdv-step-circle {
+  background: linear-gradient(135deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 100%);
+  border-color: var(--gdh-primary-green);
+  box-shadow: 0 6px 24px rgba(0, 104, 71, 0.3);
+  animation: bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-step-item.active .gdh-rdv-step-icon {
+  display: block;
+  color: white;
+}
+
+.gdh-rdv-step-item.active .gdh-rdv-step-number {
+  display: none;
+}
+
+.gdh-rdv-step-item.active .gdh-rdv-step-title {
+  color: var(--gdh-primary-green);
+  font-weight: 700;
+}
+
+@keyframes bounce-in {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  70% {
+    transform: scale(0.9);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Completed Step */
+.gdh-rdv-step-item.completed .gdh-rdv-step-circle {
+  background: linear-gradient(135deg, var(--gdh-success) 0%, #10b981 100%);
+  border-color: var(--gdh-success);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.3);
+}
+
+.gdh-rdv-step-item.completed .gdh-rdv-step-circle::after {
+  content: '✓';
+  position: absolute;
+  font-size: 28px;
+  font-weight: 700;
+  color: white;
+  animation: check-pop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-step-item.completed .gdh-rdv-step-icon,
+.gdh-rdv-step-item.completed .gdh-rdv-step-number {
+  display: none;
+}
+
+.gdh-rdv-step-item.completed .gdh-rdv-step-title {
+  color: var(--gdh-success);
+  font-weight: 600;
+}
+
+@keyframes check-pop {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Step Label */
+.gdh-rdv-step-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  max-width: 120px;
+}
+
+.gdh-rdv-step-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gdh-text-dark);
+  transition: all 0.3s ease;
+}
+
+.gdh-rdv-step-subtitle {
+  font-size: 10px;
+  color: var(--gdh-text-light);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+/* Step Connector */
+.gdh-rdv-step-connector {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0 8px;
+  margin-top: 30px;
+  position: relative;
+  z-index: 1;
+}
+
+.gdh-rdv-connector-line {
+  width: 100%;
+  height: 3px;
+  background: var(--gdh-border-light);
+  border-radius: 2px;
+  position: relative;
+  overflow: hidden;
+}
+
+.gdh-rdv-connector-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 100%);
+  border-radius: 2px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.gdh-rdv-connector-progress::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 1.5s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Connector Active State */
+.gdh-rdv-step-connector.active .gdh-rdv-connector-progress {
+  width: 100%;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .gdh-rdv-progress-wrapper {
+    padding: 16px;
+  }
+
+  .gdh-rdv-step-circle {
+    width: 50px;
+    height: 50px;
+  }
+
+  .gdh-rdv-step-icon {
+    font-size: 20px;
+  }
+
+  .gdh-rdv-step-number {
+    font-size: 18px;
+  }
+
+  .gdh-rdv-step-title {
+    font-size: 12px;
+  }
+
+  .gdh-rdv-step-subtitle {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Keep horizontal layout - removed vertical override */
+}
+
+/* Legacy styles (keep for backward compatibility) */
+.gdh-rdv-progress {
+  margin-bottom: 32px;
+}
+
+.gdh-rdv-steps {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.875rem;
+  color: var(--gdh-text-light);
+  font-weight: 500;
+}
+
+.gdh-rdv-step {
+  transition: var(--gdh-transition);
+}
+
+.gdh-rdv-step.active {
+  color: var(--gdh-primary-green);
+  font-weight: 700;
+  transform: scale(1.05);
+}
+
+.gdh-rdv-step.completed {
+  color: var(--gdh-success);
+  font-weight: 600;
+  position: relative;
+}
+
+.gdh-rdv-step.completed::after {
+  content: "✓";
+  margin-left: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+/* === Step content === */
+.gdh-rdv-step-content {
+  display: none;
+  animation: fadeIn 0.3s ease;
+}
+
+.gdh-rdv-step-content.active {
+  display: block;
+}
+
+.gdh-rdv-step-header {
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid var(--gdh-border-light);
+  position: relative;
+}
+
+.gdh-rdv-step-header::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 60px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--gdh-primary-green) 0%, var(--gdh-accent-yellow) 100%);
+  border-radius: 2px;
+}
+
+.gdh-rdv-step-content h3 {
+  margin: 0 0 6px 0;
+  color: var(--gdh-primary-green);
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.gdh-rdv-step-description {
+  margin: 0;
+  color: var(--gdh-text-medium);
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.gdh-rdv-help {
+  font-size: 0.9rem;
+  color: var(--gdh-text-light);
+  margin-bottom: 16px;
+}
+
+/* Form Section */
+.gdh-rdv-form-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+/* === Fields === */
+.gdh-rdv-field,
+.gdh-rdv-slot {
+  margin-bottom: 0;
+}
+
+.gdh-rdv-field-full {
+  width: 100%;
+}
+
+.gdh-rdv-field-group {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.gdh-rdv-field-row {
+  width: 100%;
+}
+
+.gdh-rdv-field-small {
+  flex: 0 0 35%;
+  min-width: 140px;
+}
+
+.gdh-rdv-field-large {
+  flex: 1;
+  min-width: 200px;
+}
+
+.gdh-rdv-field-half {
+  flex: 1;
+  min-width: 200px;
+}
+
+.gdh-rdv-field label,
+.gdh-rdv-slot label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: var(--gdh-text-dark);
+  font-size: 12px;
+}
+
+.gdh-rdv-label-icon {
+  font-size: 18px;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Dashicons styling */
+.gdh-rdv-label-icon.dashicons {
+  width: 20px;
+  height: 20px;
+  font-size: 20px;
+}
+
+.gdh-rdv-step-header h3 .dashicons {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.gdh-rdv-label-text {
+  flex: 1;
+}
+
+.gdh-rdv-required {
+  color: var(--gdh-error);
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.gdh-rdv-field input,
+.gdh-rdv-slot input {
+  width: 100%;
+  padding: 10px 14px;
+  border: 2px solid var(--gdh-border-light);
+  border-radius: var(--gdh-radius-md);
+  font-size: 13px;
+  transition: var(--gdh-transition);
+  background: var(--gdh-bg-card);
+  color: var(--gdh-text-dark);
+  font-weight: 500;
+}
+
+.gdh-rdv-field input:hover {
+  border-color: var(--gdh-primary-green-light);
+}
+
+.gdh-rdv-field input:focus,
+.gdh-rdv-slot input:focus {
+  outline: none;
+  border-color: var(--gdh-primary-green);
+  box-shadow: 0 0 0 4px rgba(0, 104, 71, 0.12);
+  transform: translateY(-1px);
+}
+
+.gdh-rdv-field input::placeholder,
+.gdh-rdv-slot input::placeholder {
+  color: var(--gdh-text-light);
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.gdh-rdv-field input:focus::placeholder,
+.gdh-rdv-slot input:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* === Checkbox === */
+.gdh-rdv-field-checkbox {
+  margin-top: 8px;
+  padding-top: 24px;
+  border-top: 1px solid var(--gdh-border-light);
+}
+
+.gdh-rdv-checkbox-modern {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  cursor: pointer;
+  padding: 12px;
+  border-radius: var(--gdh-radius-md);
+  background: var(--gdh-bg-light);
+  transition: var(--gdh-transition);
+  position: relative;
+}
+
+.gdh-rdv-checkbox-modern:hover {
+  background: #e8f5e9;
+  box-shadow: var(--gdh-shadow-sm);
+}
+
+.gdh-rdv-checkbox-modern input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
+}
+
+.gdh-rdv-checkmark {
+  position: relative;
+  height: 20px;
+  width: 20px;
+  background-color: white;
+  border: 2px solid var(--gdh-border-light);
+  border-radius: var(--gdh-radius-sm);
+  flex-shrink: 0;
+  transition: var(--gdh-transition);
+}
+
+.gdh-rdv-checkbox-modern:hover .gdh-rdv-checkmark {
+  border-color: var(--gdh-primary-green);
+}
+
+.gdh-rdv-checkbox-modern input:checked~.gdh-rdv-checkmark {
+  background: linear-gradient(135deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 100%);
+  border-color: var(--gdh-primary-green);
+}
+
+.gdh-rdv-checkmark:after {
+  content: "";
+  position: absolute;
+  display: none;
+  left: 6px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.gdh-rdv-checkbox-modern input:checked~.gdh-rdv-checkmark:after {
+  display: block;
+}
+
+.gdh-rdv-checkbox-label {
+  flex: 1;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--gdh-text-dark);
+  font-weight: 500;
+}
+
+.gdh-rdv-checkbox-label a {
+  color: var(--gdh-primary-green);
+  text-decoration: underline;
+  font-weight: 600;
+  transition: var(--gdh-transition);
+}
+
+.gdh-rdv-checkbox-label a:hover {
+  color: var(--gdh-primary-green-light);
+}
+
+/* Old checkbox style (deprecated) */
+.gdh-rdv-checkbox {
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.gdh-rdv-checkbox input {
+  margin-right: 8px;
+}
+
+/* === Buttons === */
+.gdh-rdv-form-actions {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 16px;
+}
+
+.gdh-rdv-btn {
+  padding: 11px 20px;
+  border-radius: var(--gdh-radius-md);
+  border: none;
+  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--gdh-transition);
+  position: relative;
+  overflow: hidden;
+  letter-spacing: 0.3px;
+  min-width: 120px;
+}
+
+.gdh-rdv-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.gdh-rdv-btn:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+.gdh-rdv-btn-primary {
+  background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
+  color: var(--gdh-button-text-color, #000000);
+  font-weight: 700;
+  box-shadow: var(--gdh-shadow-md);
+}
+
+.gdh-rdv-btn-primary:hover {
+  background: linear-gradient(135deg, var(--gdh-accent-yellow-dark) 0%, #e09616 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+}
+
+.gdh-rdv-btn-secondary {
+  background: var(--gdh-bg-light);
+  color: var(--gdh-text-dark);
+  font-weight: 600;
+  border: 2px solid var(--gdh-border-light);
+}
+
+.gdh-rdv-btn-secondary:hover {
+  background: white;
+  border-color: var(--gdh-primary-green);
+  color: var(--gdh-primary-green);
+  transform: translateY(-1px);
+  box-shadow: var(--gdh-shadow-sm);
+}
+
+.gdh-rdv-btn:active {
+  transform: scale(0.98);
+}
+
+.gdh-rdv-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+  position: relative;
+}
+
+.gdh-rdv-btn:disabled:hover {
+  transform: none;
+  box-shadow: var(--gdh-shadow-md);
+}
+
+.gdh-rdv-btn-primary:disabled {
+  background: linear-gradient(135deg, #d4a017 0%, #c89116 100%);
+}
+
+.gdh-rdv-btn:disabled::after {
+  content: '';
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  top: 50%;
+  right: 16px;
+  margin-top: -8px;
+  border: 2px solid rgba(0, 0, 0, 0.3);
+  border-radius: 50%;
+  border-top-color: #000;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* === Error messages === */
+.gdh-rdv-error {
+  color: #e74c3c;
+  margin-top: 10px;
+  padding: 10px;
+  background: #fdf2f2;
+  border: 1px solid #e74c3c;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Success message === */
+.gdh-rdv-success {
+  text-align: center;
+  padding: 40px 20px;
+  animation: successPulse 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gdh-rdv-success-icon {
+  font-size: 4rem;
+  color: var(--gdh-success);
+  margin-bottom: 20px;
+  display: inline-block;
+  width: 80px;
+  height: 80px;
+  line-height: 80px;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-radius: 50%;
+  animation: successIcon 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.gdh-rdv-success h3 {
+  color: var(--gdh-text-dark);
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 0 12px 0;
+}
+
+.gdh-rdv-success p {
+  color: var(--gdh-text-medium);
+  font-size: 1rem;
+  margin: 0;
+}
+
+@keyframes successPulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+
+  50% {
+    transform: scale(1.05);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes successIcon {
+  0% {
+    transform: scale(0) rotate(-180deg);
+  }
+
+  50% {
+    transform: scale(1.2) rotate(10deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* === Responsive === */
+@media (max-width: 768px) {
+  .gdh-rdv-button {
+    width: 100%;
+    padding: 14px 20px;
+  }
+}
+
+/* Tablet responsive - no changes to desktop */
+@media (max-width: 1200px) {
+  .gdh-rdv-popup-content {
+    max-width: 900px;
+    padding: 32px;
+  }
+}
+
+/* Mobile Tablet (768px and below) */
+@media (max-width: 768px) {
+  .gdh-rdv-popup {
+    padding: 10px;
+  }
+
+  .gdh-rdv-popup-content {
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+
+  .gdh-rdv-popup-header {
+    padding-bottom: 10px;
+    margin-bottom: 12px;
+  }
+
+  .gdh-rdv-popup-header h2 {
+    font-size: 1.15rem;
+  }
+
+  .gdh-rdv-close {
+    width: 28px;
+    height: 28px;
+    font-size: 1.1rem;
+  }
+
+  /* Progress bar mobile */
+  .gdh-rdv-progress-wrapper {
+    padding: 10px;
+    margin-bottom: 14px;
+  }
+
+  .gdh-rdv-step-circle {
+    width: 32px;
+    height: 32px;
+    border-width: 2px;
+  }
+
+  .gdh-rdv-step-icon {
+    font-size: 16px;
+    display: block !important;
+  }
+
+  .gdh-rdv-step-number {
+    display: none !important;
+  }
+
+  .gdh-rdv-step-label {
+    display: none;
+  }
+
+  .gdh-rdv-step-connector {
+    margin-top: 0;
+  }
+
+  /* Step content mobile */
+  .gdh-rdv-step-header {
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+
+  .gdh-rdv-step-content h3 {
+    font-size: 1rem;
+  }
+
+  .gdh-rdv-step-description {
+    font-size: 0.8rem;
+  }
+
+  /* Form sections mobile */
+  .gdh-rdv-form-section {
+    gap: 12px;
+  }
+
+  .gdh-rdv-field-group {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .gdh-rdv-field-small,
+  .gdh-rdv-field-large,
+  .gdh-rdv-field-half {
+    flex: 1 1 100%;
+    min-width: 100%;
+  }
+
+  /* Inputs mobile */
+  .gdh-rdv-field input,
+  .gdh-rdv-slot input {
+    padding: 10px 12px;
+    font-size: 14px;
+  }
+
+  .gdh-rdv-field label,
+  .gdh-rdv-slot label {
+    font-size: 12px;
+    margin-bottom: 6px;
+  }
+
+  /* Checkbox mobile */
+  .gdh-rdv-checkbox-modern {
+    padding: 10px;
+  }
+
+  .gdh-rdv-checkbox-label {
+    font-size: 12px;
+  }
+
+  /* Buttons mobile */
+  .gdh-rdv-form-actions {
+    gap: 8px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+
+  .gdh-rdv-btn {
+    padding: 10px 18px;
+    font-size: 13px;
+    min-width: 110px;
+  }
+
+  /* Slot cards mobile */
+  .gdh-rdv-slots-container {
+    padding-bottom: 8px;
+  }
+
+  .gdh-rdv-slots {
+    gap: 12px;
+    padding: 0.5em;
+  }
+
+  .gdh-rdv-slot-card {
+    min-width: 240px;
+    max-width: 280px;
+  }
+
+  .gdh-rdv-slot-header {
+    padding: 7px 9px;
+  }
+
+  .gdh-rdv-slot-badge {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .gdh-rdv-slot-title {
+    font-size: 11px;
+  }
+
+  .gdh-rdv-date-label,
+  .gdh-rdv-time-label {
+    font-size: 10px;
+  }
+
+  .gdh-rdv-date {
+    padding: 7px 32px 7px 9px;
+    font-size: 12px;
+  }
+
+  .gdh-rdv-times-grid {
+    gap: 6px;
+  }
+
+  .gdh-rdv-time {
+    padding: 7px 5px;
+    font-size: 10px;
+  }
+
+  .gdh-rdv-time-text {
+    font-size: 9px;
+  }
+
+  .gdh-rdv-all-day {
+    padding: 9px 10px;
+    font-size: 10px;
+  }
+
+  .gdh-rdv-add-slot {
+    width: 48px;
+    height: 48px;
+    z-index: 1000;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  }
+
+  .gdh-rdv-add-icon {
+    font-size: 20px;
+  }
+
+  .gdh-rdv-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Mobile Phone (480px and below) */
+@media (max-width: 480px) {
+  .gdh-rdv-popup {
+    padding: 0;
+    align-items: flex-end;
+  }
+
+  .gdh-rdv-popup-content {
+    width: 100%;
+    padding: 14px;
+    border-radius: 16px 16px 0 0;
+    height: 100%;
+    animation: slideUpMobile 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  @keyframes slideUpMobile {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .gdh-rdv-popup-header {
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .gdh-rdv-popup-header h2 {
+    font-size: 1rem;
+  }
+
+  .gdh-rdv-close {
+    width: 26px;
+    height: 26px;
+    font-size: 1rem;
+  }
+
+  /* Progress mobile phone */
+  .gdh-rdv-progress-wrapper {
+    padding: 8px;
+    margin-bottom: 10px;
+  }
+
+  .gdh-rdv-step-circle {
+    width: 28px;
+    height: 28px;
+    border-width: 2px;
+  }
+
+  .gdh-rdv-step-icon {
+    font-size: 14px;
+    display: block !important;
+  }
+
+  .gdh-rdv-step-number {
+    display: none !important;
+  }
+
+  .gdh-rdv-step-label {
+    display: none;
+  }
+
+  .gdh-rdv-step-connector {
+    margin-top: 0;
+  }
+
+  /* Step content mobile phone */
+  .gdh-rdv-step-header {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+  }
+
+  .gdh-rdv-step-content h3 {
+    font-size: 0.95rem;
+    gap: 4px;
+  }
+
+  .gdh-rdv-step-content h3 .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  .gdh-rdv-step-description {
+    font-size: 0.75rem;
+    line-height: 1.3;
+  }
+
+  /* Form mobile phone */
+  .gdh-rdv-form-section {
+    gap: 10px;
+    position: relative;
+  }
+
+  .gdh-rdv-field-group {
+    gap: 10px;
+  }
+
+  .gdh-rdv-field label,
+  .gdh-rdv-slot label {
+    font-size: 11px;
+    margin-bottom: 5px;
+    gap: 4px;
+  }
+
+  .gdh-rdv-label-icon {
+    font-size: 14px;
+  }
+
+  .gdh-rdv-field input,
+  .gdh-rdv-slot input {
+    padding: 9px 11px;
+    font-size: 14px;
+    border-width: 1.5px;
+  }
+
+  /* Checkbox mobile phone */
+  .gdh-rdv-field-checkbox {
+    padding-top: 16px;
+  }
+
+  .gdh-rdv-checkbox-modern {
+    padding: 9px;
+    gap: 8px;
+  }
+
+  .gdh-rdv-checkmark {
+    width: 18px;
+    height: 18px;
+  }
+
+  .gdh-rdv-checkmark:after {
+    left: 5px;
+    top: 1px;
+    width: 4px;
+    height: 8px;
+  }
+
+  .gdh-rdv-checkbox-label {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  /* Buttons mobile phone */
+  .gdh-rdv-form-actions {
+    gap: 8px;
+    margin-top: 12px;
+    position: fixed;
+    bottom: 1rem;
+    width: 100%;
+  }
+
+  .gdh-rdv-btn {
+    padding: 10px 16px;
+    font-size: 12px;
+    min-width: 100px;
+    flex: 1;
+  }
+
+  /* Slot cards mobile phone */
+  .gdh-rdv-slots-container {
+    padding-bottom: 6px;
+  }
+
+  .gdh-rdv-slots {
+    gap: 10px;
+    padding: 0.3em;
+  }
+
+  .gdh-rdv-slot-card {
+    min-width: 220px;
+    max-width: 260px;
+    border-radius: 8px;
+  }
+
+  .gdh-rdv-slot-card::before {
+    height: 3px;
+  }
+
+  .gdh-rdv-slot-header {
+    padding: 7px 9px;
+  }
+
+  .gdh-rdv-slot-badge {
+    padding: 2px 6px;
+    font-size: 8px;
+    gap: 3px;
+  }
+
+  .gdh-rdv-slot-badge .dashicons {
+    font-size: 11px;
+    width: 11px;
+    height: 11px;
+  }
+
+  .gdh-rdv-slot-number {
+    font-size: 8px;
+  }
+
+  .gdh-rdv-slot-title {
+    font-size: 10px;
+    margin-left: 5px;
+  }
+
+  .gdh-rdv-remove-slot {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+
+  .gdh-rdv-slot-content {
+    padding: 9px;
+    gap: 9px;
+  }
+
+  .gdh-rdv-date-section,
+  .gdh-rdv-time-section {
+    gap: 6px;
+  }
+
+  .gdh-rdv-date-label,
+  .gdh-rdv-time-label {
+    font-size: 9px;
+    gap: 4px;
+  }
+
+  .gdh-rdv-date-label .dashicons,
+  .gdh-rdv-time-label .dashicons {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .gdh-rdv-date {
+    padding: 6px 30px 6px 8px;
+    font-size: 11px;
+    border-radius: 6px;
+  }
+
+  .gdh-rdv-date-input-wrapper .gdh-rdv-date-icon {
+    right: 8px;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  .gdh-rdv-times-grid {
+    gap: 5px;
+  }
+
+  .gdh-rdv-time {
+    padding: 6px 4px;
+    gap: 2px;
+    border-radius: 6px;
+  }
+
+  .gdh-rdv-time-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .gdh-rdv-time-text {
+    font-size: 9px;
+  }
+
+  .gdh-rdv-time-check {
+    top: 3px;
+    right: 3px;
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+  }
+
+  .gdh-rdv-all-day-section {
+    margin-top: 1px;
+  }
+
+  .gdh-rdv-all-day {
+    padding: 8px 10px;
+    font-size: 9px;
+    gap: 5px;
+    border-radius: 6px;
+  }
+
+  .gdh-rdv-all-day .dashicons {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  .gdh-rdv-all-day-badge {
+    top: 5px;
+    right: 8px;
+    font-size: 8px;
+    padding: 2px 5px;
+    border-radius: 6px;
+  }
+
+  .gdh-rdv-add-slot {
+    position: fixed !important;
+    bottom: 70px !important;
+    right: 16px !important;
+    left: auto !important;
+    top: auto !important;
+    width: 52px;
+    height: 52px;
+    z-index: 1000;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  .gdh-rdv-add-icon {
+    font-size: 22px;
+  }
+
+  .gdh-rdv-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  /* Error messages mobile phone */
+  .gdh-rdv-error-message,
+  .gdh-rdv-slot-error {
+    font-size: 11px;
+    padding: 8px 10px;
+    margin-top: 6px;
+  }
+
+  /* Success message mobile phone */
+  .gdh-rdv-success {
+    padding: 30px 15px;
+  }
+
+  .gdh-rdv-success-icon {
+    font-size: 3rem;
+    width: 60px;
+    height: 60px;
+    line-height: 60px;
+    margin-bottom: 15px;
+  }
+
+  .gdh-rdv-success h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+  }
+
+  .gdh-rdv-success p {
+    font-size: 0.9rem;
+  }
+}
+
+/* === Animations === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Step 1: Slots UI - Card Layout */
+.gdh-rdv-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.gdh-rdv-help {
+  margin: 0;
+  flex: 1;
+}
+
+.gdh-rdv-slots-container {
+  width: 100%;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  scroll-behavior: smooth;
+}
+
+.gdh-rdv-slots-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.gdh-rdv-slots-container::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 3px;
+}
+
+.gdh-rdv-slots-container::-webkit-scrollbar-thumb {
+  background: #006847;
+  border-radius: 3px;
+}
+
+.gdh-rdv-slots-container::-webkit-scrollbar-thumb:hover {
+  background: #004d35;
+}
+
+.gdh-rdv-slots {
+  display: flex;
+  gap: 16px;
+  min-width: min-content;
+  padding: 1em;
+  justify-content: center;
+}
+
+
+/* === Slot Cards === */
+.gdh-rdv-slot-card {
+  background: white;
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: 0 4px 16px rgba(0, 104, 71, 0.1);
+  min-width: 260px;
+  max-width: 300px;
+  flex-shrink: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 2px solid rgba(0, 104, 71, 0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gdh-rdv-slot-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 50%, var(--gdh-accent-yellow) 100%);
+  background-size: 200% 100%;
+  animation: gradient-shift 3s ease infinite;
+}
+
+@keyframes gradient-shift {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.gdh-rdv-slot-card:hover {
+  transform: scale(1.02);
+  box-shadow: 0 5px 2px rgba(0, 104, 71, 0.2);
+  border-color: var(--gdh-primary-green);
+}
+
+.gdh-rdv-slot-card.has-selection {
+  border-color: var(--gdh-primary-green);
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.gdh-rdv-slot-card.has-selection::before {
+  height: 6px;
+  background: var(--gdh-primary-green);
+}
+
+/* Slot Header */
+.gdh-rdv-slot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  background: linear-gradient(135deg, #f8fffe 0%, #ffffff 100%);
+  border-bottom: 1px solid rgba(0, 104, 71, 0.08);
+}
+
+.gdh-rdv-slot-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 8px;
+  background: linear-gradient(135deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 100%);
+  border-radius: 12px;
+  color: white;
+  font-size: 10px;
+  font-weight: 700;
+  box-shadow: 0 2px 6px rgba(0, 104, 71, 0.25);
+}
+
+.gdh-rdv-slot-badge .dashicons {
+  font-size: 12px;
+  width: 12px;
+  height: 12px;
+}
+
+.gdh-rdv-slot-number {
+  font-size: 10px;
+}
+
+.gdh-rdv-slot-title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--gdh-text-dark);
+  letter-spacing: -0.3px;
+  flex: 1;
+  margin-left: 6px;
+}
+
+.gdh-rdv-remove-slot {
+  background: transparent;
+  border: none;
+  color: #999;
+  cursor: pointer;
+  padding: 0;
+  font-size: 24px;
+  line-height: 1;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+.gdh-rdv-remove-slot:hover {
+  color: var(--gdh-error);
+  transform: scale(1.2);
+}
+
+/* Slot Content */
+.gdh-rdv-slot-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 12px;
+}
+
+/* Date Section */
+.gdh-rdv-date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gdh-rdv-date-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gdh-text-dark);
+}
+
+.gdh-rdv-date-label .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--gdh-primary-green);
+}
+
+.gdh-rdv-date-input-wrapper {
+  position: relative;
+}
+
+.gdh-rdv-date-input-wrapper .gdh-rdv-date-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gdh-primary-green);
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1;
+}
+
+.gdh-rdv-date-input-wrapper .gdh-rdv-date-icon:hover {
+  color: var(--gdh-primary-green-dark);
+  transform: translateY(-50%) scale(1.15);
+}
+
+.gdh-rdv-date {
+  width: 100%;
+  padding: 8px 36px 8px 10px;
+  border: 2px solid var(--gdh-border-light);
+  border-radius: 8px;
+  background: white;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--gdh-text-dark);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+/* Hide native date input calendar icon */
+.gdh-rdv-date::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  cursor: pointer;
+  position: absolute;
+  right: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.gdh-rdv-date::-webkit-inner-spin-button,
+.gdh-rdv-date::-webkit-clear-button {
+  display: none;
+}
+
+.gdh-rdv-date:hover {
+  border-color: var(--gdh-primary-green-light);
+  background: #f8fffe;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 104, 71, 0.1);
+}
+
+.gdh-rdv-date:focus {
+  outline: none;
+  border-color: var(--gdh-primary-green);
+  box-shadow: 0 0 0 4px rgba(0, 104, 71, 0.12);
+  background: white;
+}
+
+/* Time Section */
+.gdh-rdv-time-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gdh-rdv-time-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--gdh-text-dark);
+}
+
+.gdh-rdv-time-label .dashicons {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: var(--gdh-primary-green);
+}
+
+.gdh-rdv-times-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.gdh-rdv-all-day-section {
+  display: flex;
+  justify-content: stretch;
+  margin-top: 2px;
+}
+
+.gdh-rdv-add-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
+  color: var(--gdh-button-text-color, #000000);
+  cursor: pointer;
+  transition: var(--gdh-transition);
+  box-shadow: var(--gdh-shadow-md);
+  flex-shrink: 0;
+  font-weight: 700;
+  position: relative;
+  overflow: hidden;
+}
+
+.gdh-rdv-add-slot::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.4);
+  transform: translate(-50%, -50%);
+  transition: width 0.4s, height 0.4s;
+}
+
+.gdh-rdv-add-slot:hover::before {
+  width: 100px;
+  height: 100px;
+}
+
+.gdh-rdv-add-slot:hover {
+  background: linear-gradient(135deg, var(--gdh-accent-yellow-dark) 0%, #e09616 100%);
+  transform: scale(1.15) rotate(90deg);
+  box-shadow: 0 4px 16px rgba(245, 166, 35, 0.5);
+}
+
+.gdh-rdv-add-slot:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.gdh-rdv-add-icon {
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+/* Time Buttons */
+.gdh-rdv-time {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 8px 6px;
+  border-radius: 8px;
+  border: 2px solid var(--gdh-border-light);
+  background: white;
+  color: var(--gdh-text-dark);
+  font-weight: 600;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gdh-rdv-time-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+  color: var(--gdh-text-light);
+  transition: all 0.3s ease;
+}
+
+.gdh-rdv-time-text {
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.gdh-rdv-time-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  color: white;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-time:hover {
+  border-color: var(--gdh-primary-green-light);
+  background: #f8fffe;
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 104, 71, 0.15);
+}
+
+.gdh-rdv-time:hover .gdh-rdv-time-icon {
+  color: var(--gdh-primary-green);
+  transform: scale(1.1);
+}
+
+.gdh-rdv-time:active {
+  transform: translateY(-1px) scale(0.98);
+}
+
+.gdh-rdv-time[disabled] {
+  cursor: not-allowed;
+  opacity: 0.4;
+  background: var(--gdh-bg-light);
+  border-color: var(--gdh-border-light);
+  transform: none;
+}
+
+.gdh-rdv-time.selected,
+.gdh-rdv-time[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--gdh-primary-green) 0%, var(--gdh-primary-green-light) 100%);
+  border-color: var(--gdh-primary-green);
+  color: white;
+  font-weight: 700;
+  box-shadow: 0 6px 20px rgba(0, 104, 71, 0.35);
+  transform: translateY(-4px) scale(1.03);
+  animation: select-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-time.selected .gdh-rdv-time-icon,
+.gdh-rdv-time[aria-pressed="true"] .gdh-rdv-time-icon {
+  color: white;
+}
+
+.gdh-rdv-time.selected .gdh-rdv-time-check,
+.gdh-rdv-time[aria-pressed="true"] .gdh-rdv-time-check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+@keyframes select-bounce {
+  0% {
+    transform: translateY(-4px) scale(0.9);
+  }
+
+  50% {
+    transform: translateY(-6px) scale(1.05);
+  }
+
+  100% {
+    transform: translateY(-4px) scale(1.03);
+  }
+}
+
+/* All-day Button */
+.gdh-rdv-all-day {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 2px dashed var(--gdh-accent-blue);
+  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
+  color: var(--gdh-accent-blue-dark);
+  font-weight: 700;
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.gdh-rdv-all-day .dashicons {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
+
+.gdh-rdv-all-day-badge {
+  position: absolute;
+  top: 6px;
+  right: 10px;
+  font-size: 9px;
+  font-weight: 600;
+  padding: 3px 6px;
+  background: var(--gdh-accent-blue);
+  color: white;
+  border-radius: 8px;
+  opacity: 0;
+  transform: scale(0);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-all-day:hover {
+  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
+  border-color: var(--gdh-accent-blue-dark);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.25);
+}
+
+.gdh-rdv-all-day.active,
+.gdh-rdv-all-day[aria-pressed="true"] {
+  background: linear-gradient(135deg, var(--gdh-accent-blue) 0%, var(--gdh-accent-blue-dark) 100%);
+  border-color: var(--gdh-accent-blue-dark);
+  border-style: solid;
+  color: white;
+  box-shadow: 0 6px 24px rgba(26, 115, 232, 0.4);
+  transform: translateY(-4px) scale(1.02);
+  animation: select-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.gdh-rdv-all-day.active .gdh-rdv-all-day-badge,
+.gdh-rdv-all-day[aria-pressed="true"] .gdh-rdv-all-day-badge {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* === Error Styling & Validation === */
+
+/* Field wrapper with error state */
+.gdh-rdv-field.has-error {
+  position: relative;
+}
+
+/* Input error state */
+.gdh-rdv-field input.gdh-rdv-field-error,
+.gdh-rdv-field-error {
+  border-color: var(--gdh-error) !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%) !important;
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
+}
+
+/* Input invalid state (HTML5 validation) */
+.gdh-rdv-field input:invalid:not(:placeholder-shown) {
+  border-color: var(--gdh-error);
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+/* Input valid state */
+.gdh-rdv-field input:valid:not(:placeholder-shown) {
+  border-color: var(--gdh-success);
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+/* Valid checkmark icon */
+.gdh-rdv-field input:valid:not(:placeholder-shown) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+  padding-right: 40px;
+}
+
+/* Error checkmark icon */
+.gdh-rdv-field input.gdh-rdv-field-error,
+.gdh-rdv-field input:invalid:not(:placeholder-shown) {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23ef4444' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'%3E%3C/circle%3E%3Cline x1='15' y1='9' x2='9' y2='15'%3E%3C/line%3E%3Cline x1='9' y1='9' x2='15' y2='15'%3E%3C/line%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 18px;
+  padding-right: 40px;
+}
+
+/* Error message container */
+.gdh-rdv-error-message {
+  color: var(--gdh-error);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border-left: 4px solid var(--gdh-error);
+  border-radius: var(--gdh-radius-sm);
+  animation: slideInError 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--gdh-shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  line-height: 1.4;
+}
+
+.gdh-rdv-error-message::before {
+  content: '⚠';
+  font-size: 16px;
+  flex-shrink: 0;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Success message */
+.gdh-rdv-success-message {
+  color: var(--gdh-success);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 8px;
+  padding: 10px 14px;
+  background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+  border-left: 4px solid var(--gdh-success);
+  border-radius: var(--gdh-radius-sm);
+  animation: slideInError 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--gdh-shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gdh-rdv-success-message::before {
+  content: '✓';
+  font-size: 16px;
+  flex-shrink: 0;
+  font-weight: 700;
+}
+
+/* Slot/Time grid error state */
+.gdh-rdv-times-grid.gdh-rdv-field-error {
+  border: 2px solid var(--gdh-error);
+  border-radius: var(--gdh-radius-md);
+  padding: 10px;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+/* Legacy slot error (keep for backward compatibility) */
+.gdh-rdv-slot-error {
+  color: var(--gdh-error);
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border-left: 4px solid var(--gdh-error);
+  border-radius: var(--gdh-radius-sm);
+  animation: slideInError 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: var(--gdh-shadow-sm);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.gdh-rdv-slot-error::before {
+  content: '⚠';
+  font-size: 16px;
+  flex-shrink: 0;
+}
+
+/* Label error state */
+.gdh-rdv-field.has-error label {
+  color: var(--gdh-error);
+}
+
+/* Checkbox error state */
+.gdh-rdv-checkbox-modern.has-error {
+  border: 2px solid var(--gdh-error);
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+
+.gdh-rdv-checkbox-modern.has-error .gdh-rdv-checkmark {
+  border-color: var(--gdh-error);
+}
+
+/* Animations */
+@keyframes slideInError {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes shake {
+
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+
+  25% {
+    transform: translateX(-5px);
+  }
+
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .gdh-rdv-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .gdh-rdv-slot-card {
+    min-width: 260px;
+  }
+
+  .gdh-rdv-times-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  .gdh-rdv-date {
+    min-width: auto;
+    width: 100%;
+  }
+
+  .gdh-rdv-add-slot {
+    align-self: flex-start;
+  }
+}

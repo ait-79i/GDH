@@ -1,0 +1,33 @@
+{% if slots is empty %}
+	<span style="color: #999;">Aucun créneau</span>
+{% else %}
+	<div style="font-size: 12px; line-height: 1.6;">
+		{% for slot in slots %}
+			<div
+				style="margin-bottom: 8px; padding: 6px 8px; background: #f6f7f7; border-radius: 4px; border-left: 3px solid {{ slot.color }};">
+				{# Priority and date #}
+				<div style="margin-bottom: 3px;">
+					<strong style="color: {{ slot.color }}; font-size: 11px;">{{ slot.label }}
+						choix:</strong>
+					<span style="color: #2c3338;">{{ slot.day_name }}
+						{{ slot.formatted_date }}</span>
+				</div>
+
+				{# Times #}
+				{% if slot.is_all_day %}
+					<div style="display: inline-block; padding: 2px 6px; background: #00a32a; color: white; border-radius: 3px; font-size: 10px; font-weight: 600;">
+						TOUTE LA JOURNÉE
+					</div>
+				{% else %}
+					<div style="display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px;">
+						{% for time in slot.times %}
+							<span style="display: inline-block; padding: 2px 6px; background: white; border: 1px solid #dcdcde; border-radius: 3px; font-size: 10px; color: #50575e;">
+								{{ time }}
+							</span>
+						{% endfor %}
+					</div>
+				{% endif %}
+			</div>
+		{% endfor %}
+	</div>
+{% endif %}
