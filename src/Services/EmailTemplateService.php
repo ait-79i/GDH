@@ -92,24 +92,24 @@ class EmailTemplateService
         $siteName    = get_bloginfo('name');
         $artisanName = $siteName; // alias; peut être remplacé par une option dédiée si nécessaire
         return [
-            'nom_lead'          => trim($first . ' ' . $last),
-            'date_rdv'          => $aptDate,
-            'email_lead'        => (string) $email,
-            'phone'             => (string) $phone,
-            'address'           => (string) $address,
-            'city'              => (string) $city,
-            'postal_code'       => (string) $postal,
-            'nom_destinataire'  => $artisanName,
-            'creneaux_rdv'      => $slotsFormatted,
+            'nom_lead'         => trim($first . ' ' . $last),
+            'date_rdv'         => $aptDate,
+            'email_lead'       => (string) $email,
+            'phone'            => (string) $phone,
+            'address'          => (string) $address,
+            'city'             => (string) $city,
+            'postal_code'      => (string) $postal,
+            'nom_destinataire' => $artisanName,
+            'creneaux_rdv'     => $slotsFormatted,
         ];
     }
 
     private function getPlaceholderAliases()
     {
         return [
-            'artisan_name' => 'nom_destinataire',
-            'client_name'  => 'nom_lead',
-            'client_email' => 'email_lead',
+            'artisan_name'      => 'nom_destinataire',
+            'client_name'       => 'nom_lead',
+            'client_email'      => 'email_lead',
             'appointment_date'  => 'date_rdv',
             'appointment_slots' => 'creneaux_rdv',
         ];
@@ -157,20 +157,20 @@ class EmailTemplateService
     public function sendOnAppointment($post_id, array $formData)
     {
         // Load template from options
-        $subject                 = (string) get_option('gdh_email_subject', '');
-        $body                    = (string) get_option('gdh_email_body', '');
-        $style                   = '';
-        $contentType             = 'html';
+        $subject     = (string) get_option('gdh_email_subject', '');
+        $body        = (string) get_option('gdh_email_body', '');
+        $style       = '';
+        $contentType = 'html';
         if ($subject === '' || $body === '') {
             $this->logger->error('GDH Email: sujet ou corps du modèle manquant');
             return false;
         }
-        $available               = $this->getAvailableVariables();
-        $isHtml                  = ($contentType === 'html');
-        $context                 = $this->buildContextFromData($post_id, $formData, $isHtml);
-        $aliases                 = $this->getPlaceholderAliases();
-        $placeholdersRaw         = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
-        $placeholders            = array_map(function ($k) use ($aliases) { return isset($aliases[$k]) ? $aliases[$k] : $k; }, $placeholdersRaw);
+        $available       = $this->getAvailableVariables();
+        $isHtml          = ($contentType === 'html');
+        $context         = $this->buildContextFromData($post_id, $formData, $isHtml);
+        $aliases         = $this->getPlaceholderAliases();
+        $placeholdersRaw = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
+        $placeholders    = array_map(function ($k) use ($aliases) {return isset($aliases[$k]) ? $aliases[$k] : $k;}, $placeholdersRaw);
         list($unknown, $missing) = $this->validatePlaceholders($placeholders, $available, $context);
         if (! empty($unknown) || ! empty($missing)) {
             $msg = 'Template invalide; inconnus=[' . implode(',', $unknown) . '], manquants=[' . implode(',', $missing) . ']';

@@ -76,23 +76,6 @@
     return ta ? (ta.value || '') : '';
   }
 
-  function gdhMaybeOverwrite(confirmMsg, checkIds) {
-    try {
-      for (let i = 0; i < checkIds.length; i++) {
-        const el = document.getElementById(checkIds[i]);
-        let val = '';
-        if (!el) continue;
-        if (el.tagName === 'TEXTAREA' || el.tagName === 'INPUT') {
-          val = (el.value || '').trim();
-        } else {
-          val = gdhGetEditorContent(checkIds[i]) || '';
-        }
-        if (val) { return window.confirm(confirmMsg); }
-      }
-    } catch (_) { }
-    return true;
-  }
-
   // Helper: check if HTML content is effectively empty (ignoring tags and NBSP)
   function gdhIsEmptyHtml(html) {
     try {
@@ -133,225 +116,300 @@
     } catch (_) { }
   });
 
-// Delegated handler: close our validation notice on dismiss icon click
-$(document).on('click', '#gdh-confirm-validate-error .notice-dismiss', function () {
-  const $notice = $('#gdh-confirm-validate-error');
-  if ($notice.length) { $notice.remove(); }
-});
-
-// Live toggle for confirmation panel
-$(document).on('change', '#gdh_confirm_enabled', function () {
-  const on = this.checked;
-  $('#gdh_confirm_wrap').toggleClass('gdh-muted', !on);
-  $('#gdh_confirm_block').toggleClass('gdh-pe-none', !on);
-  $('#gdh_confirm_subject').prop('disabled', !on);
-  // If enabling and content is empty, auto-fill defaults
-  if (on) {
-    try {
-      const confTpl = gdhDefaultTemplates.confirm;
-      const cSubjEl = document.getElementById('gdh_confirm_subject');
-      const cBodyRaw = gdhGetEditorContent('gdh_confirm_body');
-      const cSubjEmpty = !cSubjEl || (cSubjEl.value || '').trim() === '';
-      const cBodyEmpty = gdhIsEmptyHtml(cBodyRaw);
-      if (confTpl && (cSubjEmpty || cBodyEmpty)) {
-        if (cSubjEl && cSubjEmpty) { cSubjEl.value = confTpl.subject; }
-        if (cBodyEmpty) { gdhSetEditorContent('gdh_confirm_body', confTpl.body); }
-      }
-    } catch (_) { }
-  }
-});
-
-// Toggle: receiver mode via radio buttons
-$(document).on('change', 'input[name="receiver_mode"]', function () {
-  const mode = $('input[name="receiver_mode"]:checked').val();
-  const staticOn = (mode === 'static');
-  const dynOn = (mode === 'dynamic');
-  // Static panel
-  $('#gdh_recv_static_wrap').toggleClass('gdh-muted', !staticOn);
-  $('#gdh_recv_static_block').toggleClass('gdh-pe-none', !staticOn);
-  $('#receiver_static_email, #receiver_static_name').prop('disabled', !staticOn);
-  // Dynamic panel
-  $('#gdh_recv_dyn_wrap').toggleClass('gdh-muted', !dynOn);
-  $('#gdh_recv_dyn_block').toggleClass('gdh-pe-none', !dynOn);
-  $('#receiver_dynamic_post_type, #receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !dynOn);
-  // If switching to dynamic and PT already chosen, ensure meta are loaded
-  if (dynOn) {
-    const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
-    if (postType) { gdhFetchAndPopulateMeta(postType); }
-  }
-});
-
-// Helpers to populate dynamic meta key selects
-function gdhResetMetaSelect($sel) {
-  if (!$sel || !$sel.length) return;
-  $sel.empty();
-  $sel.append($('<option/>', { value: '', text: '— Sélectionner une meta —' }));
-}
-
-function gdhPopulateMetaSelect($sel, keys, selected) {
-  if (!$sel || !$sel.length) return;
-  gdhResetMetaSelect($sel);
-  if (Array.isArray(keys)) {
-    keys.forEach(function (k) {
-      $sel.append($('<option/>', { value: k, text: k }));
-    });
-  }
-  if (selected && keys && keys.indexOf(selected) !== -1) {
-    $sel.val(selected);
-  } else {
-    $sel.val('');
-  }
-}
-
-function gdhFetchAndPopulateMeta(postType) {
-  const $emailSel = $('#receiver_dynamic_email');
-  const $nameSel = $('#receiver_dynamic_name');
-  if (!postType) {
-    gdhResetMetaSelect($emailSel);
-    gdhResetMetaSelect($nameSel);
-    return;
-  }
-  // Show loading state
-  if ($emailSel.length) { $emailSel.prop('disabled', true); }
-  if ($nameSel.length) { $nameSel.prop('disabled', true); }
-
-  const selectedEmail = ($emailSel.attr('data-selected') || '').trim();
-  const selectedName = ($nameSel.attr('data-selected') || '').trim();
-
-  $.ajax({
-    url: (window.gdhMailSettings ? gdhMailSettings.ajax_url : ''),
-    method: 'POST',
-    dataType: 'json',
-    data: {
-      action: 'gdh_get_meta_keys',
-      nonce: (window.gdhMailSettings ? gdhMailSettings.nonce : ''),
-      post_type: postType
-    }
-  }).done(function (res) {
-    const keys = (res && res.success && res.data && Array.isArray(res.data.meta_keys)) ? res.data.meta_keys : [];
-    gdhPopulateMetaSelect($emailSel, keys, selectedEmail);
-    gdhPopulateMetaSelect($nameSel, keys, selectedName);
-  }).fail(function () {
-    gdhResetMetaSelect($emailSel);
-    gdhResetMetaSelect($nameSel);
-  }).always(function () {
-    const dynOn = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
-    if ($emailSel.length) { $emailSel.prop('disabled', !dynOn); }
-    if ($nameSel.length) { $nameSel.prop('disabled', !dynOn); }
+  // Delegated handler: close our validation notice on dismiss icon click
+  $(document).on('click', '#gdh-confirm-validate-error .notice-dismiss', function () {
+    const $notice = $('#gdh-confirm-validate-error');
+    if ($notice.length) { $notice.remove(); }
   });
-}
 
-// Change handler: fetch meta keys when post type changes
-$(document).on('change', '#receiver_dynamic_post_type', function () {
-  if ($('input[name="receiver_mode"]:checked').val() !== 'dynamic') return;
-  const postType = this.value;
-  if (postType) {
-    gdhFetchAndPopulateMeta(postType);
-  } else {
-    gdhFetchAndPopulateMeta('');
-  }
-});
-
-// Initial population on load if dynamic enabled and post type already chosen
-$(function () {
-  try {
-    const dynEnabled = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
-    const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
-    if (dynEnabled && postType) {
-      gdhFetchAndPopulateMeta(postType);
-    }
-  } catch (_) { }
-});
-
-// Prevent submit if confirmation is enabled but subject/body is empty
-$(document).on('submit', 'form', function (e) {
-  const $form = $(this);
-  // Ensure this is our email settings form
-  const hasAction = $form.find('input[name="action"][value="gdh_save_email_settings"]').length > 0;
-  if (!hasAction) return;
-
-  // Validate receiver selection (static/dynamic)
-  (function () {
-    const modeEl = document.querySelector('input[name="receiver_mode"]:checked');
-    const mode = modeEl ? modeEl.value : '';
-    let errors = [];
-    let firstField = null;
-
-    // No method selected -> block and notify
-    if (!mode) {
-      e.preventDefault();
-      e.stopPropagation();
-      const wrap = document.querySelector('.wrap');
-      let notice = document.getElementById('gdh-receiver-validate-error');
-      if (!notice) {
-        notice = document.createElement('div');
-        notice.id = 'gdh-receiver-validate-error';
-        notice.className = 'notice notice-error is-dismissible';
-        notice.setAttribute('role', 'alert');
-        notice.setAttribute('aria-live', 'assertive');
-        notice.tabIndex = -1;
-        notice.innerHTML = '<p></p><button type="button" class="notice-dismiss" aria-label="Fermer cette notification"><span class="screen-reader-text">Fermer cette notification.</span></button>';
-        if (wrap) {
-          wrap.insertBefore(notice, wrap.firstChild.nextSibling);
-        } else {
-          $(notice).insertBefore($form);
+  // Live toggle for confirmation panel
+  $(document).on('change', '#gdh_confirm_enabled', function () {
+    const on = this.checked;
+    $('#gdh_confirm_wrap').toggleClass('gdh-muted', !on);
+    $('#gdh_confirm_block').toggleClass('gdh-pe-none', !on);
+    $('#gdh_confirm_subject').prop('disabled', !on);
+    // If enabling and content is empty, auto-fill defaults
+    if (on) {
+      try {
+        const confTpl = gdhDefaultTemplates.confirm;
+        const cSubjEl = document.getElementById('gdh_confirm_subject');
+        const cBodyRaw = gdhGetEditorContent('gdh_confirm_body');
+        const cSubjEmpty = !cSubjEl || (cSubjEl.value || '').trim() === '';
+        const cBodyEmpty = gdhIsEmptyHtml(cBodyRaw);
+        if (confTpl && (cSubjEmpty || cBodyEmpty)) {
+          if (cSubjEl && cSubjEmpty) { cSubjEl.value = confTpl.subject; }
+          if (cBodyEmpty) { gdhSetEditorContent('gdh_confirm_body', confTpl.body); }
         }
-      } else if (!notice.querySelector('.notice-dismiss')) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'notice-dismiss';
-        btn.setAttribute('aria-label', 'Fermer cette notification');
-        btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
-        notice.appendChild(btn);
-      }
-      const p = notice.querySelector('p');
-      if (p) {
-        p.textContent = 'Veuillez sélectionner une méthode de destinataire (statique ou dynamique) avant d\'enregistrer.';
-      }
-      const dismissBtn = notice.querySelector('.notice-dismiss');
-      if (dismissBtn && !dismissBtn._gdhBound) {
-        dismissBtn.addEventListener('click', function () {
-          if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
-        });
-        dismissBtn._gdhBound = true;
-      }
-      if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
-      notice._gdhTimer = setTimeout(function () {
-        if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
-      }, 7000);
-      try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
-      const firstRadio = document.querySelector('input[name="receiver_mode"]');
-      if (firstRadio && typeof firstRadio.focus === 'function') { firstRadio.focus(); }
+      } catch (_) { }
+    }
+  });
+
+  // Toggle: receiver mode via radio buttons
+  $(document).on('change', 'input[name="receiver_mode"]', function () {
+    const mode = $('input[name="receiver_mode"]:checked').val();
+    const staticOn = (mode === 'static');
+    const dynOn = (mode === 'dynamic');
+    // Static panel
+    $('#gdh_recv_static_wrap').toggleClass('gdh-muted', !staticOn);
+    $('#gdh_recv_static_block').toggleClass('gdh-pe-none', !staticOn);
+    $('#receiver_static_email, #receiver_static_name').prop('disabled', !staticOn);
+    // Dynamic panel
+    $('#gdh_recv_dyn_wrap').toggleClass('gdh-muted', !dynOn);
+    $('#gdh_recv_dyn_block').toggleClass('gdh-pe-none', !dynOn);
+    $('#receiver_dynamic_post_type, #receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !dynOn);
+    // If switching to dynamic and PT already chosen, ensure meta are loaded
+    if (dynOn) {
+      const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
+      if (postType) { gdhFetchAndPopulateMeta(postType); }
+    }
+  });
+
+  // Helpers to populate dynamic meta key selects
+  function gdhResetMetaSelect($sel) {
+    if (!$sel || !$sel.length) return;
+    $sel.empty();
+    $sel.append($('<option/>', { value: '', text: '— Sélectionner une meta —' }));
+  }
+
+  function gdhPopulateMetaSelect($sel, keys, selected) {
+    if (!$sel || !$sel.length) return;
+    gdhResetMetaSelect($sel);
+    if (Array.isArray(keys)) {
+      keys.forEach(function (k) {
+        $sel.append($('<option/>', { value: k, text: k }));
+      });
+    }
+    if (selected && keys && keys.indexOf(selected) !== -1) {
+      $sel.val(selected);
+    } else {
+      $sel.val('');
+    }
+  }
+
+  function gdhFetchAndPopulateMeta(postType) {
+    const $emailSel = $('#receiver_dynamic_email');
+    const $nameSel = $('#receiver_dynamic_name');
+    if (!postType) {
+      gdhResetMetaSelect($emailSel);
+      gdhResetMetaSelect($nameSel);
       return;
     }
-    if (mode === 'static') {
-      const emailEl = document.getElementById('receiver_static_email');
-      const nameEl = document.getElementById('receiver_static_name');
-      const email = emailEl ? (emailEl.value || '').trim() : '';
-      const name = nameEl ? (nameEl.value || '').trim() : '';
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      if (!email) { errors.push('adresse e-mail du destinataire'); firstField = firstField || emailEl; }
-      else if (!emailOk) { errors.push('adresse e-mail du destinataire (format invalide)'); firstField = firstField || emailEl; }
-      if (!name) { errors.push('nom complet du destinataire'); firstField = firstField || nameEl; }
-    } else if (mode === 'dynamic') {
-      const ptEl = document.getElementById('receiver_dynamic_post_type');
-      const emSel = document.getElementById('receiver_dynamic_email');
-      const nmSel = document.getElementById('receiver_dynamic_name');
-      const pt = ptEl ? (ptEl.value || '').trim() : '';
-      const emKey = emSel ? (emSel.value || '').trim() : '';
-      const nmKey = nmSel ? (nmSel.value || '').trim() : '';
-      if (!pt) { errors.push('type de contenu'); firstField = firstField || ptEl; }
-      if (!emKey) { errors.push('meta de l\'e-mail du destinataire'); firstField = firstField || emSel; }
-      if (!nmKey) { errors.push('meta du nom complet'); firstField = firstField || nmSel; }
+    // Show loading state
+    if ($emailSel.length) { $emailSel.prop('disabled', true); }
+    if ($nameSel.length) { $nameSel.prop('disabled', true); }
+
+    const selectedEmail = ($emailSel.attr('data-selected') || '').trim();
+    const selectedName = ($nameSel.attr('data-selected') || '').trim();
+
+    $.ajax({
+      url: (window.gdhMailSettings ? gdhMailSettings.ajax_url : ''),
+      method: 'POST',
+      dataType: 'json',
+      data: {
+        action: 'gdh_get_meta_keys',
+        nonce: (window.gdhMailSettings ? gdhMailSettings.nonce : ''),
+        post_type: postType
+      }
+    }).done(function (res) {
+      const keys = (res && res.success && res.data && Array.isArray(res.data.meta_keys)) ? res.data.meta_keys : [];
+      gdhPopulateMetaSelect($emailSel, keys, selectedEmail);
+      gdhPopulateMetaSelect($nameSel, keys, selectedName);
+    }).fail(function () {
+      gdhResetMetaSelect($emailSel);
+      gdhResetMetaSelect($nameSel);
+    }).always(function () {
+      const dynOn = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
+      if ($emailSel.length) { $emailSel.prop('disabled', !dynOn); }
+      if ($nameSel.length) { $nameSel.prop('disabled', !dynOn); }
+    });
+  }
+
+  // Change handler: fetch meta keys when post type changes
+  $(document).on('change', '#receiver_dynamic_post_type', function () {
+    if ($('input[name="receiver_mode"]:checked').val() !== 'dynamic') return;
+    const postType = this.value;
+    if (postType) {
+      gdhFetchAndPopulateMeta(postType);
+    } else {
+      gdhFetchAndPopulateMeta('');
     }
-    if (mode && errors.length) {
+  });
+
+  // Initial population on load if dynamic enabled and post type already chosen
+  $(function () {
+    try {
+      const dynEnabled = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
+      const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
+      if (dynEnabled && postType) {
+        gdhFetchAndPopulateMeta(postType);
+      }
+    } catch (_) { }
+  });
+
+  // Prevent submit if confirmation is enabled but subject/body is empty
+  $(document).on('submit', 'form', function (e) {
+    const $form = $(this);
+    // Ensure this is our email settings form
+    const hasAction = $form.find('input[name="action"][value="gdh_save_email_settings"]').length > 0;
+    if (!hasAction) return;
+
+    // Validate receiver selection (static/dynamic)
+    (function () {
+      const modeEl = document.querySelector('input[name="receiver_mode"]:checked');
+      const mode = modeEl ? modeEl.value : '';
+      let errors = [];
+      let firstField = null;
+
+      // No method selected -> block and notify
+      if (!mode) {
+        e.preventDefault();
+        e.stopPropagation();
+        const wrap = document.querySelector('.wrap');
+        let notice = document.getElementById('gdh-receiver-validate-error');
+        if (!notice) {
+          notice = document.createElement('div');
+          notice.id = 'gdh-receiver-validate-error';
+          notice.className = 'notice notice-error is-dismissible';
+          notice.setAttribute('role', 'alert');
+          notice.setAttribute('aria-live', 'assertive');
+          notice.tabIndex = -1;
+          notice.innerHTML = '<p></p><button type="button" class="notice-dismiss" aria-label="Fermer cette notification"><span class="screen-reader-text">Fermer cette notification.</span></button>';
+          if (wrap) {
+            wrap.insertBefore(notice, wrap.firstChild.nextSibling);
+          } else {
+            $(notice).insertBefore($form);
+          }
+        } else if (!notice.querySelector('.notice-dismiss')) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'notice-dismiss';
+          btn.setAttribute('aria-label', 'Fermer cette notification');
+          btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
+          notice.appendChild(btn);
+        }
+        const p = notice.querySelector('p');
+        if (p) {
+          p.textContent = 'Veuillez sélectionner une méthode de destinataire (statique ou dynamique) avant d\'enregistrer.';
+        }
+        const dismissBtn = notice.querySelector('.notice-dismiss');
+        if (dismissBtn && !dismissBtn._gdhBound) {
+          dismissBtn.addEventListener('click', function () {
+            if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
+          });
+          dismissBtn._gdhBound = true;
+        }
+        if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
+        notice._gdhTimer = setTimeout(function () {
+          if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
+        }, 7000);
+        try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
+        const firstRadio = document.querySelector('input[name="receiver_mode"]');
+        if (firstRadio && typeof firstRadio.focus === 'function') { firstRadio.focus(); }
+        return;
+      }
+      if (mode === 'static') {
+        const emailEl = document.getElementById('receiver_static_email');
+        const nameEl = document.getElementById('receiver_static_name');
+        const email = emailEl ? (emailEl.value || '').trim() : '';
+        const name = nameEl ? (nameEl.value || '').trim() : '';
+        const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+        if (!email) { errors.push('adresse e-mail du destinataire'); firstField = firstField || emailEl; }
+        else if (!emailOk) { errors.push('adresse e-mail du destinataire (format invalide)'); firstField = firstField || emailEl; }
+        if (!name) { errors.push('nom complet du destinataire'); firstField = firstField || nameEl; }
+      } else if (mode === 'dynamic') {
+        const ptEl = document.getElementById('receiver_dynamic_post_type');
+        const emSel = document.getElementById('receiver_dynamic_email');
+        const nmSel = document.getElementById('receiver_dynamic_name');
+        const pt = ptEl ? (ptEl.value || '').trim() : '';
+        const emKey = emSel ? (emSel.value || '').trim() : '';
+        const nmKey = nmSel ? (nmSel.value || '').trim() : '';
+        if (!pt) { errors.push('type de contenu'); firstField = firstField || ptEl; }
+        if (!emKey) { errors.push('meta de l\'e-mail du destinataire'); firstField = firstField || emSel; }
+        if (!nmKey) { errors.push('meta du nom complet'); firstField = firstField || nmSel; }
+      }
+      if (mode && errors.length) {
+        e.preventDefault();
+        e.stopPropagation();
+        const wrap = document.querySelector('.wrap');
+        let notice = document.getElementById('gdh-receiver-validate-error');
+        if (!notice) {
+          notice = document.createElement('div');
+          notice.id = 'gdh-receiver-validate-error';
+          notice.className = 'notice notice-error is-dismissible';
+          notice.setAttribute('role', 'alert');
+          notice.setAttribute('aria-live', 'assertive');
+          notice.tabIndex = -1;
+          notice.innerHTML = '<p></p><button type="button" class="notice-dismiss" aria-label="Fermer cette notification"><span class="screen-reader-text">Fermer cette notification.</span></button>';
+          if (wrap) {
+            wrap.insertBefore(notice, wrap.firstChild.nextSibling);
+          } else {
+            $(notice).insertBefore($form);
+          }
+        } else if (!notice.querySelector('.notice-dismiss')) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'notice-dismiss';
+          btn.setAttribute('aria-label', 'Fermer cette notification');
+          btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
+          notice.appendChild(btn);
+        }
+        const p = notice.querySelector('p');
+        if (p) {
+          if (mode === 'static') {
+            p.textContent = 'Le destinataire statique est sélectionné : veuillez renseigner ' + errors.join(', ') + ' avant d\'enregistrer.';
+          } else {
+            p.textContent = 'Le destinataire dynamique est sélectionné : veuillez renseigner ' + errors.join(', ') + ' avant d\'enregistrer.';
+          }
+        }
+        // Dismiss binding and auto-dismiss
+        const dismissBtn = notice.querySelector('.notice-dismiss');
+        if (dismissBtn && !dismissBtn._gdhBound) {
+          dismissBtn.addEventListener('click', function () {
+            if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
+          });
+          dismissBtn._gdhBound = true;
+        }
+        if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
+        notice._gdhTimer = setTimeout(function () {
+          if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
+        }, 7000);
+        try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
+        if (firstField && typeof firstField.focus === 'function') { firstField.focus(); }
+      }
+    })();
+
+    const enabled = document.getElementById('gdh_confirm_enabled');
+    if (!enabled || !enabled.checked) return;
+
+    const subjEl = document.getElementById('gdh_confirm_subject');
+    const subject = (subjEl && !subjEl.disabled ? (subjEl.value || '').trim() : '');
+
+    // Try TinyMCE first, fallback to textarea
+    let bodyText = '';
+    try {
+      if (typeof tinymce !== 'undefined') {
+        const ed = tinymce.get('gdh_confirm_body');
+        if (ed && !ed.isHidden()) {
+          const html = ed.getContent({ format: 'raw' }) || '';
+          bodyText = html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim();
+        }
+      }
+    } catch (err) { }
+
+    if (!bodyText) {
+      const ta = document.getElementById('gdh_confirm_body');
+      if (ta) bodyText = (ta.value || '').trim();
+    }
+
+    if (!subject || !bodyText) {
       e.preventDefault();
       e.stopPropagation();
+      // Show an error notice
       const wrap = document.querySelector('.wrap');
-      let notice = document.getElementById('gdh-receiver-validate-error');
+      let notice = document.getElementById('gdh-confirm-validate-error');
       if (!notice) {
         notice = document.createElement('div');
-        notice.id = 'gdh-receiver-validate-error';
+        notice.id = 'gdh-confirm-validate-error';
         notice.className = 'notice notice-error is-dismissible';
         notice.setAttribute('role', 'alert');
         notice.setAttribute('aria-live', 'assertive');
@@ -362,142 +420,67 @@ $(document).on('submit', 'form', function (e) {
         } else {
           $(notice).insertBefore($form);
         }
-      } else if (!notice.querySelector('.notice-dismiss')) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'notice-dismiss';
-        btn.setAttribute('aria-label', 'Fermer cette notification');
-        btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
-        notice.appendChild(btn);
-      }
-      const p = notice.querySelector('p');
-      if (p) {
-        if (mode === 'static') {
-          p.textContent = 'Le destinataire statique est sélectionné : veuillez renseigner ' + errors.join(', ') + ' avant d\'enregistrer.';
-        } else {
-          p.textContent = 'Le destinataire dynamique est sélectionné : veuillez renseigner ' + errors.join(', ') + ' avant d\'enregistrer.';
+      } else {
+        // Ensure dismiss button exists for already-rendered notice
+        if (!notice.querySelector('.notice-dismiss')) {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'notice-dismiss';
+          btn.setAttribute('aria-label', 'Fermer cette notification');
+          btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
+          notice.appendChild(btn);
         }
       }
-      // Dismiss binding and auto-dismiss
+
+      const p = notice.querySelector('p');
+      if (p) {
+        if (!subject && !bodyText) {
+          p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le sujet et le corps avant d'enregistrer.";
+        } else if (!subject) {
+          p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le sujet avant d'enregistrer.";
+        } else {
+          p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le corps du message avant d'enregistrer.";
+        }
+      }
+
+      // Enable manual dismiss and auto-dismiss of the notice
       const dismissBtn = notice.querySelector('.notice-dismiss');
       if (dismissBtn && !dismissBtn._gdhBound) {
         dismissBtn.addEventListener('click', function () {
-          if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
+          if (notice && notice.parentNode) {
+            notice.parentNode.removeChild(notice);
+          }
         });
         dismissBtn._gdhBound = true;
       }
       if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
       notice._gdhTimer = setTimeout(function () {
-        if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
-      }, 7000);
-      try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
-      if (firstField && typeof firstField.focus === 'function') { firstField.focus(); }
-    }
-  })();
-
-  const enabled = document.getElementById('gdh_confirm_enabled');
-  if (!enabled || !enabled.checked) return;
-
-  const subjEl = document.getElementById('gdh_confirm_subject');
-  const subject = (subjEl && !subjEl.disabled ? (subjEl.value || '').trim() : '');
-
-  // Try TinyMCE first, fallback to textarea
-  let bodyText = '';
-  try {
-    if (typeof tinymce !== 'undefined') {
-      const ed = tinymce.get('gdh_confirm_body');
-      if (ed && !ed.isHidden()) {
-        const html = ed.getContent({ format: 'raw' }) || '';
-        bodyText = html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim();
-      }
-    }
-  } catch (err) { }
-
-  if (!bodyText) {
-    const ta = document.getElementById('gdh_confirm_body');
-    if (ta) bodyText = (ta.value || '').trim();
-  }
-
-  if (!subject || !bodyText) {
-    e.preventDefault();
-    e.stopPropagation();
-    // Show an error notice
-    const wrap = document.querySelector('.wrap');
-    let notice = document.getElementById('gdh-confirm-validate-error');
-    if (!notice) {
-      notice = document.createElement('div');
-      notice.id = 'gdh-confirm-validate-error';
-      notice.className = 'notice notice-error is-dismissible';
-      notice.setAttribute('role', 'alert');
-      notice.setAttribute('aria-live', 'assertive');
-      notice.tabIndex = -1;
-      notice.innerHTML = '<p></p><button type="button" class="notice-dismiss" aria-label="Fermer cette notification"><span class="screen-reader-text">Fermer cette notification.</span></button>';
-      if (wrap) {
-        wrap.insertBefore(notice, wrap.firstChild.nextSibling);
-      } else {
-        $(notice).insertBefore($form);
-      }
-    } else {
-      // Ensure dismiss button exists for already-rendered notice
-      if (!notice.querySelector('.notice-dismiss')) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'notice-dismiss';
-        btn.setAttribute('aria-label', 'Fermer cette notification');
-        btn.innerHTML = '<span class="screen-reader-text">Fermer cette notification.</span>';
-        notice.appendChild(btn);
-      }
-    }
-
-    const p = notice.querySelector('p');
-    if (p) {
-      if (!subject && !bodyText) {
-        p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le sujet et le corps avant d'enregistrer.";
-      } else if (!subject) {
-        p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le sujet avant d'enregistrer.";
-      } else {
-        p.textContent = "Le modèle de confirmation est activé : veuillez renseigner le corps du message avant d'enregistrer.";
-      }
-    }
-
-    // Enable manual dismiss and auto-dismiss of the notice
-    const dismissBtn = notice.querySelector('.notice-dismiss');
-    if (dismissBtn && !dismissBtn._gdhBound) {
-      dismissBtn.addEventListener('click', function () {
         if (notice && notice.parentNode) {
           notice.parentNode.removeChild(notice);
         }
-      });
-      dismissBtn._gdhBound = true;
-    }
-    if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
-    notice._gdhTimer = setTimeout(function () {
-      if (notice && notice.parentNode) {
-        notice.parentNode.removeChild(notice);
-      }
-    }, 7000);
+      }, 7000);
 
-    // Bring notice into view and focus for clarity
-    try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
+      // Bring notice into view and focus for clarity
+      try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
 
-    // Focus the first missing field
-    if (!subject && subjEl) {
-      subjEl.focus();
-    } else {
-      try {
-        if (typeof tinymce !== 'undefined') {
-          const ed = tinymce.get('gdh_confirm_body');
-          if (ed && !ed.isHidden()) { ed.focus(); }
-          else {
-            const ta = document.getElementById('gdh_confirm_body');
-            if (ta) ta.focus();
+      // Focus the first missing field
+      if (!subject && subjEl) {
+        subjEl.focus();
+      } else {
+        try {
+          if (typeof tinymce !== 'undefined') {
+            const ed = tinymce.get('gdh_confirm_body');
+            if (ed && !ed.isHidden()) { ed.focus(); }
+            else {
+              const ta = document.getElementById('gdh_confirm_body');
+              if (ta) ta.focus();
+            }
           }
+        } catch (err) {
+          const ta = document.getElementById('gdh_confirm_body');
+          if (ta) ta.focus();
         }
-      } catch (err) {
-        const ta = document.getElementById('gdh_confirm_body');
-        if (ta) ta.focus();
       }
     }
-  }
-});
+  });
 })(jQuery);

@@ -2,8 +2,8 @@
 namespace GDH\Ajax;
 
 use GDH\PostTypes\AppointmentPostType;
-use GDH\Services\Logger;
 use GDH\Services\EmailTemplateService;
+use GDH\Services\Logger;
 
 class AppointmentAjaxHandler
 {
@@ -12,7 +12,7 @@ class AppointmentAjaxHandler
 
     public function __construct(Logger $logger)
     {
-        $this->logger = $logger;
+        $this->logger       = $logger;
         $this->emailService = new EmailTemplateService($this->logger);
         $this->init();
     }
@@ -88,18 +88,22 @@ class AppointmentAjaxHandler
                 ], 400);
             }
 
-            // Validate terms acceptance - accept both boolean and string values
-            $termsAccepted = isset($formData['accept_terms']) &&
-                ($formData['accept_terms'] === true ||
-                $formData['accept_terms'] === 'true' ||
-                $formData['accept_terms'] === 1 ||
-                $formData['accept_terms'] === '1');
+            // Validate terms acceptance only if CGV page is configured
+            $cgvPageId = get_option('cgv_page_id', '');
+            if (! empty($cgvPageId)) {
+                // CGV is configured, so terms acceptance is required
+                $termsAccepted = isset($formData['accept_terms']) &&
+                    ($formData['accept_terms'] === true ||
+                    $formData['accept_terms'] === 'true' ||
+                    $formData['accept_terms'] === 1 ||
+                    $formData['accept_terms'] === '1');
 
-            if (! $termsAccepted) {
-                $this->logger->error('GDH AJAX: Terms not accepted - value: ' . var_export($formData['accept_terms'], true));
-                wp_send_json_error([
-                    'message' => 'Vous devez accepter les conditions générales.',
-                ], 400);
+                if (! $termsAccepted) {
+                    $this->logger->error('GDH AJAX: Terms not accepted - value: ' . var_export($formData['accept_terms'], true));
+                    wp_send_json_error([
+                        'message' => 'Vous devez accepter les conditions générales.',
+                    ], 400);
+                }
             }
 
             // Create appointment
