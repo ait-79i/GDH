@@ -469,7 +469,24 @@ jQuery(document).ready(function ($) {
       // Date icon click event - trigger date input
       $dateIcon.on('click', function () {
         $date.focus();
-        $date[0].showPicker && $date[0].showPicker();
+        if ($date[0] && typeof $date[0].showPicker === 'function') {
+          $date[0].showPicker();
+        }
+      });
+
+      // Date input click/keyboard - open native picker when available
+      $date.on('click', function () {
+        if (this && typeof this.showPicker === 'function') {
+          this.showPicker();
+        }
+      });
+      $date.on('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          if (this && typeof this.showPicker === 'function') {
+            this.showPicker();
+          }
+        }
       });
 
       // Date change event
