@@ -509,18 +509,19 @@
 
   .gdh-rdv-step-icon {
     font-size: 20px;
+    display: block !important;
   }
 
   .gdh-rdv-step-number {
-    font-size: 18px;
+    display: none !important;
   }
 
-  .gdh-rdv-step-title {
-    font-size: 12px;
+  .gdh-rdv-step-label {
+    display: none;
   }
 
-  .gdh-rdv-step-subtitle {
-    font-size: 10px;
+  .gdh-rdv-step-connector {
+    margin-top: 0;
   }
 }
 
@@ -1304,10 +1305,34 @@
 
   .gdh-rdv-step-icon {
     font-size: 14px;
-    display: block !important;
+    display: none !important;
   }
 
   .gdh-rdv-step-number {
+    display: block !important;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .gdh-rdv-step-item.active .gdh-rdv-step-icon {
+    display: block !important;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) !important;
+    margin: 0 !important;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    text-align: center;
+  }
+
+  .gdh-rdv-step-item.active .gdh-rdv-step-number,
+  .gdh-rdv-step-item.completed .gdh-rdv-step-number {
+    display: none !important;
+  }
+
+  .gdh-rdv-step-item.completed .gdh-rdv-step-icon {
     display: none !important;
   }
 
