@@ -294,11 +294,14 @@ jQuery(document).ready(function ($) {
     });
 
     // Validate checkboxes
-    $step.find('.gdh-rdv-checkbox-modern input[type="checkbox"]').each(function () {
-      if (!validateCheckbox($(this))) {
-        isValid = false;
-      }
-    });
+    const $checkboxes = $step.find('.gdh-rdv-checkbox-modern input[type="checkbox"]');
+    if ($checkboxes.length) {
+      $checkboxes.each(function () {
+        if (!validateCheckbox($(this))) {
+          isValid = false;
+        }
+      });
+    }
 
     return isValid;
   }

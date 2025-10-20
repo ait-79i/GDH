@@ -49,17 +49,19 @@
 			</div>
 		</div>
 
+		{% if cgv_url %}
 		<div class="gdh-rdv-field gdh-rdv-field-checkbox">
 			<label class="gdh-rdv-checkbox-modern">
 				<input type="checkbox" name="accept_terms" data-error-message="Vous devez accepter les conditions générales" required>
 				<span class="gdh-rdv-checkmark"></span>
 				<span class="gdh-rdv-checkbox-label">
 					J'accepte les
-					<a href="{{ cgv_url|default('#') }}" target="_blank">conditions générales de vente</a>
+					<a href="{{ cgv_url }}" target="_blank">conditions générales de vente</a>
 					<span class="gdh-rdv-required">*</span>
 				</span>
 			</label>
 			<div class="gdh-rdv-error-message" style="display: none;"></div>
 		</div>
+		{% endif %}
 	</div>
 </div>
