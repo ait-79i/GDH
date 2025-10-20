@@ -27,7 +27,7 @@ class ShortcodeManager
     {
         $atts = shortcode_atts([
             'button_label' => 'Prendre rendez-vous',
-            'class'        => "gdh-rdv-btn",
+            'class'        => "",
             'style'        => "",
         ],
             $atts,
@@ -43,6 +43,14 @@ class ShortcodeManager
         $align_raw   = isset($opts['title_align']) ? $opts['title_align'] : 'left';
         $allowed     = ['left', 'center', 'right'];
         $title_align = in_array($align_raw, $allowed, true) ? $align_raw : 'left';
+        $cgv_url     = '';
+        $cgv_id      = isset($opts['cgv_page_id']) ? absint($opts['cgv_page_id']) : 0;
+        if ($cgv_id) {
+            $link = get_permalink($cgv_id);
+            if ($link) {
+                $cgv_url = esc_url($link);
+            }
+        }
 
         $html = $this->twig->render('frontend/popup.twig', [
             'button_label' => $label,
@@ -50,6 +58,7 @@ class ShortcodeManager
             'style'        => $style,
             'title_text'   => $title_text,
             'title_align'  => $title_align,
+            'cgv_url'      => $cgv_url,
         ]);
 
         if (trim($html) === '') {

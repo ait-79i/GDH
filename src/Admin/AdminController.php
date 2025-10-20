@@ -96,6 +96,19 @@ class AdminController
         add_settings_field('font_url', 'URL de police (facultatif)', [$this, 'fieldText'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'font_url', 'default' => '']);
         add_settings_field('title_text', 'Titre de la popup', [$this, 'fieldText'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'title_text', 'default' => 'Prendre rendez-vous']);
         add_settings_field('title_align', 'Alignement du titre', [$this, 'fieldSelect'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'title_align', 'default' => 'left', 'options' => ['left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite']]);
+        $pages = get_posts([
+            'post_type'        => 'page',
+            'post_status'      => 'publish',
+            'numberposts'      => -1,
+            'orderby'          => 'title',
+            'order'            => 'ASC',
+            'suppress_filters' => false,
+        ]);
+        $page_options = ['' => '— Sélectionner —'];
+        foreach ($pages as $p) {
+            $page_options[$p->ID] = get_the_title($p);
+        }
+        add_settings_field('cgv_page_id', 'CGV', [$this, 'fieldSelect'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'cgv_page_id', 'default' => '', 'options' => $page_options]);
     }
 
     public function enqueueAdminAssets($hook)
@@ -467,6 +480,7 @@ class AdminController
         $align                 = isset($input['title_align']) ? $input['title_align'] : 'left';
         $allowed               = ['left', 'center', 'right'];
         $output['title_align'] = in_array($align, $allowed, true) ? $align : 'left';
+        $output['cgv_page_id'] = isset($input['cgv_page_id']) ? (string) absint($input['cgv_page_id']) : '';
         return $output;
     }
 }
