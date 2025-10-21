@@ -88,9 +88,9 @@ class EmailTemplateService
                 }
             }
         }
-        $adminEmail  = get_option('admin_email');
-        $siteName    = get_bloginfo('name');
-        $artisanName = $siteName; // alias; peut être remplacé par une option dédiée si nécessaire
+        // Get recipient info from form data (passed from frontend with dynamic/static mode)
+        $recipientName = isset($formData['recipient_name']) ? $formData['recipient_name'] : '';
+        
         return [
             'nom_lead'         => trim($first . ' ' . $last),
             'date_rdv'         => $aptDate,
@@ -99,7 +99,7 @@ class EmailTemplateService
             'address'          => (string) $address,
             'city'             => (string) $city,
             'postal_code'      => (string) $postal,
-            'nom_destinataire' => $artisanName,
+            'nom_destinataire' => (string) $recipientName,
             'creneaux_rdv'     => $slotsFormatted,
         ];
     }
