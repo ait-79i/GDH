@@ -2,6 +2,7 @@
 namespace GDH\Ajax;
 
 use GDH\PostTypes\AppointmentPostType;
+use GDH\Services\ArtisanEmailService;
 use GDH\Services\EmailTemplateService;
 use GDH\Services\Logger;
 
@@ -9,11 +10,13 @@ class AppointmentAjaxHandler
 {
     private $logger;
     private $emailService;
+    private $artisanEmailService;
 
     public function __construct(Logger $logger)
     {
-        $this->logger       = $logger;
-        $this->emailService = new EmailTemplateService($this->logger);
+        $this->logger              = $logger;
+        $this->emailService        = new EmailTemplateService($this->logger);
+        $this->artisanEmailService = new ArtisanEmailService($this->logger);
         $this->init();
     }
 
@@ -118,14 +121,50 @@ class AppointmentAjaxHandler
 
             $this->logger->info("GDH AJAX: Appointment created successfully - ID: {$post_id}");
 
-            // Try to send email (non-blocking for booking result)
+
+            // Save destinataire information directly from form data
+            $recipientEmail = isset($formData['recipient_email']) ? sanitize_email($formData['recipient_email']) : '';
+            $recipientName  = isset($formData['recipient_name']) ? sanitize_text_field($formData['recipient_name']) : '';
+
+            if ($recipientEmail && is_email($recipientEmail)) {
+                update_post_meta($post_id, '_gdh_destinataire_email', $recipientEmail);
+                update_post_meta($post_id, '_gdh_destinataire_name', $recipientName);
+                $this->logger->info("GDH AJAX: Destinataire saved - {$recipientName} ({$recipientEmail})");
+            } else {
+                $this->logger->warning("GDH AJAX: No valid recipient email provided in form data");
+            }
+
+            // Save current post context for dynamic mode display
+            if (isset($formData['current_post_type']) && isset($formData['current_post_id'])) {
+                update_post_meta($post_id, '_gdh_current_post_type', sanitize_text_field($formData['current_post_type']));
+                update_post_meta($post_id, '_gdh_current_post_id', absint($formData['current_post_id']));
+            }
+
+            // Try to send confirmation email to client (non-blocking for booking result)
             try {
                 $sent = $this->emailService->sendOnAppointment($post_id, $formData);
                 if (! $sent) {
-                    $this->logger->error('GDH AJAX: Email sending failed or skipped');
+                    $this->logger->error('GDH AJAX: Client confirmation email failed or skipped');
                 }
             } catch (\Throwable $e) {
-                $this->logger->error('GDH AJAX: Email exception - ' . $e->getMessage());
+                $this->logger->error('GDH AJAX: Client email exception - ' . $e->getMessage());
+            }
+
+            // Try to send notification email to artisan/recipient (non-blocking)
+            $artisanSent = false;
+            try {
+                $artisanSent = $this->artisanEmailService->sendArtisanNotification($post_id, $formData);
+                if (! $artisanSent) {
+                    $this->logger->error('GDH AJAX: Artisan notification email failed or skipped');
+                }
+            } catch (\Throwable $e) {
+                $this->logger->error('GDH AJAX: Artisan email exception - ' . $e->getMessage());
+            }
+
+            // Update email sent status if artisan email was sent successfully
+            if ($artisanSent) {
+                update_post_meta($post_id, '_gdh_email_sent', '1');
+                $this->logger->info("GDH AJAX: Email sent status updated to true");
             }
 
             // Send success response

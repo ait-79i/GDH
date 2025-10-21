@@ -332,6 +332,13 @@ jQuery(document).ready(function ($) {
   // Submit form function
   function submitForm() {
     const $form = $("#gdh-rdv-form");
+    const $popup = $("#gdh-rdv-popup");
+
+    // Get current post type and ID for dynamic recipient
+    const currentPostType = $popup.data('post-type') || '';
+    const currentPostId = $popup.data('post-id') || 0;
+
+    console.log(currentPostType, currentPostId);
 
     // Collect form data
     const formData = {
@@ -346,8 +353,16 @@ jQuery(document).ready(function ($) {
       last_name: $('input[name="last_name"]').val(),
       email: $('input[name="email"]').val(),
       phone: $('input[name="phone"]').val(),
-      accept_terms: $('input[name="accept_terms"]').is(':checked')
+      accept_terms: $('input[name="accept_terms"]').is(':checked'),
+      // Recipient information (from hidden inputs)
+      recipient_email: $('input[name="recipient_email"]').val(),
+      recipient_name: $('input[name="recipient_name"]').val(),
+      // Auto-detected post context for dynamic recipient
+      current_post_type: currentPostType,
+      current_post_id: currentPostId
     };
+
+    console.log("formData", formData);
 
     // Collect slots data
     $('.gdh-rdv-slot-card').each(function () {

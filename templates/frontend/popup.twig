@@ -1,8 +1,14 @@
-<button type="button" class="{{ class }}" data-gdh-rdv-open style="{{ style }}">
-	{{ button_label }}
-</button>
+{% if config_error %}
+	<div class="gdh-rdv-config-error" style="background:#fff3cd;border:1px solid #ffc107;border-radius:4px;padding:15px;margin:10px 0;color:#856404;">
+		<strong>⚠️ Configuration requise</strong>
+		<p style="margin:10px 0 0 0;">{{ config_error|raw }}</p>
+	</div>
+{% else %}
+	<button type="button" class="{{ class }}" data-gdh-rdv-open style="{{ style }}">
+		{{ button_label }}
+	</button>
 
-<div id="gdh-rdv-popup" class="gdh-rdv-popup" style="display: none;">
+	<div id="gdh-rdv-popup" class="gdh-rdv-popup" style="display: none;" data-post-type="{{ current_post_type }}" data-post-id="{{ current_post_id }}">
 	<div class="gdh-rdv-popup-overlay"></div>
 	<div
 		class="gdh-rdv-popup-content">
@@ -18,6 +24,10 @@
 		{# Form #}
 		<form
 			id="gdh-rdv-form" class="gdh-rdv-form">
+			{# Hidden inputs for recipient information #}
+			<input type="hidden" name="recipient_email" value="{{ recipient_email }}" />
+			<input type="hidden" name="recipient_name" value="{{ recipient_name }}" />
+			
 			{# Step 1: Time Slots #}
 			{% include 'frontend/steps/step-1-slots.twig' %}
 
@@ -35,3 +45,4 @@
 		{% include 'frontend/parts/success.twig' %}
 	</div>
 </div>
+{% endif %}

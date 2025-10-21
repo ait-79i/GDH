@@ -212,6 +212,8 @@ class AppointmentPostType
         $new_columns['phone']        = 'Téléphone';
         $new_columns['address']      = 'Adresse';
         $new_columns['availability'] = 'Disponibilités';
+        $new_columns['destinataire'] = 'Destinataire';
+        $new_columns['email_sent']   = 'Email envoyé';
 
         return $new_columns;
     }
@@ -280,6 +282,56 @@ class AppointmentPostType
                     'slots' => $formattedSlots,
                 ]);
                 break;
+
+            case 'destinataire':
+                $destinataire_name = get_post_meta($post_id, '_gdh_destinataire_name', true);
+                $destinataire_email = get_post_meta($post_id, '_gdh_destinataire_email', true);
+                $current_post_type = get_post_meta($post_id, '_gdh_current_post_type', true);
+                $current_post_id = get_post_meta($post_id, '_gdh_current_post_id', true);
+                
+                // Get receiver configuration to determine mode
+                $receivers = get_option('gdh_receivers', []);
+                $dynamicEnabled = isset($receivers['dynamic']['enabled']) && $receivers['dynamic']['enabled'] === '1';
+                
+                if (!$destinataire_email) {
+                    echo '<span style="color:#999;">—</span>';
+                    break;
+                }
+                
+                // Dynamic mode: show post ID with public link + name + email
+                if ($dynamicEnabled && $current_post_id) {
+                    $post_view_link = get_permalink($current_post_id);
+                    if ($post_view_link) {
+                        echo '<a href="' . esc_url($post_view_link) . '" target="_blank" style="font-weight:600;color:#2271b1;">ID: ' . esc_html($current_post_id) . '</a>';
+                        if ($destinataire_name) {
+                            echo '<br><span style="font-size:12px;color:#666;">' . esc_html($destinataire_name) . '</span>';
+                        }
+                        echo '<br><span style="font-size:12px;color:#666;">' . esc_html($destinataire_email) . '</span>';
+                    } else {
+                        echo '<span style="font-weight:600;">ID: ' . esc_html($current_post_id) . '</span>';
+                        if ($destinataire_name) {
+                            echo '<br><span style="font-size:12px;color:#666;">' . esc_html($destinataire_name) . '</span>';
+                        }
+                        echo '<br><span style="font-size:12px;color:#666;">' . esc_html($destinataire_email) . '</span>';
+                    }
+                } 
+                // Static mode: show only email (no link)
+                else {
+                    echo '<span style="font-weight:600;">' . esc_html($destinataire_email) . '</span>';
+                    if ($destinataire_name) {
+                        echo '<br><span style="font-size:12px;color:#666;">' . esc_html($destinataire_name) . '</span>';
+                    }
+                }
+                break;
+
+            case 'email_sent':
+                $email_sent = get_post_meta($post_id, '_gdh_email_sent', true);
+                if ($email_sent === '1') {
+                    echo '<span style="color:#46b450;font-weight:600;">✓ Oui</span>';
+                } else {
+                    echo '<span style="color:#dc3232;font-weight:600;">✗ Non</span>';
+                }
+                break;
         }
     }
 
@@ -328,6 +380,7 @@ class AppointmentPostType
         update_post_meta($post_id, '_gdh_postal_code', sanitize_text_field($data['postal_code']));
         update_post_meta($post_id, '_gdh_city', sanitize_text_field($data['city']));
         update_post_meta($post_id, '_gdh_accept_terms', $data['accept_terms'] ? '1' : '0');
+        update_post_meta($post_id, '_gdh_email_sent', '0');
 
         // Save slots data
         if (! empty($data['slots']) && is_array($data['slots'])) {

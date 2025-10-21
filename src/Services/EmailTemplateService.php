@@ -190,13 +190,13 @@ class EmailTemplateService
             $filter = function () {return 'text/html';};
             add_filter('wp_mail_content_type', $filter);
             $htmlBody = $this->buildHtmlBody($renderedBody, $style);
-            $sent     = wp_mail($to, $renderedSubject, $htmlBody, $headers);
+            $sent = wp_mail($to, $renderedSubject, $htmlBody, $headers);
             remove_filter('wp_mail_content_type', $filter);
             if (! $sent) {
                 $plain = wp_strip_all_tags($renderedBody);
                 $sent  = wp_mail($to, $renderedSubject, $plain, $headers);
             }
-        } else {
+        } else {    
             $plain = wp_strip_all_tags($renderedBody);
             $sent  = wp_mail($to, $renderedSubject, $plain, $headers);
         }
