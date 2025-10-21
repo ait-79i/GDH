@@ -2,7 +2,7 @@
 	<span>Modèle d’e-mail de confirmation de demande</span>
 </h3>
 <div id="gdh_confirm_wrap" class="{% if not confirm_enabled %}gdh-muted{% endif %}">
-	<input type="checkbox" id="gdh_confirm_enabled" name="confirm_enabled" value="1" {% if confirm_enabled %} checked {% endif %}>
+	<input type="checkbox" id="gdh_confirm_enabled" name="gdh_email_confirm_enabled" value="1" {% if confirm_enabled %} checked {% endif %}>
 	Activer l’envoi de confirmation au client
 	<div id="gdh_confirm_block" class="{% if not confirm_enabled %}gdh-pe-none{% endif %}">
 		<table class="form-table gdh-inner-table" role="presentation">
@@ -17,7 +17,7 @@
 							<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ placeholder }}</span>
 						{% endfor %}
 					</div>
-					<input type="text" id="gdh_confirm_subject" name="confirm_subject" class="regular-text" value="{{ confirm_subject_value|e }}" {% if not confirm_enabled %} disabled {% endif %}/>
+					<input type="text" id="gdh_confirm_subject" name="gdh_email_confirm_subject" class="regular-text" value="{{ confirm_subject_value|e }}" {% if not confirm_enabled %} disabled {% endif %}/>
 				</td>
 			</tr>
 			<tr>

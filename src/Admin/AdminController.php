@@ -21,7 +21,7 @@ class AdminController
         add_action('admin_menu', [$this, 'removeEmailTemplateSubmenus'], 999);
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
-        add_action('admin_post_gdh_save_email_settings', [$this, 'handleEmailSettingsSave']);
+        add_action('admin_init', [$this, 'registerEmailSettings']);
         add_action('wp_ajax_gdh_get_meta_keys', [$this, 'ajaxGetMetaKeys']);
     }
 
@@ -58,7 +58,7 @@ class AdminController
         ]);
 
         add_settings_section('gdh_rdv_design_section', '', '__return_false', 'gdh_rdv_design_page');
-
+        
         add_settings_field('primary_color', 'Couleur primaire', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color', 'default' => '#006847']);
         add_settings_field('primary_color_light', 'Couleur primaire (clair)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color_light', 'default' => '#00855e']);
         add_settings_field('primary_color_dark', 'Couleur primaire (foncé)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color_dark', 'default' => '#004d35']);
@@ -109,6 +109,18 @@ class AdminController
             $page_options[$p->ID] = get_the_title($p);
         }
         add_settings_field('cgv_page_id', 'CGV', [$this, 'fieldSelect'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'cgv_page_id', 'default' => '', 'options' => $page_options]);
+    }
+
+    public function registerEmailSettings()
+    {
+        register_setting('gdh_email_settings_group', 'gdh_email_subject');
+        register_setting('gdh_email_settings_group', 'gdh_email_body');
+        register_setting('gdh_email_settings_group', 'gdh_email_confirm_enabled');
+        register_setting('gdh_email_settings_group', 'gdh_email_confirm_subject');
+        register_setting('gdh_email_settings_group', 'gdh_email_confirm_body');
+        register_setting('gdh_email_settings_group', 'gdh_receivers', [
+            'sanitize_callback' => [$this, 'sanitizeEmailSettings'],
+        ]);
     }
 
     public function enqueueAdminAssets($hook)
@@ -195,8 +207,8 @@ class AdminController
         // Receiver settings (static and dynamic)
         $receivers_opt       = get_option('gdh_receivers', []);
         $recv_static_enabled = isset($receivers_opt['static']['enabled']) && $receivers_opt['static']['enabled'] === '1';
-        $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : '';
-        $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : '';
+        $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : get_option('admin_email');
+        $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : get_bloginfo('name');
         $recv_dyn_enabled    = isset($receivers_opt['dynamic']['enabled']) && $receivers_opt['dynamic']['enabled'] === '1';
         $recv_dyn_email      = isset($receivers_opt['dynamic']['email']) ? (string) $receivers_opt['dynamic']['email'] : '';
         $recv_dyn_name       = isset($receivers_opt['dynamic']['name']) ? (string) $receivers_opt['dynamic']['name'] : '';
@@ -211,15 +223,18 @@ class AdminController
         }
 
         // Derive current receiver mode for radio UI (legacy-compatible)
-        $recv_mode = $recv_static_enabled ? 'static' : ($recv_dyn_enabled ? 'dynamic' : '');
+        // Default to static if no mode is configured
+        $recv_mode = $recv_static_enabled ? 'static' : ($recv_dyn_enabled ? 'dynamic' : 'static');
 
-        // Nonce field HTML
-        $nonce_field = wp_nonce_field('gdh_email_settings', 'gdh_email_settings_nonce', true, false);
+        // Settings fields HTML
+        ob_start();
+        settings_fields('gdh_email_settings_group');
+        $settings_fields_html = ob_get_clean();
 
         // Editor HTML capture with initial content (patch current template)
         ob_start();
         wp_editor($body_initial, 'gdh_body', [
-            'textarea_name' => 'body',
+            'textarea_name' => 'gdh_email_body',
             'media_buttons' => false,
             'textarea_rows' => 16,
             'editor_height' => 380,
@@ -229,7 +244,7 @@ class AdminController
         // Confirmation body editor
         ob_start();
         wp_editor($confirm_body_initial, 'gdh_confirm_body', [
-            'textarea_name' => 'confirm_body',
+            'textarea_name' => 'gdh_email_confirm_body',
             'media_buttons' => false,
             'textarea_rows' => 14,
             'editor_height' => 340,
@@ -240,9 +255,9 @@ class AdminController
             'variables'                    => $vars,
             'variables_sujet_gauche'       => ['nom_lead', 'date_rdv'],
             'variables_confirmation_sujet' => ['nom_destinataire', 'date_rdv'],
-            'show_saved_notice'            => isset($_GET['gdh_email_saved']),
-            'admin_post_url'               => esc_url(admin_url('admin-post.php')),
-            'nonce_field'                  => $nonce_field,
+            'show_saved_notice'            => isset($_GET['settings-updated']),
+            'form_action'                  => 'options.php',
+            'settings_fields_html'         => $settings_fields_html,
             'editor_html'                  => $editor_html,
             'subject_value'                => $subject_value,
             // Confirmation props
@@ -263,57 +278,7 @@ class AdminController
         echo $view;
     }
 
-    public function handleEmailSettingsSave()
-    {
-        if (! current_user_can('manage_options')) {
-            wp_die('Permissions insuffisantes');
-        }
-        if (! isset($_POST['gdh_email_settings_nonce']) || ! wp_verify_nonce($_POST['gdh_email_settings_nonce'], 'gdh_email_settings')) {
-            wp_die('Nonce invalide');
-        }
 
-        // Save main template subject/body as options (single template storage)
-        $subject = isset($_POST['subject']) ? sanitize_text_field($_POST['subject']) : '';
-        $body    = isset($_POST['body']) ? wp_kses_post($_POST['body']) : '';
-        update_option('gdh_email_subject', $subject);
-        update_option('gdh_email_body', $body);
-
-        // Save confirmation email settings
-        $confirm_enabled_post = isset($_POST['confirm_enabled']) && $_POST['confirm_enabled'] === '1' ? '1' : '0';
-        $confirm_subject_post = isset($_POST['confirm_subject']) ? sanitize_text_field($_POST['confirm_subject']) : '';
-        $confirm_body_post    = isset($_POST['confirm_body']) ? wp_kses_post($_POST['confirm_body']) : '';
-        update_option('gdh_email_confirm_enabled', $confirm_enabled_post);
-        update_option('gdh_email_confirm_subject', $confirm_subject_post);
-        update_option('gdh_email_confirm_body', $confirm_body_post);
-
-        // Save receiver settings (combined array option)
-        $recv_mode_post = isset($_POST['receiver_mode']) ? sanitize_key($_POST['receiver_mode']) : '';
-        $recv_static_enabled_post = ($recv_mode_post === 'static') ? '1' : '0';
-        $recv_static_email_post   = isset($_POST['receiver_static_email']) ? sanitize_email($_POST['receiver_static_email']) : '';
-        $recv_static_name_post    = isset($_POST['receiver_static_name']) ? sanitize_text_field($_POST['receiver_static_name']) : '';
-        $recv_dyn_enabled_post    = ($recv_mode_post === 'dynamic') ? '1' : '0';
-        $recv_dyn_email_post      = isset($_POST['receiver_dynamic_email']) ? sanitize_text_field($_POST['receiver_dynamic_email']) : '';
-        $recv_dyn_name_post       = isset($_POST['receiver_dynamic_name']) ? sanitize_text_field($_POST['receiver_dynamic_name']) : '';
-        $recv_dyn_post_type_post  = isset($_POST['receiver_dynamic_post_type']) ? sanitize_key($_POST['receiver_dynamic_post_type']) : '';
-
-        $receivers_new = [
-            'static'  => [
-                'enabled' => $recv_static_enabled_post,
-                'email'   => $recv_static_email_post,
-                'name'    => $recv_static_name_post,
-            ],
-            'dynamic' => [
-                'enabled'   => $recv_dyn_enabled_post,
-                'email'     => $recv_dyn_email_post,
-                'name'      => $recv_dyn_name_post,
-                'post_type' => $recv_dyn_post_type_post,
-            ],
-        ];
-        update_option('gdh_receivers', $receivers_new);
-
-        wp_safe_redirect(admin_url('admin.php?page=gdh_email_settings'));
-        exit;
-    }
 
     public function ajaxGetMetaKeys()
     {
@@ -470,5 +435,29 @@ class AdminController
         $output['title_align'] = in_array($align, $allowed, true) ? $align : 'left';
         $output['cgv_page_id'] = isset($input['cgv_page_id']) ? (string) absint($input['cgv_page_id']) : '';
         return $output;
+    }
+
+    public function sanitizeEmailSettings($input)
+    {
+        if (!is_array($input)) {
+            return [];
+        }
+
+        // Get receiver mode from radio
+        $receiver_mode = isset($_POST['receiver_mode']) ? sanitize_key($_POST['receiver_mode']) : 'static';
+        
+        return [
+            'static' => [
+                'enabled' => ($receiver_mode === 'static') ? '1' : '0',
+                'email' => isset($input['static']['email']) ? sanitize_email($input['static']['email']) : '',
+                'name' => isset($input['static']['name']) ? sanitize_text_field($input['static']['name']) : '',
+            ],
+            'dynamic' => [
+                'enabled' => ($receiver_mode === 'dynamic') ? '1' : '0',
+                'email' => isset($input['dynamic']['email']) ? sanitize_text_field($input['dynamic']['email']) : '',
+                'name' => isset($input['dynamic']['name']) ? sanitize_text_field($input['dynamic']['name']) : '',
+                'post_type' => isset($input['dynamic']['post_type']) ? sanitize_key($input['dynamic']['post_type']) : '',
+            ],
+        ];
     }
 }

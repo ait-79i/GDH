@@ -63,8 +63,8 @@ class ShortcodeManager
             }
         }
 
-        // Validate recipient configuration
-        $config_error = $this->validateRecipientConfiguration($current_post_type);
+        // Validate configuration
+        $config_error = $this->validateConfiguration($current_post_type);
 
         // Get recipient information to pass to template
         $recipient_email = '';
@@ -77,10 +77,8 @@ class ShortcodeManager
                 $recipient_name  = $recipientInfo['name'];
             } else {
                 // When recipient cannot be resolved, block the button with guidance
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                $config_error = sprintf(
-                    'Configuration requise : Aucun destinataire valide n\'a été détecté. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">configurer l\'e-mail du destinataire</a> (mode statique) ou renseigner les métadonnées sur le contenu (mode dynamique).',
-                    esc_url($settings_url)
+                $config_error = $this->createErrorMessage(
+                    'Configuration requise : Aucun destinataire valide n\'a été détecté. Veuillez configurer l\'e-mail du destinataire (mode statique) ou renseigner les métadonnées sur le contenu (mode dynamique).'
                 );
             }
         }
@@ -152,10 +150,62 @@ class ShortcodeManager
             }
         }
 
+        // Default fallback: use site email and name if no configuration
+        $siteEmail = get_option('admin_email');
+        $siteName = get_bloginfo('name');
+        
+        if ($siteEmail && is_email($siteEmail)) {
+            $this->logger->info('GDH Shortcode: Using default site email as fallback');
+            return [
+                'email' => $siteEmail,
+                'name'  => $siteName,
+            ];
+        }
+
         $this->logger->error('GDH Shortcode: No valid recipient configured');
         return false;
     }
 
+    /**
+     * Create error message with settings link
+     */
+    private function createErrorMessage($message)
+    {
+        return sprintf(
+            '%s Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">accéder aux paramètres</a>.',
+            $message,
+            esc_url(admin_url('admin.php?page=gdh_email_settings'))
+        );
+    }
+    
+    /**
+     * Validate complete configuration
+     *
+     * @param string $detected_post_type The detected post type where shortcode is placed
+     * @return string|false Error message if configuration is invalid, false if valid
+     */
+    private function validateConfiguration($detected_post_type)
+    {
+        $receivers = get_option('gdh_receivers', []);
+        $staticEnabled = isset($receivers['static']['enabled']) && $receivers['static']['enabled'] === '1';
+        $dynamicEnabled = isset($receivers['dynamic']['enabled']) && $receivers['dynamic']['enabled'] === '1';
+        
+        // If modes are configured, validate them and templates
+        if ($staticEnabled || $dynamicEnabled) {
+            // Validate recipient configuration
+            $recipientError = $this->validateRecipientConfiguration($detected_post_type);
+            if ($recipientError) {
+                return $recipientError;
+            }
+            
+            // Validate email templates
+            return $this->validateEmailTemplates();
+        }
+        
+        // No modes configured, using fallback - no validation needed
+        return false;
+    }
+    
     /**
      * Validate recipient configuration
      *
@@ -170,13 +220,9 @@ class ShortcodeManager
         $staticEnabled  = isset($receivers['static']['enabled']) && $receivers['static']['enabled'] === '1';
         $dynamicEnabled = isset($receivers['dynamic']['enabled']) && $receivers['dynamic']['enabled'] === '1';
 
-        // No mode selected
+        // If no mode selected, use default (site email) - no error
         if (! $staticEnabled && ! $dynamicEnabled) {
-            $settings_url = admin_url('admin.php?page=gdh_email_settings');
-            return sprintf(
-                'Configuration incomplète : Aucun mode de destinataire n\'est activé. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">configurer les paramètres des e-mails</a>.',
-                esc_url($settings_url)
-            );
+            return false; // Allow default fallback
         }
 
         // Static mode validation
@@ -185,19 +231,11 @@ class ShortcodeManager
             $name  = isset($receivers['static']['name']) ? trim($receivers['static']['name']) : '';
 
             if (empty($email) || ! is_email($email)) {
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Configuration incomplète : L\'adresse e-mail du destinataire statique est manquante ou invalide. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">compléter la configuration</a>.',
-                    esc_url($settings_url)
-                );
+                return $this->createErrorMessage('Configuration incomplète : L\'adresse e-mail du destinataire statique est manquante ou invalide.');
             }
 
             if (empty($name)) {
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Configuration incomplète : Le nom du destinataire statique est manquant. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">compléter la configuration</a>.',
-                    esc_url($settings_url)
-                );
+                return $this->createErrorMessage('Configuration incomplète : Le nom du destinataire statique est manquant.');
             }
         }
 
@@ -209,30 +247,20 @@ class ShortcodeManager
             
             // Check if post type is configured
             if (empty($configuredPostType)) {
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Configuration incomplète : Le type de contenu pour le destinataire dynamique n\'est pas sélectionné. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">compléter la configuration</a>.',
-                    esc_url($settings_url)
-                );
+                return $this->createErrorMessage('Configuration incomplète : Le type de contenu pour le destinataire dynamique n\'est pas sélectionné.');
             }
             
             // Check if meta keys are configured
             if (empty($emailMetaKey) || empty($nameMetaKey)) {
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Configuration incomplète : Les champs meta pour l\'e-mail ou le nom du destinataire dynamique ne sont pas configurés. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">compléter la configuration</a>.',
-                    esc_url($settings_url)
-                );
+                return $this->createErrorMessage('Configuration incomplète : Les champs meta pour l\'e-mail ou le nom du destinataire dynamique ne sont pas configurés.');
             }
 
             // If shortcode is not rendered in a singular context (no detected post type), block usage with guidance
             if (empty($detected_post_type)) {
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Configuration requise : Le destinataire dynamique nécessite que le shortcode soit placé dans un contenu du type configuré. Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">vérifier la configuration</a> et placer le shortcode sur un contenu de type "%s".',
-                    esc_url($settings_url),
+                return $this->createErrorMessage(sprintf(
+                    'Configuration requise : Le destinataire dynamique nécessite que le shortcode soit placé dans un contenu du type configuré et placer le shortcode sur un contenu de type "%s".',
                     esc_html($configuredPostType)
-                );
+                ));
             }
             
             // Check if detected post type matches configured post type
@@ -245,16 +273,39 @@ class ShortcodeManager
                     ? $post_types[$configuredPostType]->labels->singular_name 
                     : $configuredPostType;
                 
-                $settings_url = admin_url('admin.php?page=gdh_email_settings');
-                return sprintf(
-                    'Incompatibilité de type de contenu : Le shortcode est placé dans un contenu de type "%s" mais le destinataire dynamique est configuré pour "%s". Veuillez <a href="%s" style="color:#0073aa;text-decoration:underline;">ajuster la configuration</a> ou déplacer le shortcode.',
+                return $this->createErrorMessage(sprintf(
+                    'Incompatibilité de type de contenu : Le shortcode est placé dans un contenu de type "%s" mais le destinataire dynamique est configuré pour "%s". Ajuster la configuration ou déplacer le shortcode.',
                     esc_html($detected_label),
-                    esc_html($configured_label),
-                    esc_url($settings_url)
-                );
+                    esc_html($configured_label)
+                ));
             }
         }
 
+        return false; // No error
+    }
+    
+    /**
+     * Validate email templates configuration
+     *
+     * @return string|false Error message if templates are invalid, false if valid
+     */
+    private function validateEmailTemplates()
+    {
+        $subject = (string) get_option('gdh_email_subject', '');
+        $body = (string) get_option('gdh_email_body', '');
+        
+        if (empty($subject) && empty($body)) {
+            return $this->createErrorMessage('Templates d\'emails manquants : Les templates d\'emails ne sont pas configurés.');
+        }
+        
+        if (empty($subject)) {
+            return $this->createErrorMessage('Template incomplet : Le sujet de l\'email artisan est manquant.');
+        }
+        
+        if (empty($body)) {
+            return $this->createErrorMessage('Template incomplet : Le corps de l\'email artisan est manquant.');
+        }
+        
         return false; // No error
     }
 }

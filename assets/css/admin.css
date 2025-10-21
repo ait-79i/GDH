@@ -1,18 +1,66 @@
 /* GDH Admin Styles: Paramètres des e-mailss */
-.gdh-email-settings .gdh-two-col {
-    width: 100%;
+.gdh-email-settings .postbox {
+    margin-bottom: 20px;
 }
 
-.gdh-email-settings .gdh-two-col td {
-    vertical-align: top;
-    width: 50%;
-    padding: 0 12px;
+.gdh-email-settings .postbox .inside {
+    margin: 0;
+    padding: 20px;
 }
 
-/* Vertical divider between columns */
-.gdh-email-settings .gdh-two-col td+td {
+/* Grid layouts */
+.gdh-email-settings .gdh-recipients-grid,
+.gdh-email-settings .gdh-templates-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+}
+
+.gdh-email-settings .gdh-recipient-option,
+.gdh-email-settings .gdh-template-section {
+    min-width: 0;
+}
+
+/* Vertical divider */
+.gdh-email-settings .gdh-recipient-option:last-child,
+.gdh-email-settings .gdh-template-section:last-child {
     border-left: 1px solid #dcdcde;
-    padding-left: 24px;
+    padding-left: 30px;
+}
+
+/* Section headers */
+.gdh-email-settings h3 {
+    margin: 0 0 8px 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.gdh-email-settings .description {
+    margin: 0 0 15px 0;
+    font-style: italic;
+    color: #646970;
+    font-size: 13px;
+}
+
+/* Fields wrapper */
+.gdh-email-settings .gdh-fields-wrap {
+    margin-top: 15px;
+}
+
+.gdh-email-settings .gdh-field {
+    margin-bottom: 15px;
+}
+
+.gdh-email-settings .gdh-field label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.gdh-email-settings .gdh-field input,
+.gdh-email-settings .gdh-field select {
+    width: 100%;
+    max-width: 100%;
 }
 
 .gdh-email-settings .gdh-muted {
@@ -43,8 +91,12 @@
 
 .gdh-email-settings .gdh-label {
     display: block;
-    margin: 6px 0 4px;
+    margin: 0 0 12px 0;
     font-weight: 600;
+}
+
+.gdh-email-settings .gdh-label input[type="radio"] {
+    margin-right: 6px;
 }
 
 .gdh-email-settings .gdh-section-title {
@@ -91,7 +143,14 @@
 /* Spacing between rows inside section tables */
 .gdh-email-settings .gdh-inner-table {
     border-collapse: separate;
-    border-spacing: 0 15px;
+    border-spacing: 0 8px;
+    margin-top: 12px;
+}
+
+/* Wrapper spacing */
+.gdh-email-settings #gdh_recv_static_wrap,
+.gdh-email-settings #gdh_recv_dyn_wrap {
+    margin-top: 12px;
 }
 
 /* Remove gap between Visuel/Code tabs and the editor */

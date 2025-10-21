@@ -7,109 +7,92 @@
 		</div>
 	{% endif %}
 
+	<form method="post" action="{{ form_action }}">
+		{{ settings_fields_html|raw }}
 
-	<form method="post" action="{{ admin_post_url }}">
-		<input type="hidden" name="action" value="gdh_save_email_settings"/>
-		{{ nonce_field|raw }}
-
-		<table class="form-table gdh-two-col" role="presentation">
-			<tbody>
-				<tr>
-					<td>
+		<!-- Section 1: Configuration des destinataires -->
+		<div class="postbox">
+			<div class="postbox-header">
+				<h2 class="hndle">Configuration des destinataires</h2>
+			</div>
+			<div class="inside">
+				<div class="gdh-recipients-grid">
+					<div class="gdh-recipient-option">
+						<h3>Destinataire statique</h3>
+						<p class="description">Email fixe pour toutes les demandes</p>
 						<label for="gdh_recv_mode_static" class="gdh-label">
 							<input type="radio" id="gdh_recv_mode_static" name="receiver_mode" value="static" {% if recv_mode == 'static' %} checked {% endif %}>
-							Activer le destinataire statique
+							Activer ce mode
 						</label>
-						<div id="gdh_recv_static_wrap" class="{% if recv_mode != 'static' %}gdh-muted{% endif %}">
-							<table class="form-table gdh-inner-table" role="presentation">
-								<tbody id="gdh_recv_static_block" class="{% if recv_mode != 'static' %}gdh-pe-none{% endif %}">
-									<tr>
-										<th scope="row">
-											<label for="receiver_static_email">E-mail du destinataire</label>
-										</th>
-										<td>
-											<input type="email" id="receiver_static_email" name="receiver_static_email" class="regular-text" value="{{ recv_static_email|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
-										</td>
-									</tr>
-									<tr>
-										<th scope="row">
-											<label for="receiver_static_name">Nom complet</label>
-										</th>
-										<td>
-											<input type="text" id="receiver_static_name" name="receiver_static_name" class="regular-text" value="{{ recv_static_name|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+						<div id="gdh_recv_static_wrap" class="gdh-fields-wrap {% if recv_mode != 'static' %}gdh-muted{% endif %}">
+							<div id="gdh_recv_static_block" class="{% if recv_mode != 'static' %}gdh-pe-none{% endif %}">
+								<div class="gdh-field">
+									<label for="receiver_static_email">E-mail</label>
+									<input type="email" id="receiver_static_email" name="gdh_receivers[static][email]" class="regular-text" value="{{ recv_static_email|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
+								</div>
+								<div class="gdh-field">
+									<label for="receiver_static_name">Nom</label>
+									<input type="text" id="receiver_static_name" name="gdh_receivers[static][name]" class="regular-text" value="{{ recv_static_name|e }}" {% if recv_mode != 'static' %} disabled {% endif %}>
+								</div>
+							</div>
 						</div>
-					</td>
-					<td>
+					</div>
+					<div class="gdh-recipient-option">
+						<h3>Destinataire dynamique</h3>
+						<p class="description">Email récupéré depuis les meta du post courant</p>
 						<label for="gdh_recv_mode_dynamic" class="gdh-label">
 							<input type="radio" id="gdh_recv_mode_dynamic" name="receiver_mode" value="dynamic" {% if recv_mode == 'dynamic' %} checked {% endif %}>
-							Activer le destinataire dynamique
+							Activer ce mode
 						</label>
-						<div id="gdh_recv_dyn_wrap" class="{% if recv_mode != 'dynamic' %}gdh-muted{% endif %}">
-							<table class="form-table gdh-inner-table" role="presentation">
-								<tbody id="gdh_recv_dyn_block" class="{% if recv_mode != 'dynamic' %}gdh-pe-none{% endif %}">
-									<tr>
-										<th scope="row">
-											<label for="receiver_dynamic_post_type">Type de contenu</label>
-										</th>
-										<td>
-											<select id="receiver_dynamic_post_type" name="receiver_dynamic_post_type" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
-												<option value="">— Sélectionner —</option>
-												{% for key, label in all_post_types %}
-													<option value="{{ key|e }}" {% if recv_dyn_post_type == key %} selected {% endif %}>{{ label }}</option>
-												{% endfor %}
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th scope="row">
-											<label for="receiver_dynamic_email">E-mail du destinataire</label>
-										</th>
-										<td>
-											<select id="receiver_dynamic_email" name="receiver_dynamic_email" data-selected="{{ recv_dyn_email|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
-												<option value="">— Sélectionner une meta —</option>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th scope="row">
-											<label for="receiver_dynamic_name">Nom complet</label>
-										</th>
-										<td>
-											<select id="receiver_dynamic_name" name="receiver_dynamic_name" data-selected="{{ recv_dyn_name|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
-												<option value="">— Sélectionner une meta —</option>
-											</select>
-										</td>
-									</tr>
-								</tbody>
-							</table>
+						<div id="gdh_recv_dyn_wrap" class="gdh-fields-wrap {% if recv_mode != 'dynamic' %}gdh-muted{% endif %}">
+							<div id="gdh_recv_dyn_block" class="{% if recv_mode != 'dynamic' %}gdh-pe-none{% endif %}">
+								<div class="gdh-field">
+									<label for="receiver_dynamic_post_type">Type de contenu</label>
+									<select id="receiver_dynamic_post_type" name="gdh_receivers[dynamic][post_type]" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+										<option value="">— Sélectionner —</option>
+										{% for key, label in all_post_types %}
+											<option value="{{ key|e }}" {% if recv_dyn_post_type == key %} selected {% endif %}>{{ label }}</option>
+										{% endfor %}
+									</select>
+								</div>
+								<div class="gdh-field">
+									<label for="receiver_dynamic_email">Meta key email</label>
+									<select id="receiver_dynamic_email" name="gdh_receivers[dynamic][email]" data-selected="{{ recv_dyn_email|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+										<option value="">— Sélectionner une meta —</option>
+									</select>
+								</div>
+								<div class="gdh-field">
+									<label for="receiver_dynamic_name">Meta key nom</label>
+									<select id="receiver_dynamic_name" name="gdh_receivers[dynamic][name]" data-selected="{{ recv_dyn_name|e }}" {% if recv_mode != 'dynamic' %} disabled {% endif %}>
+										<option value="">— Sélectionner une meta —</option>
+									</select>
+								</div>
+							</div>
 						</div>
-					</td>
-				</tr>
-			</tbody>
-		</table>
+					</div>
+				</div>
+			</div>
+		</div>
 
-		<hr/>
-
-		<table class="form-table gdh-two-col" role="presentation">
-			<tbody>
-				<tr>
-					<td>
+		<!-- Section 2: Templates d'emails -->
+		<div class="postbox">
+			<div class="postbox-header">
+				<h2 class="hndle">Templates d'emails</h2>
+			</div>
+			<div class="inside">
+				<div class="gdh-templates-grid">
+					<div class="gdh-template-section">
 						{% include 'admin/mail/partials/artisan-mail.twig' %}
-					</td>
-					<td>
+					</div>
+					<div class="gdh-template-section">
 						{% include 'admin/mail/partials/confirmation-mail.twig' %}
-					</td>
-				</tr>
-			</tbody>
-		</table>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<p class="submit">
-			<button type="submit" class="button button-primary">Enregistrer le template</button>
+			<button type="submit" class="button button-primary">Enregistrer les paramètres</button>
 		</p>
 	</form>
-
-
 </div>
