@@ -192,14 +192,14 @@ class AdminController
         $confirm_subject_value = (string) get_option('gdh_email_confirm_subject', '');
         $confirm_body_initial  = (string) get_option('gdh_email_confirm_body', '');
 
-        // Receiver settings (static and dynamic) - combined option with legacy fallback
+        // Receiver settings (static and dynamic)
         $receivers_opt       = get_option('gdh_receivers', []);
-        $recv_static_enabled = isset($receivers_opt['static']['enabled']) ? ($receivers_opt['static']['enabled'] === '1') : (get_option('gdh_receiver_static_enabled', '0') === '1');
-        $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : (string) get_option('gdh_receiver_static_email', '');
-        $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : (string) get_option('gdh_receiver_static_name', '');
-        $recv_dyn_enabled    = isset($receivers_opt['dynamic']['enabled']) ? ($receivers_opt['dynamic']['enabled'] === '1') : (get_option('gdh_receiver_dynamic_enabled', '0') === '1');
-        $recv_dyn_email      = isset($receivers_opt['dynamic']['email']) ? (string) $receivers_opt['dynamic']['email'] : (string) get_option('gdh_receiver_dynamic_email', '');
-        $recv_dyn_name       = isset($receivers_opt['dynamic']['name']) ? (string) $receivers_opt['dynamic']['name'] : (string) get_option('gdh_receiver_dynamic_name', '');
+        $recv_static_enabled = isset($receivers_opt['static']['enabled']) && $receivers_opt['static']['enabled'] === '1';
+        $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : '';
+        $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : '';
+        $recv_dyn_enabled    = isset($receivers_opt['dynamic']['enabled']) && $receivers_opt['dynamic']['enabled'] === '1';
+        $recv_dyn_email      = isset($receivers_opt['dynamic']['email']) ? (string) $receivers_opt['dynamic']['email'] : '';
+        $recv_dyn_name       = isset($receivers_opt['dynamic']['name']) ? (string) $receivers_opt['dynamic']['name'] : '';
         $recv_dyn_post_type  = isset($receivers_opt['dynamic']['post_type']) ? (string) $receivers_opt['dynamic']['post_type'] : '';
 
         // Build list of available post types (UI-visible)
@@ -373,18 +373,6 @@ class AdminController
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
         echo $this->twig->render('admin/appointment/fields/opacity.twig', [
-            'name'  => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
-            'value' => esc_attr($value),
-        ]);
-    }
-
-    public function fieldFontFamily($args)
-    {
-        $options = get_option('gdh_rdv_design_settings', []);
-        $key     = $args['key'];
-        $default = $args['default'];
-        $value   = isset($options[$key]) ? $options[$key] : $default;
-        echo $this->twig->render('admin/appointment/fields/font-family.twig', [
             'name'  => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
             'value' => esc_attr($value),
         ]);
