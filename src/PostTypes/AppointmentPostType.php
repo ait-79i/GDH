@@ -20,6 +20,9 @@ class AppointmentPostType
         add_action('manage_' . self::POST_TYPE . '_posts_custom_column', [$this, 'renderCustomColumns'], 10, 2);
         add_filter('post_row_actions', [$this, 'filterRowActions'], 10, 2);
         add_action('admin_head', [$this, 'makeTitleReadonly']);
+        add_action('admin_footer', [$this, 'addResendEmailScript']);
+        add_action('wp_ajax_gdh_resend_email', [$this, 'resendEmail']);
+        add_action('admin_notices', [$this, 'displayAdminNotices']);
     }
 
     public function register()
@@ -330,6 +333,7 @@ class AppointmentPostType
                     echo '<span style="color:#46b450;font-weight:600;">✓ Oui</span>';
                 } else {
                     echo '<span style="color:#dc3232;font-weight:600;">✗ Non</span>';
+                    echo '<button type="button" class="button button-small gdh-resend-email" data-post-id="' . esc_attr($post_id) . '" style="margin:0px 30px;">Envoyer</button>';
                 }
                 break;
         }
@@ -391,4 +395,192 @@ class AppointmentPostType
     }
 // [/]
 
+    /**
+     * Add JavaScript for resending emails
+     */
+    public function addResendEmailScript()
+    {
+        $screen = get_current_screen();
+        if (!$screen || $screen->post_type !== self::POST_TYPE) {
+            return;
+        }
+        ?>
+        <script type="text/javascript">
+        jQuery(document).ready(function($) {
+            $(document).on('click', '.gdh-resend-email', function() {
+                const button = $(this);
+                const postId = button.data('post-id');
+                
+                if (!postId) return;
+                
+                // Disable button and show loading state
+                button.prop('disabled', true).text('Envoi...');
+                
+                // Send AJAX request
+                $.ajax({
+                    url: ajaxurl,
+                    type: 'POST',
+                    data: {
+                        action: 'gdh_resend_email',
+                        post_id: postId,
+                        nonce: '<?php echo wp_create_nonce('gdh_resend_email_nonce'); ?>'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update the email_sent column to show success
+                            const row = button.closest('tr');
+                            row.find('td.column-email_sent').html('<span style="color:#46b450;font-weight:600;">✓ Oui</span>');
+                            // Remove the button
+                            button.remove();
+                            
+                            // Reload page if there was an error message to show
+                            if (response.data && response.data.reload) {
+                                window.location.reload();
+                            }
+                        } else {
+                            // Restore button
+                            button.prop('disabled', false).text('Envoyer');
+                            
+                            // Reload page to show admin notice
+                            window.location.reload();
+                        }
+                    },
+                    error: function() {
+                        // Restore button
+                        button.prop('disabled', false).text('Envoyer');
+                        // Reload page to show admin notice
+                        window.location.reload();
+                    }
+                });
+            });
+        });
+        </script>
+        <?php
+    }
+    
+    /**
+     * AJAX handler for resending email
+     */
+    public function resendEmail()
+    {
+        // Check nonce
+        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'gdh_resend_email_nonce')) {
+            $this->setAdminNotice('error', 'Erreur de sécurité. Veuillez rafraîchir la page.');
+            wp_send_json_error(['reload' => true]);
+        }
+        
+        // Check post ID
+        $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
+        if (!$post_id) {
+            $this->setAdminNotice('error', 'ID de rendez-vous invalide.');
+            wp_send_json_error(['reload' => true]);
+        }
+        
+        // Check if post exists and is of correct type
+        $post = get_post($post_id);
+        if (!$post || $post->post_type !== self::POST_TYPE) {
+            $this->setAdminNotice('error', 'Rendez-vous introuvable.');
+            wp_send_json_error(['reload' => true]);
+        }
+        
+        // Initialize logger and email service
+        $logger = new \GDH\Services\Logger();
+        $artisanEmailService = new \GDH\Services\ArtisanEmailService($logger);
+        
+        // Prepare form data from post meta
+        $formData = [
+            'first_name' => get_post_meta($post_id, '_gdh_first_name', true),
+            'last_name' => get_post_meta($post_id, '_gdh_last_name', true),
+            'email' => get_post_meta($post_id, '_gdh_email', true),
+            'phone' => get_post_meta($post_id, '_gdh_phone', true),
+            'address' => get_post_meta($post_id, '_gdh_address', true),
+            'postal_code' => get_post_meta($post_id, '_gdh_postal_code', true),
+            'city' => get_post_meta($post_id, '_gdh_city', true),
+        ];
+        
+        // Try to send the email
+        try {
+            $sent = $artisanEmailService->sendArtisanNotification($post_id, $formData);
+            
+            if ($sent) {
+                // Update email sent status
+                update_post_meta($post_id, '_gdh_email_sent', '1');
+                
+                // Check if client confirmation email is enabled in settings
+                $client_email_enabled = get_option('gdh_enable_client_email', '0') === '1';
+                
+                if ($client_email_enabled) {
+                    // Send confirmation email to the lead (client)
+                    $emailService = new \GDH\Services\EmailTemplateService($logger);
+                    try {
+                        $clientSent = $emailService->sendOnAppointment($post_id, $formData);
+                        if (!$clientSent) {
+                            $logger->error("Client confirmation email failed for appointment ID: {$post_id}");
+                            $this->setAdminNotice('warning', 'Email artisan envoyé avec succès, mais l\'email de confirmation au client a échoué.');
+                            wp_send_json_success(['reload' => true]);
+                        } else {
+                            $logger->info("Client confirmation email sent successfully for appointment ID: {$post_id}");
+                            $this->setAdminNotice('success', 'Emails envoyés avec succès à l\'artisan et au client.');
+                            wp_send_json_success(['reload' => true]);
+                        }
+                    } catch (\Throwable $e) {
+                        $logger->error('GDH Resend: Client email exception - ' . $e->getMessage());
+                        $this->setAdminNotice('warning', 'Email artisan envoyé avec succès, mais l\'email de confirmation au client a échoué: ' . $e->getMessage());
+                        wp_send_json_success(['reload' => true]);
+                    }
+                } else {
+                    // Client email is disabled, just show success for artisan email
+                    $logger->info("Email resent successfully for appointment ID: {$post_id}");
+                    $this->setAdminNotice('success', 'Email envoyé avec succès à l\'artisan.');
+                    wp_send_json_success(['reload' => true]);
+                }
+            } else {
+                $logger->error("Failed to resend email for appointment ID: {$post_id}");
+                $this->setAdminNotice('error', 'Échec de l\'envoi de l\'email. Vérifiez la configuration.');
+                wp_send_json_error(['reload' => true]);
+            }
+        } catch (\Exception $e) {
+            $logger->error("Exception while resending email: " . $e->getMessage());
+            $this->setAdminNotice('error', 'Erreur: ' . $e->getMessage());
+            wp_send_json_error(['reload' => true]);
+        }
+    }
+    
+    /**
+     * Store admin notice in transient for display
+     */
+    private function setAdminNotice($type, $message) {
+        set_transient('gdh_admin_notice', [
+            'type' => $type,
+            'message' => $message
+        ], 45); // Expires after 45 seconds
+    }
+    
+    /**
+     * Display admin notices from transient
+     */
+    public function displayAdminNotices() {
+        $screen = get_current_screen();
+        if (!$screen || $screen->post_type !== self::POST_TYPE) {
+            return;
+        }
+        
+        $notice = get_transient('gdh_admin_notice');
+        if (!$notice) {
+            return;
+        }
+        
+        // Clear the notice right after displaying it
+        delete_transient('gdh_admin_notice');
+        
+        $type = isset($notice['type']) ? $notice['type'] : 'info';
+        $message = isset($notice['message']) ? $notice['message'] : '';
+        
+        if (!$message) {
+            return;
+        }
+        
+        $class = 'notice notice-' . $type . ' is-dismissible';
+        printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
+    }
 }

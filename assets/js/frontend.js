@@ -246,7 +246,7 @@ jQuery(document).ready(function ($) {
     }
     // Check tel format
     else if ($input.attr('type') === 'tel' && value) {
-      const telPattern = /[0-9\s\.\-\+]{10,}/;
+      const telPattern = /^(?:(?:\+|00)33[\s.-]{0,3}(?:\(0\)[\s.-]{0,3})?|0)[1-9](?:(?:[\s.-]?\d{2}){4}|\d{2}(?:[\s.-]?\d{3}){2})$/;
       if (!telPattern.test(value)) {
         isValid = false;
         customError = errorMessage;
@@ -338,7 +338,6 @@ jQuery(document).ready(function ($) {
     const currentPostType = $popup.data('post-type') || '';
     const currentPostId = $popup.data('post-id') || 0;
 
-    console.log(currentPostType, currentPostId);
 
     // Collect form data
     const formData = {
@@ -362,7 +361,6 @@ jQuery(document).ready(function ($) {
       current_post_id: currentPostId
     };
 
-    console.log("formData", formData);
 
     // Collect slots data
     $('.gdh-rdv-slot-card').each(function () {
