@@ -140,17 +140,7 @@ class AppointmentAjaxHandler
                 update_post_meta($post_id, '_gdh_current_post_id', absint($formData['current_post_id']));
             }
 
-            // Try to send confirmation email to client (non-blocking for booking result)
-            try {
-                $sent = $this->emailService->sendOnAppointment($post_id, $formData);
-                if (! $sent) {
-                    $this->logger->error('GDH AJAX: Client confirmation email failed or skipped');
-                }
-            } catch (\Throwable $e) {
-                $this->logger->error('GDH AJAX: Client email exception - ' . $e->getMessage());
-            }
-
-            // Try to send notification email to artisan/recipient (non-blocking)
+            // Try to send notification email to artisan/recipient first (non-blocking)
             $artisanSent = false;
             try {
                 $artisanSent = $this->artisanEmailService->sendArtisanNotification($post_id, $formData);
@@ -165,6 +155,20 @@ class AppointmentAjaxHandler
             if ($artisanSent) {
                 update_post_meta($post_id, '_gdh_email_sent', '1');
                 $this->logger->info("GDH AJAX: Email sent status updated to true");
+            }
+
+            // Only send confirmation email to client if artisan notification was sent successfully
+            if ($artisanSent) {
+                try {
+                    $sent = $this->emailService->sendOnAppointment($post_id, $formData);
+                    if (! $sent) {
+                        $this->logger->error('GDH AJAX: Client confirmation email failed or skipped');
+                    }
+                } catch (\Throwable $e) {
+                    $this->logger->error('GDH AJAX: Client email exception - ' . $e->getMessage());
+                }
+            } else {
+                $this->logger->info('GDH AJAX: Client confirmation email skipped because artisan notification failed');
             }
 
             // Send success response
