@@ -36,12 +36,25 @@ class Autoloader
 
         // Get the relative class name
         $relativeClass = substr($class, $len);
+        
+        // Security: Validate class name contains only allowed characters
+        if (!preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff\\]*$/', $relativeClass)) {
+            return;
+        }
+        
+        // Security: Prevent path traversal attacks
+        if (strpos($relativeClass, '..') !== false || strpos($relativeClass, '/') !== false) {
+            return;
+        }
 
         // Replace namespace separators with directory separators, append .php
         $file = self::$baseDir . str_replace('\\', DIRECTORY_SEPARATOR, $relativeClass) . '.php';
-
-        if (is_file($file)) {
-            require_once $file;
+        
+        // Security: Ensure file is within base directory
+        $realFile = realpath($file);
+        $realBase = realpath(self::$baseDir);
+        if ($realFile && $realBase && strpos($realFile, $realBase) === 0 && is_file($realFile)) {
+            require_once $realFile;
         }
     }
 }

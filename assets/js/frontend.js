@@ -23,11 +23,12 @@ jQuery(document).ready(function ($) {
   //next button
   $(document).on("click", ".gdh-rdv-next", function (e) {
     e.preventDefault();
-
-    if (validateCurrentStep()) {
+    
+    const $popup = $(this).closest('.gdh-rdv-popup');
+    if (validateCurrentStep($popup)) {
       if (currentStep < totalSteps) {
         currentStep++;
-        updateStep();
+        updateStep($popup);
       }
     }
   });
@@ -36,9 +37,10 @@ jQuery(document).ready(function ($) {
   $(document).on("click", ".gdh-rdv-prev", function (e) {
     e.preventDefault();
 
+    const $popup = $(this).closest('.gdh-rdv-popup');
     if (currentStep > 1) {
       currentStep--;
-      updateStep();
+      updateStep($popup);
     }
   });
 
@@ -46,11 +48,12 @@ jQuery(document).ready(function ($) {
   $(document).on("click", ".gdh-rdv-submit", function (e) {
     e.preventDefault();
 
+    const $popup = $(this).closest('.gdh-rdv-popup');
     // Clear previous errors
-    $(".gdh-rdv-error").remove();
+    $popup.find(".gdh-rdv-error").remove();
 
     // Validate step 3 and show all field errors
-    const isValid = validateAllFieldsInStep(3);
+    const isValid = validateAllFieldsInStep(3, $popup);
 
     if (isValid) {
       // If validation passes, submit the form
@@ -61,34 +64,31 @@ jQuery(document).ready(function ($) {
     }
   });
 
-  function validateCurrentStep() {
-    $currentStepContent = $(`.gdh-rdv-step-content[data-step="${currentStep}"`);
+  function validateCurrentStep($popup) {
     let isValid = true;
 
-    $(".gdh-rdv-error").remove();
+    $popup.find(".gdh-rdv-error").remove();
 
     switch (currentStep) {
       case 1:
-        isValid = validateStep1Slots();
+        isValid = validateStep1Slots($popup);
         break;
       case 2:
       case 3:
-        // Use the new field-by-field validation
-        isValid = validateAllFieldsInStep(currentStep);
+        isValid = validateAllFieldsInStep(currentStep, $popup);
         break;
     }
 
     return isValid;
   }
 
-  function updateStep() {
-    $(".gdh-rdv-step-content").removeClass("active");
-
-    $(`.gdh-rdv-step-content[data-step="${currentStep}"`).addClass("active");
+  function updateStep($popup) {
+    $popup.find(".gdh-rdv-step-content").removeClass("active");
+    $popup.find(`.gdh-rdv-step-content[data-step="${currentStep}"]`).addClass("active");
 
     // Update legacy steps
-    $(".gdh-rdv-step").removeClass("active completed");
-    $(".gdh-rdv-step").each(function (index) {
+    $popup.find(".gdh-rdv-step").removeClass("active completed");
+    $popup.find(".gdh-rdv-step").each(function (index) {
       if (index + 1 < currentStep) {
         $(this).addClass("completed");
       } else if (index + 1 === currentStep) {
@@ -97,8 +97,8 @@ jQuery(document).ready(function ($) {
     });
 
     // Update modern step items
-    $(".gdh-rdv-step-item").removeClass("active completed");
-    $(".gdh-rdv-step-item").each(function () {
+    $popup.find(".gdh-rdv-step-item").removeClass("active completed");
+    $popup.find(".gdh-rdv-step-item").each(function () {
       const stepNum = parseInt($(this).data("step"));
       if (stepNum < currentStep) {
         $(this).addClass("completed");
@@ -108,8 +108,8 @@ jQuery(document).ready(function ($) {
     });
 
     // Update connectors
-    $(".gdh-rdv-step-connector").removeClass("active");
-    $(".gdh-rdv-step-connector").each(function () {
+    $popup.find(".gdh-rdv-step-connector").removeClass("active");
+    $popup.find(".gdh-rdv-step-connector").each(function () {
       const connector = $(this).data("connector");
       if (connector) {
         const [from, to] = connector.split("-").map(Number);
@@ -119,13 +119,13 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    updateButtons();
+    updateButtons($popup);
   }
 
-  function updateButtons() {
-    const $prevBtn = $(".gdh-rdv-prev");
-    const $nextBtn = $(".gdh-rdv-next");
-    const $submitBtn = $(".gdh-rdv-submit");
+  function updateButtons($popup) {
+    const $prevBtn = $popup.find(".gdh-rdv-prev");
+    const $nextBtn = $popup.find(".gdh-rdv-next");
+    const $submitBtn = $popup.find(".gdh-rdv-submit");
 
     // Previous button
     if (currentStep === 1) {
@@ -173,11 +173,13 @@ jQuery(document).ready(function ($) {
     $("#gdh-rdv-success").hide();
     $(".gdh-rdv-error").remove();
     resetStep1Slots();
-    updateStep();
+    const $popup = $("#gdh-rdv-popup");
+    updateStep($popup);
     initStep1Slots();
   }
 
-  updateStep();
+  const $popup = $("#gdh-rdv-popup");
+  if ($popup.length) updateStep($popup);
 
   // ===== Real-time Validation for Steps 2 & 3 =====
   function initFieldValidation() {
@@ -282,8 +284,8 @@ jQuery(document).ready(function ($) {
   }
 
   // Validate all fields in current step
-  function validateAllFieldsInStep(stepNumber) {
-    const $step = $(`.gdh-rdv-step-content[data-step="${stepNumber}"]`);
+  function validateAllFieldsInStep(stepNumber, $popup) {
+    const $step = $popup.find(`.gdh-rdv-step-content[data-step="${stepNumber}"]`);
     let isValid = true;
 
     // Validate all inputs

@@ -2,46 +2,47 @@
 namespace GDH\Ajax;
 
 use GDH\PostTypes\AppointmentPostType;
-use GDH\Services\ArtisanEmailService;
 use GDH\Services\EmailTemplateService;
 use GDH\Services\Logger;
+use GDH\Services\RecipientService;
 
 class AppointmentAjaxHandler
 {
     private $logger;
     private $emailService;
-    private $artisanEmailService;
 
     public function __construct(Logger $logger)
     {
-        $this->logger              = $logger;
-        $this->emailService        = new EmailTemplateService($this->logger);
-        $this->artisanEmailService = new ArtisanEmailService($this->logger);
+        $this->logger       = $logger;
+        $this->emailService = new EmailTemplateService($this->logger);
         $this->init();
     }
 
     private function init()
     {
-        // For logged-in users
+        // Security: Add rate limiting and validation
         add_action('wp_ajax_gdh_rdv_submit', [$this, 'handleSubmit']);
-
-        // For non-logged-in users (public form)
         add_action('wp_ajax_nopriv_gdh_rdv_submit', [$this, 'handleSubmit']);
     }
 
     public function handleSubmit()
     {
         try {
-            // Log received data for debugging
-            $this->logger->info('GDH AJAX: Request received - ' . json_encode($_POST));
-
-            // Verify nonce
-            if (! isset($_POST['nonce']) || ! wp_verify_nonce($_POST['nonce'], 'gdh_rdv_nonce')) {
+            // Security: Verify nonce first
+            if (!check_ajax_referer('gdh_rdv_nonce', 'nonce', false)) {
                 $this->logger->error('GDH AJAX: Nonce verification failed');
                 wp_send_json_error([
                     'message' => 'Erreur de sécurité. Veuillez rafraîchir la page et réessayer.',
                 ], 403);
             }
+            
+            // Security: Validate request method
+            if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+                wp_send_json_error(['message' => 'Méthode non autorisée'], 405);
+            }
+            
+            // Log request received
+            $this->logger->info('GDH AJAX: Request received');
 
             // Get form data
             if (! isset($_POST['formData'])) {
@@ -51,8 +52,13 @@ class AppointmentAjaxHandler
                 ], 400);
             }
 
-            // Decode JSON string to array
-            $formData = json_decode(stripslashes($_POST['formData']), true);
+            // Security: Sanitize and decode JSON
+            $rawData = isset($_POST['formData']) ? wp_unslash($_POST['formData']) : '';
+            if (strlen($rawData) > 10000) { // Limit payload size
+                wp_send_json_error(['message' => 'Données trop volumineuses'], 413);
+            }
+            
+            $formData = json_decode($rawData, true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
                 $this->logger->error('GDH AJAX: JSON decode error - ' . json_last_error_msg());
@@ -64,13 +70,16 @@ class AppointmentAjaxHandler
             // Log form data structure
             $this->logger->info('GDH AJAX: Form data - ' . json_encode($formData));
 
+            // Security: Sanitize all form data
+            $formData = $this->sanitizeFormData($formData);
+            
             // Validate required fields
             $requiredFields = ['first_name', 'last_name', 'email', 'phone', 'address', 'postal_code', 'city'];
             foreach ($requiredFields as $field) {
                 if (empty($formData[$field])) {
                     $this->logger->error("GDH AJAX: Missing required field: {$field}");
                     wp_send_json_error([
-                        'message' => "Tous les champs obligatoires doivent être remplis. Champ manquant: {$field}",
+                        'message' => 'Tous les champs obligatoires doivent être remplis.',
                     ], 400);
                 }
             }
@@ -122,16 +131,17 @@ class AppointmentAjaxHandler
             $this->logger->info("GDH AJAX: Appointment created successfully - ID: {$post_id}");
 
 
-            // Save destinataire information directly from form data
-            $recipientEmail = isset($formData['recipient_email']) ? sanitize_email($formData['recipient_email']) : '';
-            $recipientName  = isset($formData['recipient_name']) ? sanitize_text_field($formData['recipient_name']) : '';
-
-            if ($recipientEmail && is_email($recipientEmail)) {
-                update_post_meta($post_id, '_gdh_destinataire_email', $recipientEmail);
-                update_post_meta($post_id, '_gdh_destinataire_name', $recipientName);
-                $this->logger->info("GDH AJAX: Destinataire saved - {$recipientName} ({$recipientEmail})");
+            // Security: Get recipient info from server configuration, not form data
+            $recipientInfo = RecipientService::getSecureRecipientInfo($formData);
+            if ($recipientInfo) {
+                update_post_meta($post_id, '_gdh_destinataire_email', $recipientInfo['email']);
+                update_post_meta($post_id, '_gdh_destinataire_name', $recipientInfo['name']);
+                $this->logger->info("GDH AJAX: Destinataire saved - {$recipientInfo['name']} ({$recipientInfo['email']})");
             } else {
-                $this->logger->warning("GDH AJAX: No valid recipient email provided in form data");
+                $this->logger->error("GDH AJAX: Failed to resolve secure recipient info");
+                wp_send_json_error([
+                    'message' => 'Erreur de configuration du destinataire.',
+                ], 500);
             }
 
             // Save current post context for dynamic mode display
@@ -140,35 +150,33 @@ class AppointmentAjaxHandler
                 update_post_meta($post_id, '_gdh_current_post_id', absint($formData['current_post_id']));
             }
 
-            // Try to send notification email to artisan/recipient first (non-blocking)
-            $artisanSent = false;
+            // Send notification email to receiver
+            $receiverSent = false;
             try {
-                $artisanSent = $this->artisanEmailService->sendArtisanNotification($post_id, $formData);
-                if (! $artisanSent) {
-                    $this->logger->error('GDH AJAX: Artisan notification email failed or skipped');
+                $receiverSent = $this->emailService->sendOnAppointment($post_id, $formData);
+                if ($receiverSent) {
+                    update_post_meta($post_id, '_gdh_email_sent', '1');
+                    $this->logger->info("GDH AJAX: Receiver notification sent successfully");
+                } else {
+                    $this->logger->error('GDH AJAX: Receiver notification email failed');
                 }
             } catch (\Throwable $e) {
-                $this->logger->error('GDH AJAX: Artisan email exception - ' . $e->getMessage());
+                $this->logger->error('GDH AJAX: Receiver email exception - ' . $e->getMessage());
             }
 
-            // Update email sent status if artisan email was sent successfully
-            if ($artisanSent) {
-                update_post_meta($post_id, '_gdh_email_sent', '1');
-                $this->logger->info("GDH AJAX: Email sent status updated to true");
-            }
-
-            // Only send confirmation email to client if artisan notification was sent successfully
-            if ($artisanSent) {
+            // Send confirmation email to client if confirmation is enabled
+            $confirmEnabled = get_option('gdh_email_confirm_enabled', '0') === '1';
+            if ($confirmEnabled) {
                 try {
-                    $sent = $this->emailService->sendOnAppointment($post_id, $formData);
-                    if (! $sent) {
-                        $this->logger->error('GDH AJAX: Client confirmation email failed or skipped');
+                    $confirmSent = $this->emailService->sendConfirmationToClient($post_id, $formData);
+                    if ($confirmSent) {
+                        $this->logger->info("GDH AJAX: Client confirmation sent successfully");
+                    } else {
+                        $this->logger->error('GDH AJAX: Client confirmation email failed');
                     }
                 } catch (\Throwable $e) {
-                    $this->logger->error('GDH AJAX: Client email exception - ' . $e->getMessage());
+                    $this->logger->error('GDH AJAX: Client confirmation exception - ' . $e->getMessage());
                 }
-            } else {
-                $this->logger->info('GDH AJAX: Client confirmation email skipped because artisan notification failed');
             }
 
             // Send success response
@@ -184,4 +192,62 @@ class AppointmentAjaxHandler
             ], 500);
         }
     }
+    
+
+    
+    /**
+     * Security: Sanitize form data
+     */
+    private function sanitizeFormData($data)
+    {
+        if (!is_array($data)) {
+            return [];
+        }
+        
+        $sanitized = [];
+        
+        // Sanitize text fields
+        $text_fields = ['first_name', 'last_name', 'address', 'city', 'current_post_type'];
+        foreach ($text_fields as $field) {
+            $sanitized[$field] = isset($data[$field]) ? sanitize_text_field($data[$field]) : '';
+        }
+        
+        // Sanitize email
+        $sanitized['email'] = isset($data['email']) ? sanitize_email($data['email']) : '';
+        
+        // Sanitize phone and postal code
+        $sanitized['phone'] = isset($data['phone']) ? preg_replace('/[^0-9+\-\s\(\)]/', '', $data['phone']) : '';
+        $sanitized['postal_code'] = isset($data['postal_code']) ? preg_replace('/[^0-9A-Za-z\-\s]/', '', $data['postal_code']) : '';
+        
+        // Sanitize boolean
+        $sanitized['accept_terms'] = isset($data['accept_terms']) ? (bool) $data['accept_terms'] : false;
+        
+        // Sanitize integers
+        $sanitized['current_post_id'] = isset($data['current_post_id']) ? absint($data['current_post_id']) : 0;
+        
+        // Sanitize slots array
+        $sanitized['slots'] = [];
+        if (isset($data['slots']) && is_array($data['slots'])) {
+            foreach ($data['slots'] as $slot) {
+                if (is_array($slot)) {
+                    $clean_slot = [
+                        'date' => isset($slot['date']) ? sanitize_text_field($slot['date']) : '',
+                        'times' => []
+                    ];
+                    
+                    if (isset($slot['times']) && is_array($slot['times'])) {
+                        foreach ($slot['times'] as $time) {
+                            $clean_slot['times'][] = sanitize_text_field($time);
+                        }
+                    }
+                    
+                    $sanitized['slots'][] = $clean_slot;
+                }
+            }
+        }
+        
+        return $sanitized;
+    }
+    
+
 }

@@ -31,24 +31,24 @@
 
 /* Base Button Styles */
 .gdh-rdv-button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 32px;
-  border: none;
-  border-radius: var(--gdh-radius-md);
-  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
-  font-weight: 600;
-  font-size: 15px;
-  text-align: center;
-  text-decoration: none;
-  cursor: pointer;
-  transition: var(--gdh-transition);
-  box-sizing: border-box;
-  outline: none;
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.3px;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 14px 32px !important;
+  border: none !important;
+  border-radius: var(--gdh-radius-md) !important;
+  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+  font-weight: 600 !important;
+  font-size: 15px !important;
+  text-align: center !important;
+  text-decoration: none !important;
+  cursor: pointer !important;
+  transition: var(--gdh-transition) !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+  position: relative !important;
+  overflow: hidden !important;
+  letter-spacing: 0.3px !important;
 }
 
 .gdh-rdv-button::before {
@@ -79,11 +79,11 @@
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%);
-  color: #000000;
-  border: none;
-  font-weight: 700;
-  box-shadow: var(--gdh-shadow-md);
+  background: linear-gradient(135deg, var(--gdh-accent-yellow) 0%, var(--gdh-accent-yellow-dark) 100%) !important;
+  color: #000000 !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: var(--gdh-shadow-md) !important;
 }
 
 .btn-primary:hover {
@@ -94,23 +94,23 @@
 
 /* === Popup Modal === */
 .gdh-rdv-popup {
-  position: fixed;
-  inset: 0;
+  position: fixed !important;
+  inset: 0 !important;
   display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
-  padding: 20px;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 9999 !important;
+  font-family: var(--gdh-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+  padding: 20px !important;
 }
 
 .gdh-rdv-popup-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(var(--gdh-overlay-rgb, 0, 0, 0), var(--gdh-overlay-opacity, 0.4));
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  animation: overlayFadeIn 0.4s ease;
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(var(--gdh-overlay-rgb, 0, 0, 0), var(--gdh-overlay-opacity, 0.4)) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  animation: overlayFadeIn 0.4s ease !important;
 }
 
 @keyframes overlayFadeIn {
@@ -124,19 +124,19 @@
 }
 
 .gdh-rdv-popup-content {
-  position: relative;
-  background: var(--gdh-bg-card);
-  border-radius: var(--gdh-radius-lg);
-  box-shadow: var(--gdh-shadow-xl);
-  width: 95%;
-  max-width: 1100px;
-  max-height: 92vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-  z-index: 10000;
-  animation: popupSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
-  padding: 24px;
-  border: 1px solid rgba(0, 104, 71, 0.1);
+  position: relative !important;
+  background: var(--gdh-bg-card) !important;
+  border-radius: var(--gdh-radius-lg) !important;
+  box-shadow: var(--gdh-shadow-xl) !important;
+  width: 95% !important;
+  max-width: 1100px !important;
+  max-height: 92vh !important;
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  z-index: 10000 !important;
+  animation: popupSlideIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+  padding: 24px !important;
+  border: 1px solid rgba(0, 104, 71, 0.1) !important;
 }
 
 @keyframes popupSlideIn {
@@ -168,13 +168,13 @@
 
 /* === Popup Header === */
 .gdh-rdv-popup-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 2px solid var(--gdh-border-light);
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  border-bottom: 2px solid var(--gdh-border-light) !important;
+  padding-bottom: 12px !important;
+  margin-bottom: 16px !important;
+  position: relative !important;
 }
 
 .gdh-rdv-popup-header::after {
@@ -189,13 +189,13 @@
 }
 
 .gdh-rdv-popup-header h2 {
-  font-size: 1.35rem;
-  margin: 0;
-  color: var(--gdh-primary-green);
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  line-height: 1.2;
-  flex: 1;
+  font-size: 1.35rem !important;
+  margin: 0 !important;
+  color: var(--gdh-primary-green) !important;
+  font-weight: 700 !important;
+  letter-spacing: -0.5px !important;
+  line-height: 1.2 !important;
+  flex: 1 !important;
 }
 
 .gdh-rdv-popup-header.align-left h2 {
@@ -211,19 +211,19 @@
 }
 
 .gdh-rdv-close {
-  background: var(--gdh-bg-light);
-  border: none;
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  font-size: 1.25rem;
-  color: var(--gdh-text-medium);
-  cursor: pointer;
-  transition: var(--gdh-transition);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
+  background: var(--gdh-bg-light) !important;
+  border: none !important;
+  width: 30px !important;
+  height: 30px !important;
+  border-radius: 50% !important;
+  font-size: 1.25rem !important;
+  color: var(--gdh-text-medium) !important;
+  cursor: pointer !important;
+  transition: var(--gdh-transition) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  line-height: 1 !important;
 }
 
 .gdh-rdv-close:hover {
@@ -234,52 +234,52 @@
 
 /* === Modern Progress Bar === */
 .gdh-rdv-progress-wrapper {
-  margin-bottom: 20px;
-  padding: 16px;
-  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%);
-  border-radius: var(--gdh-radius-lg);
-  box-shadow: 0 4px 20px rgba(0, 104, 71, 0.08);
-  border: 1px solid rgba(0, 104, 71, 0.1);
+  margin-bottom: 20px !important;
+  padding: 16px !important;
+  background: linear-gradient(135deg, #ffffff 0%, #f8fffe 100%) !important;
+  border-radius: var(--gdh-radius-lg) !important;
+  box-shadow: 0 4px 20px rgba(0, 104, 71, 0.08) !important;
+  border: 1px solid rgba(0, 104, 71, 0.1) !important;
 }
 
 .gdh-rdv-progress-container {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 16px !important;
 }
 
 /* Steps Track */
 .gdh-rdv-steps-track {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  position: relative;
+  display: flex !important;
+  align-items: flex-start !important;
+  justify-content: space-between !important;
+  position: relative !important;
 }
 
 /* Step Item */
 .gdh-rdv-step-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  flex: 0 0 auto;
-  position: relative;
-  z-index: 2;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 8px !important;
+  flex: 0 0 auto !important;
+  position: relative !important;
+  z-index: 2 !important;
 }
 
 /* Step Circle */
 .gdh-rdv-step-circle {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: var(--gdh-bg-light);
-  border: 2px solid var(--gdh-border-light);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  cursor: pointer;
+  width: 48px !important;
+  height: 48px !important;
+  border-radius: 50% !important;
+  background: var(--gdh-bg-light) !important;
+  border: 2px solid var(--gdh-border-light) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  cursor: pointer !important;
 }
 
 .gdh-rdv-step-circle:hover {
@@ -289,17 +289,17 @@
 
 /* Step Icon */
 .gdh-rdv-step-icon {
-  font-size: 20px;
-  color: var(--gdh-text-light);
-  transition: all 0.3s ease;
-  display: none;
+  font-size: 20px !important;
+  color: var(--gdh-text-light) !important;
+  transition: all 0.3s ease !important;
+  display: none !important;
 }
 
 .gdh-rdv-step-number {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--gdh-text-light);
-  transition: all 0.3s ease;
+  font-size: 18px !important;
+  font-weight: 700 !important;
+  color: var(--gdh-text-light) !important;
+  transition: all 0.3s ease !important;
 }
 
 /* Step Pulse Animation */

@@ -27,7 +27,7 @@ class EmailTemplateService
         ];
     }
 
-    private function buildContextFromData($post_id, array $formData, $isHtml = false)
+    private function buildContextFromData($post_id, array $formData, $isHtml = false, $recipientInfo = null)
     {
         $first          = isset($formData['first_name']) ? $formData['first_name'] : get_post_meta($post_id, '_gdh_first_name', true);
         $last           = isset($formData['last_name']) ? $formData['last_name'] : get_post_meta($post_id, '_gdh_last_name', true);
@@ -88,8 +88,8 @@ class EmailTemplateService
                 }
             }
         }
-        // Get recipient info from form data (passed from frontend with dynamic/static mode)
-        $recipientName = isset($formData['recipient_name']) ? $formData['recipient_name'] : '';
+        // Use recipient info passed as parameter
+        $recipientName = $recipientInfo ? $recipientInfo['name'] : '';
         
         return [
             'nom_lead'         => trim($first . ' ' . $last),
@@ -137,6 +137,8 @@ class EmailTemplateService
         }
         return [$unknown, $missing];
     }
+    
+
 
     private function replacePlaceholders($text, array $context)
     {
@@ -156,55 +158,92 @@ class EmailTemplateService
 
     public function sendOnAppointment($post_id, array $formData)
     {
-        // Load template from options
-        $subject     = (string) get_option('gdh_email_subject', '');
-        $body        = (string) get_option('gdh_email_body', '');
-        $style       = '';
-        $contentType = 'html';
+        $recipientInfo = RecipientService::getSecureRecipientInfo($formData);
+        if (!$recipientInfo) {
+            $this->logger->error('GDH Email: impossible de résoudre les informations du destinataire');
+            return false;
+        }
+        
+        return $this->sendEmail(
+            $post_id, 
+            $formData, 
+            $recipientInfo['email'], 
+            'gdh_email_subject', 
+            'gdh_email_body',
+            'GDH Email',
+            $recipientInfo
+        );
+    }
+    
+    public function sendConfirmationToClient($post_id, array $formData)
+    {
+        $recipientInfo = RecipientService::getSecureRecipientInfo($formData);
+        $context = $this->buildContextFromData($post_id, $formData, true, $recipientInfo);
+        $clientEmail = $context['email_lead'];
+        
+        if (!is_email($clientEmail)) {
+            $this->logger->error('GDH Email Confirmation: email client invalide');
+            return false;
+        }
+        
+        return $this->sendEmail(
+            $post_id, 
+            $formData, 
+            $clientEmail, 
+            'gdh_email_confirm_subject', 
+            'gdh_email_confirm_body',
+            'GDH Email Confirmation',
+            $recipientInfo
+        );
+    }
+    
+    /**
+     * Centralized email sending method to avoid code duplication
+     */
+    private function sendEmail($post_id, array $formData, $to, $subjectOption, $bodyOption, $logPrefix, $recipientInfo = null)
+    {
+        $subject = (string) get_option($subjectOption, '');
+        $body = (string) get_option($bodyOption, '');
+        
         if ($subject === '' || $body === '') {
-            $this->logger->error('GDH Email: sujet ou corps du modèle manquant');
+            $this->logger->error($logPrefix . ': sujet ou corps du modèle manquant');
             return false;
         }
-        $available       = $this->getAvailableVariables();
-        $isHtml          = ($contentType === 'html');
-        $context         = $this->buildContextFromData($post_id, $formData, $isHtml);
-        $aliases         = $this->getPlaceholderAliases();
+        
+        $available = $this->getAvailableVariables();
+        $context = $this->buildContextFromData($post_id, $formData, true, $recipientInfo);
+        $aliases = $this->getPlaceholderAliases();
         $placeholdersRaw = array_unique(array_merge($this->findPlaceholders($subject), $this->findPlaceholders($body)));
-        $placeholders    = array_map(function ($k) use ($aliases) {return isset($aliases[$k]) ? $aliases[$k] : $k;}, $placeholdersRaw);
+        $placeholders = array_map(function ($k) use ($aliases) {return isset($aliases[$k]) ? $aliases[$k] : $k;}, $placeholdersRaw);
+        
         list($unknown, $missing) = $this->validatePlaceholders($placeholders, $available, $context);
-        if (! empty($unknown) || ! empty($missing)) {
+        if (!empty($unknown) || !empty($missing)) {
             $msg = 'Template invalide; inconnus=[' . implode(',', $unknown) . '], manquants=[' . implode(',', $missing) . ']';
-            $this->logger->error('GDH Email: ' . $msg);
+            $this->logger->error($logPrefix . ': ' . $msg);
             return false;
         }
+        
         $renderedSubject = $this->replacePlaceholders($subject, $context);
-        $renderedBody    = $this->replacePlaceholders($body, $context);
-        $to              = $context['email_lead'];
-        if (! is_email($to)) {
-            $this->logger->error('GDH Email: email client invalide');
-            return false;
-        }
-        $headers = [];
-        $sent    = false;
-        if ($contentType === 'html') {
-            $filter = function () {return 'text/html';};
-            add_filter('wp_mail_content_type', $filter);
-            $htmlBody = $this->buildHtmlBody($renderedBody, $style);
-            $sent = wp_mail($to, $renderedSubject, $htmlBody, $headers);
-            remove_filter('wp_mail_content_type', $filter);
-            if (! $sent) {
-                $plain = wp_strip_all_tags($renderedBody);
-                $sent  = wp_mail($to, $renderedSubject, $plain, $headers);
-            }
-        } else {    
+        $renderedBody = $this->replacePlaceholders($body, $context);
+        
+        // Send HTML email with fallback to plain text
+        $filter = function () {return 'text/html';};
+        add_filter('wp_mail_content_type', $filter);
+        $htmlBody = $this->buildHtmlBody($renderedBody, '');
+        $sent = wp_mail($to, $renderedSubject, $htmlBody, []);
+        remove_filter('wp_mail_content_type', $filter);
+        
+        if (!$sent) {
             $plain = wp_strip_all_tags($renderedBody);
-            $sent  = wp_mail($to, $renderedSubject, $plain, $headers);
+            $sent = wp_mail($to, $renderedSubject, $plain, []);
         }
-        if (! $sent) {
-            $this->logger->error('GDH Email: envoi échoué');
+        
+        if (!$sent) {
+            $this->logger->error($logPrefix . ': envoi échoué');
             return false;
         }
-        $this->logger->info('GDH Email: envoi réussi au client');
+        
+        $this->logger->info($logPrefix . ': envoi réussi');
         return true;
     }
 }

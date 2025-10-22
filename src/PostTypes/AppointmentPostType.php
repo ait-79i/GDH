@@ -2,6 +2,8 @@
 namespace GDH\PostTypes;
 
 use GDH\Services\TwigService;
+use GDH\Services\EmailTemplateService;
+use GDH\Services\Logger;
 
 class AppointmentPostType
 {
@@ -484,8 +486,8 @@ class AppointmentPostType
         }
         
         // Initialize logger and email service
-        $logger = new \GDH\Services\Logger();
-        $artisanEmailService = new \GDH\Services\ArtisanEmailService($logger);
+        $logger = new Logger();
+        $emailService = new EmailTemplateService($logger);
         
         // Prepare form data from post meta
         $formData = [
@@ -496,47 +498,49 @@ class AppointmentPostType
             'address' => get_post_meta($post_id, '_gdh_address', true),
             'postal_code' => get_post_meta($post_id, '_gdh_postal_code', true),
             'city' => get_post_meta($post_id, '_gdh_city', true),
+            'current_post_type' => get_post_meta($post_id, '_gdh_current_post_type', true),
+            'current_post_id' => get_post_meta($post_id, '_gdh_current_post_id', true),
         ];
         
         // Try to send the email
         try {
-            $sent = $artisanEmailService->sendArtisanNotification($post_id, $formData);
+            // Send notification email to receiver
+            $receiverSent = $emailService->sendOnAppointment($post_id, $formData);
             
-            if ($sent) {
+            if ($receiverSent) {
                 // Update email sent status
                 update_post_meta($post_id, '_gdh_email_sent', '1');
                 
-                // Check if client confirmation email is enabled in settings
-                $client_email_enabled = get_option('gdh_enable_client_email', '0') === '1';
+                // Check if client confirmation email is enabled
+                $confirmEnabled = get_option('gdh_email_confirm_enabled', '0') === '1';
                 
-                if ($client_email_enabled) {
-                    // Send confirmation email to the lead (client)
-                    $emailService = new \GDH\Services\EmailTemplateService($logger);
+                if ($confirmEnabled) {
+                    // Send confirmation email to client
                     try {
-                        $clientSent = $emailService->sendOnAppointment($post_id, $formData);
-                        if (!$clientSent) {
+                        $confirmSent = $emailService->sendConfirmationToClient($post_id, $formData);
+                        if (!$confirmSent) {
                             $logger->error("Client confirmation email failed for appointment ID: {$post_id}");
-                            $this->setAdminNotice('warning', 'Email artisan envoyé avec succès, mais l\'email de confirmation au client a échoué.');
+                            $this->setAdminNotice('warning', 'Email destinataire envoyé avec succès, mais l\'email de confirmation au client a échoué.');
                             wp_send_json_success(['reload' => true]);
                         } else {
-                            $logger->info("Client confirmation email sent successfully for appointment ID: {$post_id}");
-                            $this->setAdminNotice('success', 'Emails envoyés avec succès à l\'artisan et au client.');
+                            $logger->info("Both emails sent successfully for appointment ID: {$post_id}");
+                            $this->setAdminNotice('success', 'Emails envoyés avec succès au destinataire et au client.');
                             wp_send_json_success(['reload' => true]);
                         }
                     } catch (\Throwable $e) {
-                        $logger->error('GDH Resend: Client email exception - ' . $e->getMessage());
-                        $this->setAdminNotice('warning', 'Email artisan envoyé avec succès, mais l\'email de confirmation au client a échoué: ' . $e->getMessage());
+                        $logger->error('GDH Resend: Client confirmation exception - ' . $e->getMessage());
+                        $this->setAdminNotice('warning', 'Email destinataire envoyé avec succès, mais l\'email de confirmation au client a échoué: ' . $e->getMessage());
                         wp_send_json_success(['reload' => true]);
                     }
                 } else {
-                    // Client email is disabled, just show success for artisan email
-                    $logger->info("Email resent successfully for appointment ID: {$post_id}");
-                    $this->setAdminNotice('success', 'Email envoyé avec succès à l\'artisan.');
+                    // Client confirmation is disabled, just show success for receiver email
+                    $logger->info("Receiver email resent successfully for appointment ID: {$post_id}");
+                    $this->setAdminNotice('success', 'Email envoyé avec succès au destinataire.');
                     wp_send_json_success(['reload' => true]);
                 }
             } else {
-                $logger->error("Failed to resend email for appointment ID: {$post_id}");
-                $this->setAdminNotice('error', 'Échec de l\'envoi de l\'email. Vérifiez la configuration.');
+                $logger->error("Failed to resend receiver email for appointment ID: {$post_id}");
+                $this->setAdminNotice('error', 'Échec de l\'envoi de l\'email. Vérifiez la configuration du destinataire.');
                 wp_send_json_error(['reload' => true]);
             }
         } catch (\Exception $e) {

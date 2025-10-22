@@ -31,7 +31,7 @@
         '<h3 style="margin:16px 0 8px;">Créneaux proposés</h3>' +
         '{{creneaux_rdv}}' +
         '<p style="margin-top:16px;">Merci de revenir vers le client pour confirmer un créneau.</p>' +
-        '<p>Cordialement,<br>{{nom_destinataire}}</p>'
+        '<p>Cordialement,</p>'
       )
     },
     confirm: {
@@ -48,8 +48,7 @@
         '<li>Téléphone&nbsp;: {{phone}}</li>' +
         '<li>Adresse&nbsp;: {{address}}, {{postal_code}} {{city}}</li>' +
         '</ul>' +
-        '<p>Nous reviendrons vers vous dans les plus brefs délais. Vous pouvez répondre à cet e‑mail si nécessaire.</p>' +
-        '<p>Cordialement,<br>{{nom_destinataire}}</p>'
+        '<p>Cordialement</p>'
       )
     }
   };

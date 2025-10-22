@@ -27,6 +27,11 @@ class AdminController
 
     public function addSettingsSubmenu()
     {
+        // Security: Check user capabilities
+        if (!current_user_can('manage_options')) {
+            return;
+        }
+        
         $parent_slug     = 'edit.php?post_type=gdh_appointment';
         $this->page_hook = add_submenu_page(
             $parent_slug,
@@ -282,17 +287,24 @@ class AdminController
 
     public function ajaxGetMetaKeys()
     {
-        if (! current_user_can('manage_options')) {
+        // Security: Check nonce first
+        if (!check_ajax_referer('gdh_meta_keys', 'nonce', false)) {
+            wp_send_json_error(['message' => 'invalid_nonce'], 403);
+        }
+        
+        // Security: Check user capabilities
+        if (!current_user_can('manage_options')) {
             wp_send_json_error(['message' => 'forbidden'], 403);
         }
-        if (! isset($_POST['nonce']) || ! wp_verify_nonce($_POST['nonce'], 'gdh_meta_keys')) {
-            wp_send_json_error(['message' => 'invalid_nonce'], 400);
-        }
+        
+        // Security: Validate and sanitize input
         $post_type = isset($_POST['post_type']) ? sanitize_key($_POST['post_type']) : '';
-        if (! $post_type) {
-            wp_send_json_error(['message' => 'missing_post_type'], 400);
+        if (!$post_type || !post_type_exists($post_type)) {
+            wp_send_json_error(['message' => 'invalid_post_type'], 400);
         }
+        
         global $wpdb;
+        // Get all meta keys including those starting with underscore
         $keys = $wpdb->get_col(
             $wpdb->prepare(
                 "SELECT DISTINCT pm.meta_key
@@ -301,13 +313,18 @@ class AdminController
                  WHERE p.post_type = %s
                    AND pm.meta_key IS NOT NULL
                    AND pm.meta_key <> ''
-                 ORDER BY pm.meta_key ASC",
+                 ORDER BY pm.meta_key ASC
+                 LIMIT 200",
                 $post_type
             )
         );
-        if (! is_array($keys)) {
+        
+        if (!is_array($keys)) {
             $keys = [];
         }
+        
+        // Security: Sanitize output
+        $keys = array_map('sanitize_key', $keys);
         wp_send_json_success(['meta_keys' => array_values($keys)]);
     }
 
@@ -386,6 +403,9 @@ class AdminController
             'overlay_opacity'     => '0.4',
             'font_family'         => '',
             'font_url'            => '',
+            'title_text'          => 'Prendre rendez-vous',
+            'title_align'         => 'left',
+            'cgv_page_id'         => '',
         ];
 
         $output                        = [];
@@ -439,12 +459,21 @@ class AdminController
 
     public function sanitizeEmailSettings($input)
     {
+        // Security: Check nonce
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gdh_email_settings_group-options')) {
+            wp_die('Security check failed');
+        }
+        
         if (!is_array($input)) {
             return [];
         }
 
-        // Get receiver mode from radio
+        // Security: Validate receiver mode
         $receiver_mode = isset($_POST['receiver_mode']) ? sanitize_key($_POST['receiver_mode']) : 'static';
+        $allowed_modes = ['static', 'dynamic'];
+        if (!in_array($receiver_mode, $allowed_modes, true)) {
+            $receiver_mode = 'static';
+        }
         
         return [
             'static' => [
@@ -454,8 +483,8 @@ class AdminController
             ],
             'dynamic' => [
                 'enabled' => ($receiver_mode === 'dynamic') ? '1' : '0',
-                'email' => isset($input['dynamic']['email']) ? sanitize_text_field($input['dynamic']['email']) : '',
-                'name' => isset($input['dynamic']['name']) ? sanitize_text_field($input['dynamic']['name']) : '',
+                'email' => isset($input['dynamic']['email']) ? sanitize_key($input['dynamic']['email']) : '',
+                'name' => isset($input['dynamic']['name']) ? sanitize_key($input['dynamic']['name']) : '',
                 'post_type' => isset($input['dynamic']['post_type']) ? sanitize_key($input['dynamic']['post_type']) : '',
             ],
         ];
