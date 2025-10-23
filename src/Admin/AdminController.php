@@ -1,9 +1,9 @@
 <?php
-namespace GDH\Admin;
+namespace GDHRDV\Admin;
 
-use GDH\Services\EmailTemplateService;
-use GDH\Services\Logger;
-use GDH\Services\TwigService;
+use GDHRDV\Services\EmailTemplateService;
+use GDHRDV\Services\Logger;
+use GDHRDV\Services\TwigService;
 
 class AdminController
 {
@@ -22,7 +22,6 @@ class AdminController
         add_action('admin_init', [$this, 'registerSettings']);
         add_action('admin_enqueue_scripts', [$this, 'enqueueAdminAssets']);
         add_action('admin_init', [$this, 'registerEmailSettings']);
-        add_action('wp_ajax_gdh_get_meta_keys', [$this, 'ajaxGetMetaKeys']);
     }
 
     public function addSettingsSubmenu()
@@ -32,52 +31,52 @@ class AdminController
             return;
         }
         
-        $parent_slug     = 'edit.php?post_type=gdh_appointment';
+        $parent_slug     = 'edit.php?post_type=gdhrdv_appointment';
         $this->page_hook = add_submenu_page(
             $parent_slug,
             'Apparence de la popup',
             'Apparence de la popup',
             'manage_options',
-            'gdh_rdv_design',
+            'gdhrdv_design',
             [$this, 'renderSettingsPage']
         );
     }
 
     public function addEmailSettingsSubmenu()
     {
-        $parent_slug           = 'edit.php?post_type=gdh_appointment';
+        $parent_slug           = 'edit.php?post_type=gdhrdv_appointment';
         $this->email_page_hook = add_submenu_page(
             $parent_slug,
             'Paramètres des e-mails',
             'Paramètres des e-mails',
             'manage_options',
-            'gdh_email_settings',
+            'gdhrdv_email_settings',
             [$this, 'renderEmailSettingsPage']
         );
     }
 
     public function registerSettings()
     {
-        register_setting('gdh_rdv_design_settings_group', 'gdh_rdv_design_settings', [
+        register_setting('gdhrdv_design_settings_group', 'gdhrdv_design_settings', [
             'sanitize_callback' => [$this, 'sanitizeSettings'],
         ]);
 
-        add_settings_section('gdh_rdv_design_section', '', '__return_false', 'gdh_rdv_design_page');
+        add_settings_section('gdhrdv_design_section', '', '__return_false', 'gdhrdv_design_page');
         
-        add_settings_field('primary_color', 'Couleur primaire', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color', 'default' => '#006847']);
-        add_settings_field('primary_color_light', 'Couleur primaire (clair)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color_light', 'default' => '#00855e']);
-        add_settings_field('primary_color_dark', 'Couleur primaire (foncé)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'primary_color_dark', 'default' => '#004d35']);
-        add_settings_field('accent_color', 'Couleur accent', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'accent_color', 'default' => '#FFB81c']);
-        add_settings_field('accent_color_dark', 'Couleur accent (foncé)', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'accent_color_dark', 'default' => '#F5A623']);
-        add_settings_field('buttons_text_color', 'Couleur texte des boutons', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'buttons_text_color', 'default' => '#000000']);
-        add_settings_field('overlay_color', 'Couleur d\'overlay', [$this, 'fieldColor'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'overlay_color', 'default' => '#000000']);
-        add_settings_field('overlay_opacity', 'Opacité overlay (0-1)', [$this, 'fieldOpacity'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'overlay_opacity', 'default' => '0.4']);
+        add_settings_field('primary_color', 'Couleur primaire', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'primary_color', 'default' => '#006847']);
+        add_settings_field('primary_color_light', 'Couleur primaire (clair)', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'primary_color_light', 'default' => '#00855e']);
+        add_settings_field('primary_color_dark', 'Couleur primaire (foncé)', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'primary_color_dark', 'default' => '#004d35']);
+        add_settings_field('accent_color', 'Couleur accent', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'accent_color', 'default' => '#FFB81c']);
+        add_settings_field('accent_color_dark', 'Couleur accent (foncé)', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'accent_color_dark', 'default' => '#F5A623']);
+        add_settings_field('buttons_text_color', 'Couleur texte des boutons', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'buttons_text_color', 'default' => '#000000']);
+        add_settings_field('overlay_color', 'Couleur d\'overlay', [$this, 'fieldColor'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'overlay_color', 'default' => '#000000']);
+        add_settings_field('overlay_opacity', 'Opacité overlay (0-1)', [$this, 'fieldOpacity'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'overlay_opacity', 'default' => '0.4']);
         add_settings_field(
             'font_family',
             'Police',
             [$this, 'fieldSelect'],
-            'gdh_rdv_design_page',
-            'gdh_rdv_design_section',
+            'gdhrdv_design_page',
+            'gdhrdv_design_section',
             [
                 'key'     => 'font_family',
                 'default' => '',
@@ -98,9 +97,9 @@ class AdminController
                 ],
             ]
         );
-        add_settings_field('font_url', 'URL de police (facultatif)', [$this, 'fieldText'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'font_url', 'default' => '']);
-        add_settings_field('title_text', 'Titre de la popup', [$this, 'fieldText'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'title_text', 'default' => 'Prendre rendez-vous']);
-        add_settings_field('title_align', 'Alignement du titre', [$this, 'fieldSelect'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'title_align', 'default' => 'left', 'options' => ['left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite']]);
+        add_settings_field('font_url', 'URL de police (facultatif)', [$this, 'fieldText'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'font_url', 'default' => '']);
+        add_settings_field('title_text', 'Titre de la popup', [$this, 'fieldText'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'title_text', 'default' => 'Prendre rendez-vous']);
+        add_settings_field('title_align', 'Alignement du titre', [$this, 'fieldSelect'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'title_align', 'default' => 'left', 'options' => ['left' => 'Gauche', 'center' => 'Centre', 'right' => 'Droite']]);
         $pages = get_posts([
             'post_type'        => 'page',
             'post_status'      => 'publish',
@@ -113,17 +112,17 @@ class AdminController
         foreach ($pages as $p) {
             $page_options[$p->ID] = get_the_title($p);
         }
-        add_settings_field('cgv_page_id', 'CGV', [$this, 'fieldSelect'], 'gdh_rdv_design_page', 'gdh_rdv_design_section', ['key' => 'cgv_page_id', 'default' => '', 'options' => $page_options]);
+        add_settings_field('cgv_page_id', 'CGV', [$this, 'fieldSelect'], 'gdhrdv_design_page', 'gdhrdv_design_section', ['key' => 'cgv_page_id', 'default' => '', 'options' => $page_options]);
     }
 
     public function registerEmailSettings()
     {
-        register_setting('gdh_email_settings_group', 'gdh_email_subject');
-        register_setting('gdh_email_settings_group', 'gdh_email_body');
-        register_setting('gdh_email_settings_group', 'gdh_email_confirm_enabled');
-        register_setting('gdh_email_settings_group', 'gdh_email_confirm_subject');
-        register_setting('gdh_email_settings_group', 'gdh_email_confirm_body');
-        register_setting('gdh_email_settings_group', 'gdh_receivers', [
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_email_subject');
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_email_body');
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_email_confirm_enabled');
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_email_confirm_subject');
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_email_confirm_body');
+        register_setting('gdhrdv_email_settings_group', 'gdhrdv_receivers', [
             'sanitize_callback' => [$this, 'sanitizeEmailSettings'],
         ]);
     }
@@ -138,30 +137,31 @@ class AdminController
             wp_enqueue_style('wp-editor');
             wp_enqueue_editor();
             // Enqueue scoped admin stylesheet for Email Settings page only
-            $css_path = GDH_PLUGIN_PATH . 'assets/css/admin.css';
+            $css_path = GDHRDV_PLUGIN_PATH . 'assets/css/admin.css';
             $css_ver  = file_exists($css_path) ? filemtime($css_path) : null;
             wp_enqueue_style(
-                'gdh-admin-css',
-                GDH_PLUGIN_URL . 'assets/css/admin.css',
+                'gdhrdv-admin-css',
+                GDHRDV_PLUGIN_URL . 'assets/css/admin.css',
                 ['wp-editor'],
                 $css_ver
             );
             // Enqueue page-specific JS
-            $js_path = GDH_PLUGIN_PATH . 'assets/js/mail-setting.js';
+            $js_path = GDHRDV_PLUGIN_PATH . 'assets/js/mail-setting.js';
             $js_ver  = file_exists($js_path) ? filemtime($js_path) : null;
             wp_enqueue_script(
-                'gdh-mail-settings',
-                GDH_PLUGIN_URL . 'assets/js/mail-setting.js',
+                'gdhrdv-mail-settings',
+                GDHRDV_PLUGIN_URL . 'assets/js/mail-setting.js',
                 ['jquery', 'wp-editor'],
                 $js_ver,
                 true
             );
             wp_localize_script(
-                'gdh-mail-settings',
-                'gdhMailSettings',
+                'gdhrdv-mail-settings',
+                'gdhrdvMailSettings',
                 [
                     'ajax_url' => admin_url('admin-ajax.php'),
-                    'nonce'    => wp_create_nonce('gdh_meta_keys'),
+                    'nonce'    => wp_create_nonce('gdhrdv_meta_keys'),
+                    'debug'    => (defined('WP_DEBUG') && WP_DEBUG),
                 ]
             );
         }
@@ -174,11 +174,11 @@ class AdminController
         }
 
         ob_start();
-        settings_fields('gdh_rdv_design_settings_group');
+        settings_fields('gdhrdv_design_settings_group');
         $settings_fields_html = ob_get_clean();
 
         ob_start();
-        do_settings_sections('gdh_rdv_design_page');
+        do_settings_sections('gdhrdv_design_page');
         $sections_html = ob_get_clean();
 
         ob_start();
@@ -201,16 +201,16 @@ class AdminController
         }
 
         $vars          = $this->emailService->getAvailableVariables();
-        $subject_value = (string) get_option('gdh_email_subject', '');
-        $body_initial  = (string) get_option('gdh_email_body', '');
+        $subject_value = (string) get_option('gdhrdv_email_subject', '');
+        $body_initial  = (string) get_option('gdhrdv_email_body', '');
 
         // Confirmation email settings (stored as options)
-        $confirm_enabled       = get_option('gdh_email_confirm_enabled', '0') === '1';
-        $confirm_subject_value = (string) get_option('gdh_email_confirm_subject', '');
-        $confirm_body_initial  = (string) get_option('gdh_email_confirm_body', '');
+        $confirm_enabled       = get_option('gdhrdv_email_confirm_enabled', '0') === '1';
+        $confirm_subject_value = (string) get_option('gdhrdv_email_confirm_subject', '');
+        $confirm_body_initial  = (string) get_option('gdhrdv_email_confirm_body', '');
 
         // Receiver settings (static and dynamic)
-        $receivers_opt       = get_option('gdh_receivers', []);
+        $receivers_opt       = get_option('gdhrdv_receivers', []);
         $recv_static_enabled = isset($receivers_opt['static']['enabled']) && $receivers_opt['static']['enabled'] === '1';
         $recv_static_email   = isset($receivers_opt['static']['email']) ? (string) $receivers_opt['static']['email'] : get_option('admin_email');
         $recv_static_name    = isset($receivers_opt['static']['name']) ? (string) $receivers_opt['static']['name'] : get_bloginfo('name');
@@ -233,13 +233,13 @@ class AdminController
 
         // Settings fields HTML
         ob_start();
-        settings_fields('gdh_email_settings_group');
+        settings_fields('gdhrdv_email_settings_group');
         $settings_fields_html = ob_get_clean();
 
         // Editor HTML capture with initial content (patch current template)
         ob_start();
-        wp_editor($body_initial, 'gdh_body', [
-            'textarea_name' => 'gdh_email_body',
+        wp_editor($body_initial, 'gdhrdv_body', [
+            'textarea_name' => 'gdhrdv_email_body',
             'media_buttons' => false,
             'textarea_rows' => 16,
             'editor_height' => 380,
@@ -248,8 +248,8 @@ class AdminController
 
         // Confirmation body editor
         ob_start();
-        wp_editor($confirm_body_initial, 'gdh_confirm_body', [
-            'textarea_name' => 'gdh_email_confirm_body',
+        wp_editor($confirm_body_initial, 'gdhrdv_confirm_body', [
+            'textarea_name' => 'gdhrdv_email_confirm_body',
             'media_buttons' => false,
             'textarea_rows' => 14,
             'editor_height' => 340,
@@ -285,64 +285,23 @@ class AdminController
 
 
 
-    public function ajaxGetMetaKeys()
-    {
-        // Security: Check nonce first
-        if (!check_ajax_referer('gdh_meta_keys', 'nonce', false)) {
-            wp_send_json_error(['message' => 'invalid_nonce'], 403);
-        }
-        
-        // Security: Check user capabilities
-        if (!current_user_can('manage_options')) {
-            wp_send_json_error(['message' => 'forbidden'], 403);
-        }
-        
-        // Security: Validate and sanitize input
-        $post_type = isset($_POST['post_type']) ? sanitize_key($_POST['post_type']) : '';
-        if (!$post_type || !post_type_exists($post_type)) {
-            wp_send_json_error(['message' => 'invalid_post_type'], 400);
-        }
-        
-        global $wpdb;
-        // Get all meta keys including those starting with underscore
-        $keys = $wpdb->get_col(
-            $wpdb->prepare(
-                "SELECT DISTINCT pm.meta_key
-                 FROM {$wpdb->postmeta} pm
-                 INNER JOIN {$wpdb->posts} p ON p.ID = pm.post_id
-                 WHERE p.post_type = %s
-                   AND pm.meta_key IS NOT NULL
-                   AND pm.meta_key <> ''
-                 ORDER BY pm.meta_key ASC
-                 LIMIT 200",
-                $post_type
-            )
-        );
-        
-        if (!is_array($keys)) {
-            $keys = [];
-        }
-        
-        // Security: Sanitize output
-        $keys = array_map('sanitize_key', $keys);
-        wp_send_json_success(['meta_keys' => array_values($keys)]);
-    }
+
 
     public function removeEmailTemplateSubmenus()
     {
         // Remove the CPT submenus under Rendez-vous
-        remove_submenu_page('edit.php?post_type=gdh_appointment', 'edit.php?post_type=gdh_email_template');
-        remove_submenu_page('edit.php?post_type=gdh_appointment', 'post-new.php?post_type=gdh_email_template');
+        remove_submenu_page('edit.php?post_type=gdhrdv_appointment', 'edit.php?post_type=gdhrdv_email_template');
+        remove_submenu_page('edit.php?post_type=gdhrdv_appointment', 'post-new.php?post_type=gdhrdv_email_template');
     }
 
     public function fieldColor($args)
     {
-        $options = get_option('gdh_rdv_design_settings', []);
+        $options = get_option('gdhrdv_design_settings', []);
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
         echo $this->twig->render('admin/appointment/fields/color.twig', [
-            'name'    => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'name'    => 'gdhrdv_design_settings[' . esc_attr($key) . ']',
             'value'   => esc_attr($value),
             'default' => esc_attr($default),
         ]);
@@ -350,26 +309,26 @@ class AdminController
 
     public function fieldOpacity($args)
     {
-        $options = get_option('gdh_rdv_design_settings', []);
+        $options = get_option('gdhrdv_design_settings', []);
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
         echo $this->twig->render('admin/appointment/fields/opacity.twig', [
-            'name'  => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'name'  => 'gdhrdv_design_settings[' . esc_attr($key) . ']',
             'value' => esc_attr($value),
         ]);
     }
 
     public function fieldText($args)
     {
-        $options     = get_option('gdh_rdv_design_settings', []);
+        $options     = get_option('gdhrdv_design_settings', []);
         $key         = $args['key'];
         $default     = $args['default'];
         $value       = isset($options[$key]) ? $options[$key] : $default;
         $type        = ($key === 'font_url') ? 'url' : 'text';
         $placeholder = ($key === 'font_url') ? 'https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap' : '';
         echo $this->twig->render('admin/appointment/fields/text.twig', [
-            'name'        => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'name'        => 'gdhrdv_design_settings[' . esc_attr($key) . ']',
             'value'       => esc_attr($value),
             'placeholder' => esc_attr($placeholder),
             'type'        => esc_attr($type),
@@ -378,13 +337,13 @@ class AdminController
 
     public function fieldSelect($args)
     {
-        $options = get_option('gdh_rdv_design_settings', []);
+        $options = get_option('gdhrdv_design_settings', []);
         $key     = $args['key'];
         $default = $args['default'];
         $value   = isset($options[$key]) ? $options[$key] : $default;
         $opts    = isset($args['options']) && is_array($args['options']) ? $args['options'] : [];
         echo $this->twig->render('admin/appointment/fields/select.twig', [
-            'name'    => 'gdh_rdv_design_settings[' . esc_attr($key) . ']',
+            'name'    => 'gdhrdv_design_settings[' . esc_attr($key) . ']',
             'value'   => $value,
             'options' => $opts,
         ]);
@@ -460,7 +419,7 @@ class AdminController
     public function sanitizeEmailSettings($input)
     {
         // Security: Check nonce
-        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gdh_email_settings_group-options')) {
+        if (!isset($_POST['_wpnonce']) || !wp_verify_nonce($_POST['_wpnonce'], 'gdhrdv_email_settings_group-options')) {
             wp_die('Security check failed');
         }
         

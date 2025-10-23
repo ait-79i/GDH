@@ -1,5 +1,5 @@
 <?php
-namespace GDH\Services;
+namespace GDHRDV\Services;
 
 class EmailTemplateService
 {
@@ -29,14 +29,14 @@ class EmailTemplateService
 
     private function buildContextFromData($post_id, array $formData, $isHtml = false, $recipientInfo = null)
     {
-        $first          = isset($formData['first_name']) ? $formData['first_name'] : get_post_meta($post_id, '_gdh_first_name', true);
-        $last           = isset($formData['last_name']) ? $formData['last_name'] : get_post_meta($post_id, '_gdh_last_name', true);
-        $email          = isset($formData['email']) ? $formData['email'] : get_post_meta($post_id, '_gdh_email', true);
-        $phone          = isset($formData['phone']) ? $formData['phone'] : get_post_meta($post_id, '_gdh_phone', true);
-        $address        = isset($formData['address']) ? $formData['address'] : get_post_meta($post_id, '_gdh_address', true);
-        $postal         = isset($formData['postal_code']) ? $formData['postal_code'] : get_post_meta($post_id, '_gdh_postal_code', true);
-        $city           = isset($formData['city']) ? $formData['city'] : get_post_meta($post_id, '_gdh_city', true);
-        $slots          = get_post_meta($post_id, '_gdh_slots', true);
+        $first          = isset($formData['first_name']) ? $formData['first_name'] : get_post_meta($post_id, '_gdhrdv_first_name', true);
+        $last           = isset($formData['last_name']) ? $formData['last_name'] : get_post_meta($post_id, '_gdhrdv_last_name', true);
+        $email          = isset($formData['email']) ? $formData['email'] : get_post_meta($post_id, '_gdhrdv_email', true);
+        $phone          = isset($formData['phone']) ? $formData['phone'] : get_post_meta($post_id, '_gdhrdv_phone', true);
+        $address        = isset($formData['address']) ? $formData['address'] : get_post_meta($post_id, '_gdhrdv_address', true);
+        $postal         = isset($formData['postal_code']) ? $formData['postal_code'] : get_post_meta($post_id, '_gdhrdv_postal_code', true);
+        $city           = isset($formData['city']) ? $formData['city'] : get_post_meta($post_id, '_gdhrdv_city', true);
+        $slots          = get_post_meta($post_id, '_gdhrdv_slots', true);
         $aptDate        = '';
         $slotsFormatted = '';
         if (is_array($slots) && ! empty($slots)) {
@@ -73,11 +73,11 @@ class EmailTemplateService
             if (! empty($all)) {
                 if ($isHtml) {
                     if (count($all) === 1) {
-                        $slotsFormatted = '<div class="gdh-slot">' . esc_html($all[0]) . '</div>';
+                        $slotsFormatted = '<div class="gdhrdv-slot">' . esc_html($all[0]) . '</div>';
                     } else {
                         $items = '';
                         foreach ($all as $it) {$items .= '<li>' . esc_html($it) . '</li>';}
-                        $slotsFormatted = '<ul class="gdh-slots">' . $items . '</ul>';
+                        $slotsFormatted = '<ul class="gdhrdv-slots">' . $items . '</ul>';
                     }
                 } else {
                     if (count($all) === 1) {
@@ -160,7 +160,7 @@ class EmailTemplateService
     {
         $recipientInfo = RecipientService::getSecureRecipientInfo($formData);
         if (!$recipientInfo) {
-            $this->logger->error('GDH Email: impossible de résoudre les informations du destinataire');
+            $this->logger->error('Email: Impossible de résoudre les informations du destinataire');
             return false;
         }
         
@@ -168,9 +168,9 @@ class EmailTemplateService
             $post_id, 
             $formData, 
             $recipientInfo['email'], 
-            'gdh_email_subject', 
-            'gdh_email_body',
-            'GDH Email',
+            'gdhrdv_email_subject', 
+            'gdhrdv_email_body',
+            'GDHRDV Email',
             $recipientInfo
         );
     }
@@ -182,7 +182,7 @@ class EmailTemplateService
         $clientEmail = $context['email_lead'];
         
         if (!is_email($clientEmail)) {
-            $this->logger->error('GDH Email Confirmation: email client invalide');
+            $this->logger->error('Email: Adresse email client invalide');
             return false;
         }
         
@@ -190,15 +190,15 @@ class EmailTemplateService
             $post_id, 
             $formData, 
             $clientEmail, 
-            'gdh_email_confirm_subject', 
-            'gdh_email_confirm_body',
-            'GDH Email Confirmation',
+            'gdhrdv_email_confirm_subject', 
+            'gdhrdv_email_confirm_body',
+            'GDHRDV Email Confirmation',
             $recipientInfo
         );
     }
     
     /**
-     * Centralized email sending method to avoid code duplication
+     * Méthode centralisée d'envoi d'email pour éviter la duplication de code
      */
     private function sendEmail($post_id, array $formData, $to, $subjectOption, $bodyOption, $logPrefix, $recipientInfo = null)
     {
@@ -206,7 +206,7 @@ class EmailTemplateService
         $body = (string) get_option($bodyOption, '');
         
         if ($subject === '' || $body === '') {
-            $this->logger->error($logPrefix . ': sujet ou corps du modèle manquant');
+            $this->logger->error('Email: Sujet ou corps du modèle manquant');
             return false;
         }
         
@@ -218,15 +218,14 @@ class EmailTemplateService
         
         list($unknown, $missing) = $this->validatePlaceholders($placeholders, $available, $context);
         if (!empty($unknown) || !empty($missing)) {
-            $msg = 'Template invalide; inconnus=[' . implode(',', $unknown) . '], manquants=[' . implode(',', $missing) . ']';
-            $this->logger->error($logPrefix . ': ' . $msg);
+            $this->logger->error('Email: Variables de modèle invalides');
             return false;
         }
         
         $renderedSubject = $this->replacePlaceholders($subject, $context);
         $renderedBody = $this->replacePlaceholders($body, $context);
         
-        // Send HTML email with fallback to plain text
+        // Envoi email HTML avec fallback texte brut
         $filter = function () {return 'text/html';};
         add_filter('wp_mail_content_type', $filter);
         $htmlBody = $this->buildHtmlBody($renderedBody, '');
@@ -239,11 +238,10 @@ class EmailTemplateService
         }
         
         if (!$sent) {
-            $this->logger->error($logPrefix . ': envoi échoué');
+            $this->logger->error('Email: Échec de l\'envoi');
             return false;
         }
         
-        $this->logger->info($logPrefix . ': envoi réussi');
         return true;
     }
 }

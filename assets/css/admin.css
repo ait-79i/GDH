@@ -1,41 +1,41 @@
-/* GDH Admin Styles: Paramètres des e-mailss */
-.gdh-email-settings .postbox {
+/* gdhrdv Admin Styles: Paramètres des e-mailss */
+.gdhrdv-email-settings .postbox {
     margin-bottom: 20px;
 }
 
-.gdh-email-settings .postbox .inside {
+.gdhrdv-email-settings .postbox .inside {
     margin: 0;
     padding: 20px;
 }
 
 /* Grid layouts */
-.gdh-email-settings .gdh-recipients-grid,
-.gdh-email-settings .gdh-templates-grid {
+.gdhrdv-email-settings .gdhrdv-recipients-grid,
+.gdhrdv-email-settings .gdhrdv-templates-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 30px;
 }
 
-.gdh-email-settings .gdh-recipient-option,
-.gdh-email-settings .gdh-template-section {
+.gdhrdv-email-settings .gdhrdv-recipient-option,
+.gdhrdv-email-settings .gdhrdv-template-section {
     min-width: 0;
 }
 
 /* Vertical divider */
-.gdh-email-settings .gdh-recipient-option:last-child,
-.gdh-email-settings .gdh-template-section:last-child {
+.gdhrdv-email-settings .gdhrdv-recipient-option:last-child,
+.gdhrdv-email-settings .gdhrdv-template-section:last-child {
     border-left: 1px solid #dcdcde;
     padding-left: 30px;
 }
 
 /* Section headers */
-.gdh-email-settings h3 {
+.gdhrdv-email-settings h3 {
     margin: 0 0 8px 0;
     font-size: 14px;
     font-weight: 600;
 }
 
-.gdh-email-settings .description {
+.gdhrdv-email-settings .description {
     margin: 0 0 15px 0;
     font-style: italic;
     color: #646970;
@@ -43,35 +43,35 @@
 }
 
 /* Fields wrapper */
-.gdh-email-settings .gdh-fields-wrap {
+.gdhrdv-email-settings .gdhrdv-fields-wrap {
     margin-top: 15px;
 }
 
-.gdh-email-settings .gdh-field {
+.gdhrdv-email-settings .gdhrdv-field {
     margin-bottom: 15px;
 }
 
-.gdh-email-settings .gdh-field label {
+.gdhrdv-email-settings .gdhrdv-field label {
     display: block;
     margin-bottom: 5px;
     font-weight: 600;
 }
 
-.gdh-email-settings .gdh-field input,
-.gdh-email-settings .gdh-field select {
+.gdhrdv-email-settings .gdhrdv-field input,
+.gdhrdv-email-settings .gdhrdv-field select {
     width: 100%;
     max-width: 100%;
 }
 
-.gdh-email-settings .gdh-muted {
+.gdhrdv-email-settings .gdhrdv-muted {
     opacity: .5;
 }
 
-.gdh-email-settings .gdh-pe-none {
+.gdhrdv-email-settings .gdhrdv-pe-none {
     pointer-events: none;
 }
 
-.gdh-email-settings .gdh-chip {
+.gdhrdv-email-settings .gdhrdv-chip {
     display: inline-block;
     background: transparent;
     border: 1px solid #2271b1;
@@ -84,51 +84,51 @@
     user-select: none;
 }
 
-.gdh-email-settings .gdh-chip:focus {
+.gdhrdv-email-settings .gdhrdv-chip:focus {
     outline: 2px solid #2271b1;
     outline-offset: 1px;
 }
 
-.gdh-email-settings .gdh-label {
+.gdhrdv-email-settings .gdhrdv-label {
     display: block;
     margin: 0 0 12px 0;
     font-weight: 600;
 }
 
-.gdh-email-settings .gdh-label input[type="radio"] {
+.gdhrdv-email-settings .gdhrdv-label input[type="radio"] {
     margin-right: 6px;
 }
 
-.gdh-email-settings .gdh-section-title {
+.gdhrdv-email-settings .gdhrdv-section-title {
     margin: 0 0 10px;
     font-size: 16px;
 }
 
 /* Make inputs and editors span full column width */
-.gdh-email-settings .gdh-two-col input.regular-text {
+.gdhrdv-email-settings .gdhrdv-two-col input.regular-text {
     width: 100%;
     max-width: 100%;
 }
 
-.gdh-email-settings .gdh-two-col .wp-editor-wrap,
-.gdh-email-settings .gdh-two-col .wp-editor-container {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-wrap,
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-container {
     max-width: 100%;
 }
 
-.gdh-email-settings .gdh-two-col .mce-tinymce {
+.gdhrdv-email-settings .gdhrdv-two-col .mce-tinymce {
     width: 100% !important;
 }
 
-.gdh-email-settings .gdh-two-col .wp-editor-area {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-area {
     width: 100%;
 }
 
 /* Ensure content cells are wider than labels in nested tables */
-.gdh-email-settings .gdh-two-col .form-table {
+.gdhrdv-email-settings .gdhrdv-two-col .form-table {
     width: 100%;
 }
 
-.gdh-email-settings .gdh-two-col .form-table>tbody>tr>th {
+.gdhrdv-email-settings .gdhrdv-two-col .form-table>tbody>tr>th {
     width: 18%;
     min-width: 120px;
     vertical-align: top;
@@ -136,180 +136,180 @@
     white-space: nowrap;
 }
 
-.gdh-email-settings .gdh-two-col .form-table>tbody>tr>td {
+.gdhrdv-email-settings .gdhrdv-two-col .form-table>tbody>tr>td {
     width: 82%;
 }
 
 /* Spacing between rows inside section tables */
-.gdh-email-settings .gdh-inner-table {
+.gdhrdv-email-settings .gdhrdv-inner-table {
     border-collapse: separate;
     border-spacing: 0 8px;
     margin-top: 12px;
 }
 
 /* Wrapper spacing */
-.gdh-email-settings #gdh_recv_static_wrap,
-.gdh-email-settings #gdh_recv_dyn_wrap {
+.gdhrdv-email-settings #gdhrdv_recv_static_wrap,
+.gdhrdv-email-settings #gdhrdv_recv_dyn_wrap {
     margin-top: 12px;
 }
 
 /* Remove gap between Visuel/Code tabs and the editor */
-.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-tools,
-.gdh-email-settings .wp-editor-wrap .wp-editor-tools {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-wrap .wp-editor-tools,
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tools {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
 }
 
-.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-tabs,
-.gdh-email-settings .wp-editor-wrap .wp-editor-tabs {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-wrap .wp-editor-tabs,
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tabs {
     margin-bottom: 0 !important;
 }
 
-.gdh-email-settings .gdh-two-col .wp-editor-wrap .wp-editor-container,
-.gdh-email-settings .wp-editor-wrap .wp-editor-container {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-wrap .wp-editor-container,
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-container {
     margin-top: 0 !important;
     border-top: 0 !important;
 }
 
-.gdh-email-settings .gdh-two-col .mce-tinymce,
-.gdh-email-settings .wp-editor-wrap .mce-tinymce {
+.gdhrdv-email-settings .gdhrdv-two-col .mce-tinymce,
+.gdhrdv-email-settings .wp-editor-wrap .mce-tinymce {
     margin-top: 0 !important;
     border-top: 0 !important;
 }
 
-.gdh-email-settings .gdh-two-col .quicktags-toolbar,
-.gdh-email-settings .wp-editor-wrap .quicktags-toolbar {
+.gdhrdv-email-settings .gdhrdv-two-col .quicktags-toolbar,
+.gdhrdv-email-settings .wp-editor-wrap .quicktags-toolbar {
     margin-bottom: 0 !important;
     border-bottom: 0 !important;
 }
 
 /* Tighten tabs and remove any residual borders/margins */
-.gdh-email-settings .wp-editor-wrap .wp-editor-tools {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tools {
     border-bottom: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-switch-editor {
+.gdhrdv-email-settings .wp-editor-wrap .wp-switch-editor {
     margin: 0 !important;
     border: 0 !important;
     box-shadow: none !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tabs .wp-switch-editor {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tabs .wp-switch-editor {
     margin: 0 !important;
 }
 
 /* Also normalize WP editor internal spacing */
-.gdh-email-settings .wp-editor-wrap .wp-media-buttons {
+.gdhrdv-email-settings .wp-editor-wrap .wp-media-buttons {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tabs {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tabs {
     padding-bottom: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tabs+.wp-editor-container {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tabs+.wp-editor-container {
     margin-top: -10px !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tools+.wp-editor-container {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tools+.wp-editor-container {
     margin-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .mce-toolbar-grp {
-    margin-top: 0 !important;
-    border-top: 0 !important;
-}
-
-.gdh-email-settings .wp-editor-wrap .mce-top-part {
+.gdhrdv-email-settings .wp-editor-wrap .mce-toolbar-grp {
     margin-top: 0 !important;
     border-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-container .wp-editor-area {
+.gdhrdv-email-settings .wp-editor-wrap .mce-top-part {
+    margin-top: 0 !important;
+    border-top: 0 !important;
+}
+
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-container .wp-editor-area {
     padding-top: 0 !important;
     margin-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .mce-panel {
+.gdhrdv-email-settings .wp-editor-wrap .mce-panel {
     border-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .mce-container-body {
+.gdhrdv-email-settings .wp-editor-wrap .mce-container-body {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-container textarea.wp-editor-area {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-container textarea.wp-editor-area {
     margin-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tools::after {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tools::after {
     display: none !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-area {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-area {
     margin-top: 0 !important;
     padding-top: 0 !important;
 }
 
 /* Collapse any hairline between tabs and editor */
-.gdh-email-settings .wp-editor-wrap .wp-editor-container {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-container {
     margin-top: -6px !important;
     padding-top: 0 !important;
 }
 
-.gdh-email-settings .wp-editor-wrap .wp-editor-tabs::after {
+.gdhrdv-email-settings .wp-editor-wrap .wp-editor-tabs::after {
     display: none !important;
 }
 
-.gdh-email-settings .gdh-two-col .wp-editor-wrap {
+.gdhrdv-email-settings .gdhrdv-two-col .wp-editor-wrap {
     margin-top: -25px !important;
     padding-top: 0 !important;
 }
 
 /* Ensure chips bar doesn't add extra spacing in this layout */
-.gdh-email-settings .gdh-two-col .gdh-varbar {
+.gdhrdv-email-settings .gdhrdv-two-col .gdhrdv-varbar {
     margin-bottom: -4px;
 }
 
 /* Confirmation editor specific hard overrides */
-.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tools {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .wp-editor-tools {
     margin-bottom: 0 !important;
     padding-bottom: 0 !important;
     border-bottom: 0 !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tabs {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .wp-editor-tabs {
     margin-bottom: 0 !important;
     border-bottom: 0 !important;
     box-shadow: none !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-tabs::after {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .wp-editor-tabs::after {
     display: none !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .wp-editor-container {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .wp-editor-container {
     margin-top: 0 !important;
     border-top: 0 !important;
     padding-top: 0 !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-tinymce {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .mce-tinymce {
     margin-top: 0 !important;
     border-top: 0 !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-top-part,
-.gdh-email-settings #wp-gdh_confirm_body-wrap .mce-toolbar-grp {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .mce-top-part,
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .mce-toolbar-grp {
     margin-top: 0 !important;
     border-top: 0 !important;
 }
 
-.gdh-email-settings #wp-gdh_confirm_body-wrap .quicktags-toolbar {
+.gdhrdv-email-settings #wp-gdhrdv_confirm_body-wrap .quicktags-toolbar {
     margin-bottom: 0 !important;
     border-bottom: 0 !important;
 }

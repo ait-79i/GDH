@@ -1,5 +1,5 @@
 {
-  "name": "gdh-plugin/wordpress-plugin",
+  "name": "gdhrdv-plugin/wordpress-plugin",
   "description": "Plugin WordPress pour la prise de rendez-vous en ligne via un formulaire multi-étapes dans une popup.",
   "type": "wordpress-plugin",
   "require": {
@@ -8,7 +8,7 @@
   },
   "autoload": {
     "psr-4": {
-      "GDH\\": "src/"
+      "GDHRDV\\": "src/"
     }
   }
 }

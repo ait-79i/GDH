@@ -1,28 +1,28 @@
 <style>
-	.gdh-slots-list {
+	.gdhrdv-slots-list {
 		list-style: none;
 		padding: 0;
 		margin: 0;
 	}
-	.gdh-slot-item {
+	.gdhrdv-slot-item {
 		padding: 12px;
 		margin-bottom: 10px;
 		background: #f9f9f9;
 		border-left: 4px solid #2271b1;
 		border-radius: 4px;
 	}
-	.gdh-slot-item strong {
+	.gdhrdv-slot-item strong {
 		display: block;
 		margin-bottom: 5px;
 		color: #2271b1;
 	}
-	.gdh-slot-times {
+	.gdhrdv-slot-times {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 8px;
 		margin-top: 8px;
 	}
-	.gdh-slot-time-badge {
+	.gdhrdv-slot-time-badge {
 		display: inline-block;
 		padding: 4px 10px;
 		background: #2271b1;
@@ -30,7 +30,7 @@
 		border-radius: 3px;
 		font-size: 12px;
 	}
-	.gdh-slot-all-day {
+	.gdhrdv-slot-all-day {
 		display: inline-block;
 		padding: 4px 10px;
 		background: #00a32a;
@@ -44,21 +44,21 @@
 {% if slots is empty %}
 	<p>Aucun créneau disponible.</p>
 {% else %}
-	<ul class="gdh-slots-list">
+	<ul class="gdhrdv-slots-list">
 		{% for slot in slots %}
-			<li class="gdh-slot-item">
+			<li class="gdhrdv-slot-item">
 				<strong>Créneau #{{ loop.index }}</strong>
 				<div>
 					<span class="dashicons dashicons-calendar-alt"></span>
 					Date:
 					{{ slot.formatted_date }}
 				</div>
-				<div class="gdh-slot-times">
+				<div class="gdhrdv-slot-times">
 					{% if slot.is_all_day %}
-						<span class="gdh-slot-all-day">Toute la journée</span>
+						<span class="gdhrdv-slot-all-day">Toute la journée</span>
 					{% else %}
 						{% for time in slot.times %}
-							<span class="gdh-slot-time-badge">{{ time }}</span>
+							<span class="gdhrdv-slot-time-badge">{{ time }}</span>
 						{% endfor %}
 					{% endif %}
 				</div>

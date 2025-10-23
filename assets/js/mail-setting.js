@@ -1,6 +1,15 @@
 (function ($) {
   'use strict';
 
+  // Logger conditionnel (affiche uniquement si debug est activé)
+  const gdhrdvDebug = (window.gdhrdvMailSettings && !!gdhrdvMailSettings.debug) || false;
+  const gdhrdvLog = {
+    trace: (...a) => { if (gdhrdvDebug && console && console.trace) try { console.trace(...a); } catch (_) {} },
+    info:  (...a) => { if (gdhrdvDebug && console && console.info)  try { console.info(...a); }  catch (_) {} },
+    warn:  (...a) => { if (gdhrdvDebug && console && console.warn)  try { console.warn(...a); }  catch (_) {} },
+    error: (...a) => { if (gdhrdvDebug && console && console.error) try { console.error(...a); } catch (_) {} },
+  };
+
   // Copy placeholder chips to clipboard
   $(document).on('click', '[data-var]', function (e) {
     e.preventDefault();
@@ -15,7 +24,7 @@
   }); // Added closure here
 
   // Default templates (recommended)
-  const gdhDefaultTemplates = {
+  const gdhrdvDefaultTemplates = {
     main: {
       subject: 'Nouvelle demande de rendez-vous – {{nom_lead}} – {{date_rdv}}',
       body: (
@@ -53,7 +62,7 @@
     }
   };
 
-  function gdhSetEditorContent(editorId, html) {
+  function gdhrdvSetEditorContent(editorId, html) {
     try {
       if (typeof tinymce !== 'undefined') {
         const ed = tinymce.get(editorId);
@@ -64,7 +73,7 @@
     if (ta) { ta.value = html; }
   }
 
-  function gdhGetEditorContent(editorId) {
+  function gdhrdvGetEditorContent(editorId) {
     try {
       if (typeof tinymce !== 'undefined') {
         const ed = tinymce.get(editorId);
@@ -76,7 +85,7 @@
   }
 
   // Helper: check if HTML content is effectively empty (ignoring tags and NBSP)
-  function gdhIsEmptyHtml(html) {
+  function gdhrdvIsEmptyHtml(html) {
     try {
       const text = (html || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim();
       return text.length === 0;
@@ -87,57 +96,57 @@
   $(function () {
     // Main (artisan) template
     try {
-      const mainTpl = gdhDefaultTemplates.main;
-      const subjEl = document.getElementById('gdh_subject');
-      const bodyRaw = gdhGetEditorContent('gdh_body');
+      const mainTpl = gdhrdvDefaultTemplates.main;
+      const subjEl = document.getElementById('gdhrdv_subject');
+      const bodyRaw = gdhrdvGetEditorContent('gdhrdv_body');
       const subjEmpty = !subjEl || (subjEl.value || '').trim() === '';
-      const bodyEmpty = gdhIsEmptyHtml(bodyRaw);
+      const bodyEmpty = gdhrdvIsEmptyHtml(bodyRaw);
       if (mainTpl && (subjEmpty || bodyEmpty)) {
         if (subjEl && subjEmpty) { subjEl.value = mainTpl.subject; }
-        if (bodyEmpty) { gdhSetEditorContent('gdh_body', mainTpl.body); }
+        if (bodyEmpty) { gdhrdvSetEditorContent('gdhrdv_body', mainTpl.body); }
       }
-    } catch (_) { }
+    } catch (e) { gdhrdvLog.warn('Init modèle principal: exception', e); }
 
     // Confirmation template (only if confirmation is enabled)
     try {
-      const confirmOn = $('#gdh_confirm_enabled').prop('checked');
+      const confirmOn = $('#gdhrdv_confirm_enabled').prop('checked');
       if (confirmOn) {
-        const confTpl = gdhDefaultTemplates.confirm;
-        const cSubjEl = document.getElementById('gdh_confirm_subject');
-        const cBodyRaw = gdhGetEditorContent('gdh_confirm_body');
+        const confTpl = gdhrdvDefaultTemplates.confirm;
+        const cSubjEl = document.getElementById('gdhrdv_confirm_subject');
+        const cBodyRaw = gdhrdvGetEditorContent('gdhrdv_confirm_body');
         const cSubjEmpty = !cSubjEl || (cSubjEl.value || '').trim() === '';
-        const cBodyEmpty = gdhIsEmptyHtml(cBodyRaw);
+        const cBodyEmpty = gdhrdvIsEmptyHtml(cBodyRaw);
         if (confTpl && (cSubjEmpty || cBodyEmpty)) {
           if (cSubjEl && cSubjEmpty) { cSubjEl.value = confTpl.subject; }
-          if (cBodyEmpty) { gdhSetEditorContent('gdh_confirm_body', confTpl.body); }
+          if (cBodyEmpty) { gdhrdvSetEditorContent('gdhrdv_confirm_body', confTpl.body); }
         }
       }
-    } catch (_) { }
+    } catch (e) { gdhrdvLog.warn('Init modèle de confirmation: exception', e); }
   });
 
   // Delegated handler: close our validation notice on dismiss icon click
-  $(document).on('click', '#gdh-confirm-validate-error .notice-dismiss', function () {
-    const $notice = $('#gdh-confirm-validate-error');
+  $(document).on('click', '#gdhrdv-confirm-validate-error .notice-dismiss', function () {
+    const $notice = $('#gdhrdv-confirm-validate-error');
     if ($notice.length) { $notice.remove(); }
   });
 
   // Live toggle for confirmation panel
-  $(document).on('change', '#gdh_confirm_enabled', function () {
+  $(document).on('change', '#gdhrdv_confirm_enabled', function () {
     const on = this.checked;
-    $('#gdh_confirm_wrap').toggleClass('gdh-muted', !on);
-    $('#gdh_confirm_block').toggleClass('gdh-pe-none', !on);
-    $('#gdh_confirm_subject').prop('disabled', !on);
+    $('#gdhrdv_confirm_wrap').toggleClass('gdhrdv-muted', !on);
+    $('#gdhrdv_confirm_block').toggleClass('gdhrdv-pe-none', !on);
+    $('#gdhrdv_confirm_subject').prop('disabled', !on);
     // If enabling and content is empty, auto-fill defaults
     if (on) {
       try {
-        const confTpl = gdhDefaultTemplates.confirm;
-        const cSubjEl = document.getElementById('gdh_confirm_subject');
-        const cBodyRaw = gdhGetEditorContent('gdh_confirm_body');
+        const confTpl = gdhrdvDefaultTemplates.confirm;
+        const cSubjEl = document.getElementById('gdhrdv_confirm_subject');
+        const cBodyRaw = gdhrdvGetEditorContent('gdhrdv_confirm_body');
         const cSubjEmpty = !cSubjEl || (cSubjEl.value || '').trim() === '';
-        const cBodyEmpty = gdhIsEmptyHtml(cBodyRaw);
+        const cBodyEmpty = gdhrdvIsEmptyHtml(cBodyRaw);
         if (confTpl && (cSubjEmpty || cBodyEmpty)) {
           if (cSubjEl && cSubjEmpty) { cSubjEl.value = confTpl.subject; }
-          if (cBodyEmpty) { gdhSetEditorContent('gdh_confirm_body', confTpl.body); }
+          if (cBodyEmpty) { gdhrdvSetEditorContent('gdhrdv_confirm_body', confTpl.body); }
         }
       } catch (_) { }
     }
@@ -149,30 +158,30 @@
     const staticOn = (mode === 'static');
     const dynOn = (mode === 'dynamic');
     // Static panel
-    $('#gdh_recv_static_wrap').toggleClass('gdh-muted', !staticOn);
-    $('#gdh_recv_static_block').toggleClass('gdh-pe-none', !staticOn);
+    $('#gdhrdv_recv_static_wrap').toggleClass('gdhrdv-muted', !staticOn);
+    $('#gdhrdv_recv_static_block').toggleClass('gdhrdv-pe-none', !staticOn);
     $('#receiver_static_email, #receiver_static_name').prop('disabled', !staticOn);
     // Dynamic panel
-    $('#gdh_recv_dyn_wrap').toggleClass('gdh-muted', !dynOn);
-    $('#gdh_recv_dyn_block').toggleClass('gdh-pe-none', !dynOn);
+    $('#gdhrdv_recv_dyn_wrap').toggleClass('gdhrdv-muted', !dynOn);
+    $('#gdhrdv_recv_dyn_block').toggleClass('gdhrdv-pe-none', !dynOn);
     $('#receiver_dynamic_post_type, #receiver_dynamic_email, #receiver_dynamic_name').prop('disabled', !dynOn);
     // If switching to dynamic and PT already chosen, ensure meta are loaded
     if (dynOn) {
       const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
-      if (postType) { gdhFetchAndPopulateMeta(postType); }
+      if (postType) { gdhrdvFetchAndPopulateMeta(postType); }
     }
   });
 
   // Helpers to populate dynamic meta key selects
-  function gdhResetMetaSelect($sel) {
+  function gdhrdvResetMetaSelect($sel) {
     if (!$sel || !$sel.length) return;
     $sel.empty();
     $sel.append($('<option/>', { value: '', text: '— Sélectionner une meta —' }));
   }
 
-  function gdhPopulateMetaSelect($sel, keys, selected) {
+  function gdhrdvPopulateMetaSelect($sel, keys, selected) {
     if (!$sel || !$sel.length) return;
-    gdhResetMetaSelect($sel);
+    gdhrdvResetMetaSelect($sel);
     if (Array.isArray(keys)) {
       keys.forEach(function (k) {
         $sel.append($('<option/>', { value: k, text: k }));
@@ -185,12 +194,12 @@
     }
   }
 
-  function gdhFetchAndPopulateMeta(postType) {
+  function gdhrdvFetchAndPopulateMeta(postType) {
     const $emailSel = $('#receiver_dynamic_email');
     const $nameSel = $('#receiver_dynamic_name');
     if (!postType) {
-      gdhResetMetaSelect($emailSel);
-      gdhResetMetaSelect($nameSel);
+      gdhrdvResetMetaSelect($emailSel);
+      gdhrdvResetMetaSelect($nameSel);
       return;
     }
     // Show loading state
@@ -201,21 +210,22 @@
     const selectedName = ($nameSel.attr('data-selected') || '').trim();
 
     $.ajax({
-      url: (window.gdhMailSettings ? gdhMailSettings.ajax_url : ''),
+      url: (window.gdhrdvMailSettings ? gdhrdvMailSettings.ajax_url : ''),
       method: 'POST',
       dataType: 'json',
       data: {
-        action: 'gdh_get_meta_keys',
-        nonce: (window.gdhMailSettings ? gdhMailSettings.nonce : ''),
+        action: 'gdhrdv_get_meta_keys',
+        nonce: (window.gdhrdvMailSettings ? gdhrdvMailSettings.nonce : ''),
         post_type: postType
       }
     }).done(function (res) {
       const keys = (res && res.success && res.data && Array.isArray(res.data.meta_keys)) ? res.data.meta_keys : [];
-      gdhPopulateMetaSelect($emailSel, keys, selectedEmail);
-      gdhPopulateMetaSelect($nameSel, keys, selectedName);
-    }).fail(function () {
-      gdhResetMetaSelect($emailSel);
-      gdhResetMetaSelect($nameSel);
+      gdhrdvPopulateMetaSelect($emailSel, keys, selectedEmail);
+      gdhrdvPopulateMetaSelect($nameSel, keys, selectedName);
+    }).fail(function (jqXHR, textStatus, errorThrown) {
+      gdhrdvLog.error('AJAX échec (gdhrdv_get_meta_keys):', textStatus || 'unknown', errorThrown || '', jqXHR && jqXHR.responseText);
+      gdhrdvResetMetaSelect($emailSel);
+      gdhrdvResetMetaSelect($nameSel);
     }).always(function () {
       const dynOn = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
       if ($emailSel.length) { $emailSel.prop('disabled', !dynOn); }
@@ -228,9 +238,9 @@
     if ($('input[name="receiver_mode"]:checked').val() !== 'dynamic') return;
     const postType = this.value;
     if (postType) {
-      gdhFetchAndPopulateMeta(postType);
+      gdhrdvFetchAndPopulateMeta(postType);
     } else {
-      gdhFetchAndPopulateMeta('');
+      gdhrdvFetchAndPopulateMeta('');
     }
   });
 
@@ -240,7 +250,7 @@
       const dynEnabled = ($('input[name="receiver_mode"]:checked').val() === 'dynamic');
       const postType = ($('#receiver_dynamic_post_type').val() || '').trim();
       if (dynEnabled && postType) {
-        gdhFetchAndPopulateMeta(postType);
+        gdhrdvFetchAndPopulateMeta(postType);
       }
     } catch (_) { }
   });
@@ -249,7 +259,7 @@
   $(document).on('submit', 'form', function (e) {
     const $form = $(this);
     // Ensure this is our email settings form
-    const hasAction = $form.find('input[name="action"][value="gdh_save_email_settings"]').length > 0;
+    const hasAction = $form.find('input[name="action"][value="gdhrdv_save_email_settings"]').length > 0;
     if (!hasAction) return;
 
     // Validate receiver selection (static/dynamic)
@@ -264,10 +274,10 @@
         e.preventDefault();
         e.stopPropagation();
         const wrap = document.querySelector('.wrap');
-        let notice = document.getElementById('gdh-receiver-validate-error');
+        let notice = document.getElementById('gdhrdv-receiver-validate-error');
         if (!notice) {
           notice = document.createElement('div');
-          notice.id = 'gdh-receiver-validate-error';
+          notice.id = 'gdhrdv-receiver-validate-error';
           notice.className = 'notice notice-error is-dismissible';
           notice.setAttribute('role', 'alert');
           notice.setAttribute('aria-live', 'assertive');
@@ -291,14 +301,14 @@
           p.textContent = 'Veuillez sélectionner une méthode de destinataire (statique ou dynamique) avant d\'enregistrer.';
         }
         const dismissBtn = notice.querySelector('.notice-dismiss');
-        if (dismissBtn && !dismissBtn._gdhBound) {
+        if (dismissBtn && !dismissBtn._gdhrdvBound) {
           dismissBtn.addEventListener('click', function () {
             if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
           });
-          dismissBtn._gdhBound = true;
+          dismissBtn._gdhrdvBound = true;
         }
-        if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
-        notice._gdhTimer = setTimeout(function () {
+        if (notice._gdhrdvTimer) { clearTimeout(notice._gdhrdvTimer); }
+        notice._gdhrdvTimer = setTimeout(function () {
           if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
         }, 7000);
         try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
@@ -330,10 +340,10 @@
         e.preventDefault();
         e.stopPropagation();
         const wrap = document.querySelector('.wrap');
-        let notice = document.getElementById('gdh-receiver-validate-error');
+        let notice = document.getElementById('gdhrdv-receiver-validate-error');
         if (!notice) {
           notice = document.createElement('div');
-          notice.id = 'gdh-receiver-validate-error';
+          notice.id = 'gdhrdv-receiver-validate-error';
           notice.className = 'notice notice-error is-dismissible';
           notice.setAttribute('role', 'alert');
           notice.setAttribute('aria-live', 'assertive');
@@ -362,14 +372,14 @@
         }
         // Dismiss binding and auto-dismiss
         const dismissBtn = notice.querySelector('.notice-dismiss');
-        if (dismissBtn && !dismissBtn._gdhBound) {
+        if (dismissBtn && !dismissBtn._gdhrdvBound) {
           dismissBtn.addEventListener('click', function () {
             if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
           });
-          dismissBtn._gdhBound = true;
+          dismissBtn._gdhrdvBound = true;
         }
-        if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
-        notice._gdhTimer = setTimeout(function () {
+        if (notice._gdhrdvTimer) { clearTimeout(notice._gdhrdvTimer); }
+        notice._gdhrdvTimer = setTimeout(function () {
           if (notice && notice.parentNode) { notice.parentNode.removeChild(notice); }
         }, 7000);
         try { notice.scrollIntoView({ behavior: 'smooth', block: 'start' }); notice.focus(); } catch (_) { }
@@ -377,17 +387,17 @@
       }
     })();
 
-    const enabled = document.getElementById('gdh_confirm_enabled');
+    const enabled = document.getElementById('gdhrdv_confirm_enabled');
     if (!enabled || !enabled.checked) return;
 
-    const subjEl = document.getElementById('gdh_confirm_subject');
+    const subjEl = document.getElementById('gdhrdv_confirm_subject');
     const subject = (subjEl && !subjEl.disabled ? (subjEl.value || '').trim() : '');
 
     // Try TinyMCE first, fallback to textarea
     let bodyText = '';
     try {
       if (typeof tinymce !== 'undefined') {
-        const ed = tinymce.get('gdh_confirm_body');
+        const ed = tinymce.get('gdhrdv_confirm_body');
         if (ed && !ed.isHidden()) {
           const html = ed.getContent({ format: 'raw' }) || '';
           bodyText = html.replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').trim();
@@ -396,7 +406,7 @@
     } catch (err) { }
 
     if (!bodyText) {
-      const ta = document.getElementById('gdh_confirm_body');
+      const ta = document.getElementById('gdhrdv_confirm_body');
       if (ta) bodyText = (ta.value || '').trim();
     }
 
@@ -405,10 +415,10 @@
       e.stopPropagation();
       // Show an error notice
       const wrap = document.querySelector('.wrap');
-      let notice = document.getElementById('gdh-confirm-validate-error');
+      let notice = document.getElementById('gdhrdv-confirm-validate-error');
       if (!notice) {
         notice = document.createElement('div');
-        notice.id = 'gdh-confirm-validate-error';
+        notice.id = 'gdhrdv-confirm-validate-error';
         notice.className = 'notice notice-error is-dismissible';
         notice.setAttribute('role', 'alert');
         notice.setAttribute('aria-live', 'assertive');
@@ -444,16 +454,16 @@
 
       // Enable manual dismiss and auto-dismiss of the notice
       const dismissBtn = notice.querySelector('.notice-dismiss');
-      if (dismissBtn && !dismissBtn._gdhBound) {
+      if (dismissBtn && !dismissBtn._gdhrdvBound) {
         dismissBtn.addEventListener('click', function () {
           if (notice && notice.parentNode) {
             notice.parentNode.removeChild(notice);
           }
         });
-        dismissBtn._gdhBound = true;
+        dismissBtn._gdhrdvBound = true;
       }
-      if (notice._gdhTimer) { clearTimeout(notice._gdhTimer); }
-      notice._gdhTimer = setTimeout(function () {
+      if (notice._gdhrdvTimer) { clearTimeout(notice._gdhrdvTimer); }
+      notice._gdhrdvTimer = setTimeout(function () {
         if (notice && notice.parentNode) {
           notice.parentNode.removeChild(notice);
         }
@@ -468,18 +478,33 @@
       } else {
         try {
           if (typeof tinymce !== 'undefined') {
-            const ed = tinymce.get('gdh_confirm_body');
+            const ed = tinymce.get('gdhrdv_confirm_body');
             if (ed && !ed.isHidden()) { ed.focus(); }
             else {
-              const ta = document.getElementById('gdh_confirm_body');
+              const ta = document.getElementById('gdhrdv_confirm_body');
               if (ta) ta.focus();
             }
           }
         } catch (err) {
-          const ta = document.getElementById('gdh_confirm_body');
+          const ta = document.getElementById('gdhrdv_confirm_body');
           if (ta) ta.focus();
         }
       }
     }
   });
+
+  // Expose a read-only namespace for organization and debugging (no behavior change)
+  try {
+    window.GDHRDV = window.GDHRDV || {};
+    window.GDHRDV.Admin = Object.freeze({
+      log: gdhrdvLog,
+      gdhrdvDefaultTemplates,
+      gdhrdvSetEditorContent,
+      gdhrdvGetEditorContent,
+      gdhrdvIsEmptyHtml,
+      gdhrdvResetMetaSelect,
+      gdhrdvPopulateMetaSelect,
+      gdhrdvFetchAndPopulateMeta,
+    });
+  } catch (_) {}
 })(jQuery);

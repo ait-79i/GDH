@@ -1,34 +1,34 @@
-<h3 class="gdh-section-title" style="display:flex;justify-content:space-between;align-items:center;">
+<h3 class="gdhrdv-section-title" style="display:flex;justify-content:space-between;align-items:center;">
 	<span>Modèle d’e-mail de confirmation de demande</span>
 </h3>
-<div id="gdh_confirm_wrap" class="{% if not confirm_enabled %}gdh-muted{% endif %}">
-	<input type="checkbox" id="gdh_confirm_enabled" name="gdh_email_confirm_enabled" value="1" {% if confirm_enabled %} checked {% endif %}>
+<div id="gdhrdv_confirm_wrap" class="{% if not confirm_enabled %}gdhrdv-muted{% endif %}">
+	<input type="checkbox" id="gdhrdv_confirm_enabled" name="gdhrdv_email_confirm_enabled" value="1" {% if confirm_enabled %} checked {% endif %}>
 	Activer l’envoi de confirmation au client
-	<div id="gdh_confirm_block" class="{% if not confirm_enabled %}gdh-pe-none{% endif %}">
-		<table class="form-table gdh-inner-table" role="presentation">
+	<div id="gdhrdv_confirm_block" class="{% if not confirm_enabled %}gdhrdv-pe-none{% endif %}">
+		<table class="form-table gdhrdv-inner-table" role="presentation">
 			<tr>
 				<th scope="row">
-					<label for="gdh_confirm_subject">Sujet</label>
+					<label for="gdhrdv_confirm_subject">Sujet</label>
 				</th>
 				<td>
-					<div class="gdh-varbar" style="margin-bottom: 5px;">
+					<div class="gdhrdv-varbar" style="margin-bottom: 5px;">
 						{% for var in variables_confirmation_sujet %}
 							{% set placeholder = '{{' ~ var ~ '}}' %}
-							<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ placeholder }}</span>
+							<span class="gdhrdv-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ placeholder }}</span>
 						{% endfor %}
 					</div>
-					<input type="text" id="gdh_confirm_subject" name="gdh_email_confirm_subject" class="regular-text" value="{{ confirm_subject_value|e }}" {% if not confirm_enabled %} disabled {% endif %}/>
+					<input type="text" id="gdhrdv_confirm_subject" name="gdhrdv_email_confirm_subject" class="regular-text" value="{{ confirm_subject_value|e }}" {% if not confirm_enabled %} disabled {% endif %}/>
 				</td>
 			</tr>
 			<tr>
 				<th scope="row">
-					<label for="gdh_confirm_body">Corps</label>
+					<label for="gdhrdv_confirm_body">Corps</label>
 				</th>
 				<td>
-					<div class="gdh-varbar">
+					<div class="gdhrdv-varbar">
 						{% for var in variables %}
 							{% set placeholder = '{{' ~ var ~ '}}' %}
-							<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ placeholder }}</span>
+							<span class="gdhrdv-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ placeholder }}</span>
 						{% endfor %}
 					</div>
 				</td>

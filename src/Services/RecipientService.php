@@ -1,5 +1,5 @@
 <?php
-namespace GDH\Services;
+namespace GDHRDV\Services;
 
 class RecipientService
 {
@@ -8,7 +8,7 @@ class RecipientService
      */
     public static function getSecureRecipientInfo($formData)
     {
-        $receivers = get_option('gdh_receivers', []);
+        $receivers = get_option('gdhrdv_receivers', []);
         
         // Check static mode first
         $staticEnabled = isset($receivers['static']['enabled']) && $receivers['static']['enabled'] === '1';

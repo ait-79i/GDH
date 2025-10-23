@@ -1,15 +1,19 @@
 <?php
-namespace GDH\Services;
+namespace GDHRDV\Services;
 
 class Logger
 {
     private $logFile;
+    private $maxFileSize = 5242880; // 5MB
+    private $enableLogging;
 
     public function __construct()
     {
-        // Security: Ensure log file is in safe location
-        $logDir = rtrim(GDH_PLUGIN_PATH, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'logs';
-        $this->logFile = $logDir . DIRECTORY_SEPARATOR . 'gdh.log';
+        // Active le logging uniquement en mode debug ou pour les erreurs
+        $this->enableLogging = defined('WP_DEBUG') && WP_DEBUG;
+        
+        $logDir = rtrim(GDHRDV_PLUGIN_PATH, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'logs';
+        $this->logFile = $logDir . DIRECTORY_SEPARATOR . 'gdhrdv.log';
         $this->ensureLogDirectory();
     }
 
@@ -23,49 +27,64 @@ class Logger
 
     public function info($message)
     {
-        $this->log('INFO', $message);
+        // Log les messages info uniquement en mode debug
+        if ($this->enableLogging) {
+            $this->log('INFO', $message);
+        }
     }
 
     public function error($message)
     {
+        // Log toujours les erreurs
         $this->log('ERROR', $message);
     }
 
     public function warning($message)
     {
-        $this->log('WARNING', $message);
+        // Log les avertissements uniquement en mode debug
+        if ($this->enableLogging) {
+            $this->log('WARNING', $message);
+        }
     }
 
     private function log($level, $message)
     {
-        // Security: Sanitize inputs
+        // Sécurité: Nettoie les entrées
         $level = preg_replace('/[^A-Z]/', '', strtoupper($level));
         $message = sanitize_text_field($message);
         
-        // Security: Validate log file path
+        // Sécurité: Valide le chemin du fichier de log
         $realLogFile = realpath(dirname($this->logFile));
-        $realPluginPath = realpath(GDH_PLUGIN_PATH);
+        $realPluginPath = realpath(GDHRDV_PLUGIN_PATH);
         
         if (!$realLogFile || !$realPluginPath || strpos($realLogFile, $realPluginPath) !== 0) {
-            return; // Prevent writing outside plugin directory
+            return;
         }
+        
+        // Rotation du log s'il est trop volumineux
+        $this->rotateLogIfNeeded();
         
         $timestamp = current_time('Y-m-d H:i:s');
         $logEntry = sprintf("[%s] [%s] %s%s", $timestamp, $level, $message, PHP_EOL);
         
-        // Security: Use WordPress filesystem API when available
-        if (function_exists('WP_Filesystem')) {
-            global $wp_filesystem;
-            if (WP_Filesystem()) {
-                $existing = $wp_filesystem->exists($this->logFile) ? $wp_filesystem->get_contents($this->logFile) : '';
-                $wp_filesystem->put_contents($this->logFile, $existing . $logEntry, FS_CHMOD_FILE);
-                return;
-            }
-        }
-        
-        // Fallback to file_put_contents with security checks
+        // Fallback vers file_put_contents avec vérifications de sécurité
         if (is_writable(dirname($this->logFile))) {
             file_put_contents($this->logFile, $logEntry, FILE_APPEND | LOCK_EX);
+        }
+    }
+    
+    private function rotateLogIfNeeded()
+    {
+        if (!file_exists($this->logFile)) {
+            return;
+        }
+        
+        if (filesize($this->logFile) > $this->maxFileSize) {
+            $backupFile = $this->logFile . '.old';
+            if (file_exists($backupFile)) {
+                unlink($backupFile);
+            }
+            rename($this->logFile, $backupFile);
         }
     }
 }

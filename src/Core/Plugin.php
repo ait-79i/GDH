@@ -1,16 +1,17 @@
 <?php
-namespace GDH\Core;
+namespace GDHRDV\Core;
 
-use GDH\Admin\AdminController;
-use GDH\Ajax\AppointmentAjaxHandler;
-use GDH\Frontend\FrontendController;
-use GDH\PostTypes\AppointmentPostType;
-use GDH\Services\Logger;
-use GDH\Services\TwigService;
-use GDH\Shortcodes\ShortcodeManager;
+use GDHRDV\Admin\AdminController;
+use GDHRDV\Ajax\AdminAjaxHandler;
+use GDHRDV\Ajax\FrontendAjaxHandler;
+use GDHRDV\Frontend\FrontendController;
+use GDHRDV\PostTypes\AppointmentPostType;
+use GDHRDV\Services\Logger;
+use GDHRDV\Services\TwigService;
+use GDHRDV\Shortcodes\ShortcodeManager;
 
 /**
- * Main plugin class
+ * Classe principale du plugin
  */
 class Plugin
 {
@@ -19,7 +20,7 @@ class Plugin
     private $twig;
 
     /**
-     * Get the instance of the plugin
+     * Récupère l'instance du plugin
      *
      * @return Plugin
      */
@@ -32,21 +33,22 @@ class Plugin
     }
 
     /**
-     * Initialize the plugin
+     * Initialise le plugin
      */
     public function init()
     {
         $this->logger = new Logger();
         $this->twig   = new TwigService();
 
-        // Register custom post types
+        // Enregistre les types de contenu personnalisés
         new AppointmentPostType();
 
-        // Register AJAX handler
-        new AppointmentAjaxHandler($this->logger);
-
+        // Enregistre les gestionnaires AJAX séparés
+        new FrontendAjaxHandler($this->logger);
+        
         if (is_admin()) {
             new AdminController();
+            new AdminAjaxHandler($this->logger);
         } else {
             new FrontendController($this->logger, $this->twig);
         }
@@ -55,22 +57,21 @@ class Plugin
     }
 
     /**
-     * Activate the plugin
+     * Active le plugin
      */
     public static function activate()
     {
-        // Actions d'activation
-        // Flush rewrite rules to register custom post type
+        (new AppointmentPostType())->register();
         flush_rewrite_rules();
     }
 
     /**
-     * Deactivate the plugin
+     * Désactive le plugin
      */
     public static function deactivate()
     {
         // Actions de désactivation
-        // Flush rewrite rules on deactivation
+        // Vide les règles de réécriture lors de la désactivation
         flush_rewrite_rules();
     }
 }

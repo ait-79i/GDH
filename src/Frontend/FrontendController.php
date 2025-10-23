@@ -1,8 +1,8 @@
 <?php
-namespace GDH\Frontend;
+namespace GDHRDV\Frontend;
 
-use GDH\Services\Logger;
-use GDH\Services\TwigService;
+use GDHRDV\Services\Logger;
+use GDHRDV\Services\TwigService;
 
 class FrontendController
 {
@@ -23,35 +23,35 @@ class FrontendController
 
     public function enqueue_front_scripts()
     {
-        $plugin_root = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR; // plugin root dir
+        $plugin_root = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR; // répertoire racine du plugin
         $css_path    = $plugin_root . 'assets' . DIRECTORY_SEPARATOR . 'css' . DIRECTORY_SEPARATOR . 'frontend.css';
         $js_path     = $plugin_root . 'assets' . DIRECTORY_SEPARATOR . 'js' . DIRECTORY_SEPARATOR . 'frontend.js';
         $css_ver     = file_exists($css_path) ? filemtime($css_path) : time();
         $js_ver      = file_exists($js_path) ? filemtime($js_path) : time();
 
-        // Enqueue Dashicons for frontend
+        // Charge Dashicons pour le frontend
         wp_enqueue_style('dashicons');
 
-        // Optional custom font URL from settings
-        $opts = get_option('gdh_rdv_design_settings', []);
+        // URL de police personnalisée optionnelle depuis les réglages
+        $opts = get_option('gdhrdv_design_settings', []);
         if (is_array($opts) && ! empty($opts['font_url'])) {
             $font_url = esc_url($opts['font_url']);
             if (! empty($font_url)) {
-                wp_enqueue_style('gdh-rdv-font', $font_url, [], null);
+                wp_enqueue_style('gdhrdv-font', $font_url, [], null);
             }
         }
 
         wp_enqueue_style(
-            'gdh-rdv-style',
-            GDH_PLUGIN_URL . 'assets/css/frontend.css',
+            'gdhrdv-style',
+            GDHRDV_PLUGIN_URL . 'assets/css/frontend.css',
             ['dashicons'],
             $css_ver
         );
 
-        // Inject dynamic CSS variables from settings
+        // Injecte des variables CSS dynamiques depuis les réglages
         $this->add_inline_design_variables();
 
-        // Twig.js for client-side rendering of templates
+        // Twig.js pour le rendu côté client des templates
         wp_enqueue_script(
             'twigjs',
             'https://cdn.jsdelivr.net/npm/twig@1.15.4/twig.min.js',
@@ -61,43 +61,44 @@ class FrontendController
         );
 
         wp_enqueue_script(
-            'gdh-rdv-script',
-            GDH_PLUGIN_URL . 'assets/js/frontend.js',
+            'gdhrdv-script',
+            GDHRDV_PLUGIN_URL . 'assets/js/frontend.js',
             ['jquery', 'twigjs'],
             $js_ver,
             true
         );
 
-        // Localize script with AJAX data
-        $slot_tpl_path = GDH_PLUGIN_PATH . 'templates/frontend/cards/slot-card.twig';
+        // Localise le script avec les données AJAX
+        $slot_tpl_path = GDHRDV_PLUGIN_PATH . 'templates/frontend/cards/slot-card.twig';
         $slot_tpl      = file_exists($slot_tpl_path) ? file_get_contents($slot_tpl_path) : '';
         wp_localize_script(
-            'gdh-rdv-script',
-            'gdhRdvData',
+            'gdhrdv-script',
+            'gdhrdvData',
             [
                 'ajaxUrl'   => admin_url('admin-ajax.php'),
-                'nonce'     => wp_create_nonce('gdh_rdv_nonce'),
+                'nonce'     => wp_create_nonce('gdhrdv_nonce'),
                 'templates' => [
                     'slotCard' => $slot_tpl,
                 ],
+                'debug'     => (defined('WP_DEBUG') && WP_DEBUG),
             ]
         );
     }
 
     private function add_inline_design_variables()
     {
-        $opts = get_option('gdh_rdv_design_settings', []);
+        $opts = get_option('gdhrdv_design_settings', []);
         if (! is_array($opts)) {
             return;
         }
 
         $map = [
-            '--gdh-primary-green'       => 'primary_color',
-            '--gdh-primary-green-light' => 'primary_color_light',
-            '--gdh-primary-green-dark'  => 'primary_color_dark',
-            '--gdh-accent-yellow'       => 'accent_color',
-            '--gdh-accent-yellow-dark'  => 'accent_color_dark',
-            '--gdh-button-text-color'   => 'buttons_text_color',
+            '--gdhrdv-primary-green'       => 'primary_color',
+            '--gdhrdv-primary-green-light' => 'primary_color_light',
+            '--gdhrdv-primary-green-dark'  => 'primary_color_dark',
+            '--gdhrdv-accent-yellow'       => 'accent_color',
+            '--gdhrdv-accent-yellow-dark'  => 'accent_color_dark',
+            '--gdhrdv-button-text-color'   => 'buttons_text_color',
         ];
 
         $vars = [];
@@ -110,11 +111,11 @@ class FrontendController
             }
         }
 
-        // Overlay RGB and opacity
+        // Couleur d'overlay en RGB et opacité
         if (! empty($opts['overlay_color'])) {
             $hex    = sanitize_hex_color($opts['overlay_color']);
             $rgb    = $hex ? $this->hex_to_rgb_string($hex) : '0, 0, 0';
-            $vars[] = '--gdh-overlay-rgb: ' . $rgb;
+            $vars[] = '--gdhrdv-overlay-rgb: ' . $rgb;
         }
         if (isset($opts['overlay_opacity'])) {
             $opacity = floatval($opts['overlay_opacity']);
@@ -126,19 +127,19 @@ class FrontendController
                 $opacity = 1;
             }
 
-            $vars[] = '--gdh-overlay-opacity: ' . $opacity;
+            $vars[] = '--gdhrdv-overlay-opacity: ' . $opacity;
         }
 
-        // Font family (raw string)
+        // Famille de police (chaîne brute)
         if (! empty($opts['font_family'])) {
             // sanitize_text_field already applied at save, but sanitize again
             $font   = sanitize_text_field($opts['font_family']);
-            $vars[] = '--gdh-font-family: ' . $font;
+            $vars[] = '--gdhrdv-font-family: ' . $font;
         }
 
         if (! empty($vars)) {
             $css = ':root{' . implode(';', $vars) . ';}';
-            wp_add_inline_style('gdh-rdv-style', $css);
+            wp_add_inline_style('gdhrdv-style', $css);
         }
     }
 

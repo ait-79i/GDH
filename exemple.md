@@ -1,4 +1,4 @@
-# Email Template Example (GDH)
+# Email Template Example (GDHRDV)
 
 ## Subject
 
@@ -67,9 +67,9 @@ h2 { color:#1d2327; font-size:18px; margin:24px 0 12px; }
 .details { width:100%; border-collapse:collapse; }
 .details th, .details td { text-align:left; padding:10px; border-bottom:1px solid #e2e4e7; vertical-align:top; }
 .details th { width:35%; color:#50575e; }
-.gdh-slots { margin: 0 0 12px 18px; }
-.gdh-slots li { line-height: 1.5; }
-.gdh-slot { margin: 0 0 12px; }
+.gdhrdv-slots { margin: 0 0 12px 18px; }
+.gdhrdv-slots li { line-height: 1.5; }
+.gdhrdv-slot { margin: 0 0 12px; }
 .cta { margin:24px 0; }
 .btn { display:inline-block; background:#006847; color:#ffffff !important; text-decoration:none; padding:12px 16px; border-radius:6px; font-weight:bold; }
 .footer { color:#6c7781; font-size:12px; }

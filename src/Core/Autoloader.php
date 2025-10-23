@@ -1,25 +1,25 @@
 <?php
-namespace GDH\Core;
+namespace GDHRDV\Core;
 
 class Autoloader
 {
     /**
-     * PSR-4 base namespace prefix
+     * Préfixe d'espace de noms PSR-4
      */
-    protected static $prefix = 'GDH\\';
+    protected static $prefix = 'GDHRDV\\';
 
     /**
-     * Base directory for the namespace prefix
+     * Répertoire de base pour le préfixe d'espace de noms
      */
     protected static $baseDir;
 
     public static function register(): void
     {
-        // Determine base directory from plugin path constant if available
-        if (defined('GDH_PLUGIN_PATH')) {
-            self::$baseDir = rtrim(GDH_PLUGIN_PATH, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
+        // Détermine le répertoire de base à partir de la constante du plugin si disponible
+        if (defined('GDHRDV_PLUGIN_PATH')) {
+            self::$baseDir = rtrim(GDHRDV_PLUGIN_PATH, DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'src' . DIRECTORY_SEPARATOR;
         } else {
-            // Fallback: derive from this file
+            // Solution de repli : déduire depuis ce fichier
             self::$baseDir = dirname(__DIR__, 1) . DIRECTORY_SEPARATOR;
         }
 
@@ -28,29 +28,29 @@ class Autoloader
 
     protected static function autoload(string $class): void
     {
-        // Only handle our namespace
+        // Ne gérer que notre espace de noms
         $len = strlen(self::$prefix);
         if (strncmp(self::$prefix, $class, $len) !== 0) {
             return;
         }
 
-        // Get the relative class name
+        // Récupère le nom de classe relatif
         $relativeClass = substr($class, $len);
         
-        // Security: Validate class name contains only allowed characters
+        // Sécurité : Valide que le nom de classe ne contient que des caractères autorisés
         if (!preg_match('/^[a-zA-Z_\x80-\xff][a-zA-Z0-9_\x80-\xff\\]*$/', $relativeClass)) {
             return;
         }
         
-        // Security: Prevent path traversal attacks
+        // Sécurité : Empêche les attaques de traversal de chemins
         if (strpos($relativeClass, '..') !== false || strpos($relativeClass, '/') !== false) {
             return;
         }
 
-        // Replace namespace separators with directory separators, append .php
+        // Remplace les séparateurs d'espaces de noms par des séparateurs de répertoires et ajoute .php
         $file = self::$baseDir . str_replace('\\', DIRECTORY_SEPARATOR, $relativeClass) . '.php';
         
-        // Security: Ensure file is within base directory
+        // Sécurité : S'assure que le fichier se trouve bien dans le répertoire de base
         $realFile = realpath($file);
         $realBase = realpath(self::$baseDir);
         if ($realFile && $realBase && strpos($realFile, $realBase) === 0 && is_file($realFile)) {

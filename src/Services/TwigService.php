@@ -1,5 +1,5 @@
 <?php
-namespace GDH\Services;
+namespace GDHRDV\Services;
 
 use Twig\Environment;
 use Twig\Loader\FilesystemLoader;
@@ -10,14 +10,14 @@ class TwigService
 
     public function __construct()
     {
-        $loader = new FilesystemLoader(GDH_PLUGIN_PATH . 'templates');
+        $loader = new FilesystemLoader(GDHRDV_PLUGIN_PATH . 'templates');
 
-        $cachePath = GDH_PLUGIN_PATH . 'cache/twig';
-        // Ensure cache directory exists; if not, disable caching to avoid exceptions
+        $cachePath = GDHRDV_PLUGIN_PATH . 'cache/twig';
+        // S'assurer que le répertoire de cache existe ; si non, désactiver le cache pour éviter les exceptions
         $cacheEnabled = false;
         if (! defined('WP_DEBUG') || WP_DEBUG === false) {
             if (! file_exists($cachePath)) {
-                // Attempt to create cache directory
+                // Tenter de créer le répertoire de cache
                 if (function_exists('wp_mkdir_p')) {
                     wp_mkdir_p($cachePath);
                 } else {

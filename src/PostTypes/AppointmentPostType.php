@@ -1,13 +1,13 @@
 <?php
-namespace GDH\PostTypes;
+namespace GDHRDV\PostTypes;
 
-use GDH\Services\TwigService;
-use GDH\Services\EmailTemplateService;
-use GDH\Services\Logger;
+use GDHRDV\Services\TwigService;
+use GDHRDV\Services\EmailTemplateService;
+use GDHRDV\Services\Logger;
 
 class AppointmentPostType
 {
-    const POST_TYPE = 'gdh_appointment';
+    const POST_TYPE = 'gdhrdv_appointment';
 
     private $twig;
 
@@ -23,7 +23,6 @@ class AppointmentPostType
         add_filter('post_row_actions', [$this, 'filterRowActions'], 10, 2);
         add_action('admin_head', [$this, 'makeTitleReadonly']);
         add_action('admin_footer', [$this, 'addResendEmailScript']);
-        add_action('wp_ajax_gdh_resend_email', [$this, 'resendEmail']);
         add_action('admin_notices', [$this, 'displayAdminNotices']);
     }
 
@@ -68,7 +67,7 @@ class AppointmentPostType
         register_post_type(self::POST_TYPE, $args);
     }
 
-// [Metaboxes]
+// [Metaboxes] — Gestion des boîtes meta en administration
 
     public function addMetaBoxes()
     {
@@ -76,7 +75,7 @@ class AppointmentPostType
         remove_meta_box('submitdiv', self::POST_TYPE, 'side');
 
         add_meta_box(
-            'gdh_appointment_details',
+            'gdhrdv_appointment_details',
             'Détails du rendez-vous',
             [$this, 'renderAppointmentDetailsMetaBox'],
             self::POST_TYPE,
@@ -85,7 +84,7 @@ class AppointmentPostType
         );
 
         add_meta_box(
-            'gdh_appointment_slots',
+            'gdhrdv_appointment_slots',
             'Créneaux de disponibilité',
             [$this, 'renderSlotsMetaBox'],
             self::POST_TYPE,
@@ -94,7 +93,7 @@ class AppointmentPostType
         );
 
         add_meta_box(
-            'gdh_appointment_address',
+            'gdhrdv_appointment_address',
             'Adresse d\'intervention',
             [$this, 'renderAddressMetaBox'],
             self::POST_TYPE,
@@ -105,20 +104,20 @@ class AppointmentPostType
 
     public function renderAppointmentDetailsMetaBox($post)
     {
-        wp_nonce_field('gdh_appointment_meta_box', 'gdh_appointment_meta_box_nonce');
+        wp_nonce_field('gdhrdv_appointment_meta_box', 'gdhrdv_appointment_meta_box_nonce');
 
         echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-details-metabox.twig', [
-            'first_name'   => get_post_meta($post->ID, '_gdh_first_name', true),
-            'last_name'    => get_post_meta($post->ID, '_gdh_last_name', true),
-            'email'        => get_post_meta($post->ID, '_gdh_email', true),
-            'phone'        => get_post_meta($post->ID, '_gdh_phone', true),
-            'accept_terms' => get_post_meta($post->ID, '_gdh_accept_terms', true),
+            'first_name'   => get_post_meta($post->ID, '_gdhrdv_first_name', true),
+            'last_name'    => get_post_meta($post->ID, '_gdhrdv_last_name', true),
+            'email'        => get_post_meta($post->ID, '_gdhrdv_email', true),
+            'phone'        => get_post_meta($post->ID, '_gdhrdv_phone', true),
+            'accept_terms' => get_post_meta($post->ID, '_gdhrdv_accept_terms', true),
         ]);
     }
 
     public function renderSlotsMetaBox($post)
     {
-        $slots = get_post_meta($post->ID, '_gdh_slots', true);
+        $slots = get_post_meta($post->ID, '_gdhrdv_slots', true);
 
         // Prepare slots data for Twig
         $formattedSlots = [];
@@ -141,20 +140,20 @@ class AppointmentPostType
     public function renderAddressMetaBox($post)
     {
         echo $this->twig->render('admin/appointment/appointment-metaboxes/appointment-address-metabox.twig', [
-            'address'     => get_post_meta($post->ID, '_gdh_address', true),
-            'postal_code' => get_post_meta($post->ID, '_gdh_postal_code', true),
-            'city'        => get_post_meta($post->ID, '_gdh_city', true),
+            'address'     => get_post_meta($post->ID, '_gdhrdv_address', true),
+            'postal_code' => get_post_meta($post->ID, '_gdhrdv_postal_code', true),
+            'city'        => get_post_meta($post->ID, '_gdhrdv_city', true),
         ]);
     }
 // []
 
-// [Save meta data]
+// [Sauvegarde des métadonnées]
 
     public function saveMetaData($post_id, $post)
     {
         // Verify nonce
-        if (! isset($_POST['gdh_appointment_meta_box_nonce']) ||
-            ! wp_verify_nonce($_POST['gdh_appointment_meta_box_nonce'], 'gdh_appointment_meta_box')) {
+        if (! isset($_POST['gdhrdv_appointment_meta_box_nonce']) ||
+            ! wp_verify_nonce($_POST['gdhrdv_appointment_meta_box_nonce'], 'gdhrdv_appointment_meta_box')) {
             return;
         }
 
@@ -170,14 +169,14 @@ class AppointmentPostType
 
         // Save fields (though they are readonly, this is for programmatic updates)
         $fields = [
-            'gdh_first_name'   => '_gdh_first_name',
-            'gdh_last_name'    => '_gdh_last_name',
-            'gdh_email'        => '_gdh_email',
-            'gdh_phone'        => '_gdh_phone',
-            'gdh_address'      => '_gdh_address',
-            'gdh_postal_code'  => '_gdh_postal_code',
-            'gdh_city'         => '_gdh_city',
-            'gdh_accept_terms' => '_gdh_accept_terms',
+            'gdhrdv_first_name'   => '_gdhrdv_first_name',
+            'gdhrdv_last_name'    => '_gdhrdv_last_name',
+            'gdhrdv_email'        => '_gdhrdv_email',
+            'gdhrdv_phone'        => '_gdhrdv_phone',
+            'gdhrdv_address'      => '_gdhrdv_address',
+            'gdhrdv_postal_code'  => '_gdhrdv_postal_code',
+            'gdhrdv_city'         => '_gdhrdv_city',
+            'gdhrdv_accept_terms' => '_gdhrdv_accept_terms',
         ];
 
         foreach ($fields as $field => $meta_key) {
@@ -205,7 +204,7 @@ class AppointmentPostType
     }
 // []
 
-// [Custom Columns]
+// [Colonnes personnalisées de la liste]
 
     public function setCustomColumns($columns)
     {
@@ -227,29 +226,29 @@ class AppointmentPostType
     {
         switch ($column) {
             case 'client':
-                $first_name = get_post_meta($post_id, '_gdh_first_name', true);
-                $last_name  = get_post_meta($post_id, '_gdh_last_name', true);
+                $first_name = get_post_meta($post_id, '_gdhrdv_first_name', true);
+                $last_name  = get_post_meta($post_id, '_gdhrdv_last_name', true);
                 echo esc_html($first_name . ' ' . $last_name);
                 break;
 
             case 'email':
-                $email = get_post_meta($post_id, '_gdh_email', true);
+                $email = get_post_meta($post_id, '_gdhrdv_email', true);
                 echo '<a href="mailto:' . esc_attr($email) . '">' . esc_html($email) . '</a>';
                 break;
 
             case 'phone':
-                $phone = get_post_meta($post_id, '_gdh_phone', true);
+                $phone = get_post_meta($post_id, '_gdhrdv_phone', true);
                 echo '<a href="tel:' . esc_attr($phone) . '">' . esc_html($phone) . '</a>';
                 break;
 
             case 'address':
-                $address = get_post_meta($post_id, '_gdh_address', true);
-                $city    = get_post_meta($post_id, '_gdh_city', true);
+                $address = get_post_meta($post_id, '_gdhrdv_address', true);
+                $city    = get_post_meta($post_id, '_gdhrdv_city', true);
                 echo esc_html($address . ', ' . $city);
                 break;
 
             case 'availability':
-                $slots = get_post_meta($post_id, '_gdh_slots', true);
+                $slots = get_post_meta($post_id, '_gdhrdv_slots', true);
 
                 // Prepare slots data for Twig
                 $formattedSlots = [];
@@ -289,13 +288,13 @@ class AppointmentPostType
                 break;
 
             case 'destinataire':
-                $destinataire_name = get_post_meta($post_id, '_gdh_destinataire_name', true);
-                $destinataire_email = get_post_meta($post_id, '_gdh_destinataire_email', true);
-                $current_post_type = get_post_meta($post_id, '_gdh_current_post_type', true);
-                $current_post_id = get_post_meta($post_id, '_gdh_current_post_id', true);
+                $destinataire_name = get_post_meta($post_id, '_gdhrdv_destinataire_name', true);
+                $destinataire_email = get_post_meta($post_id, '_gdhrdv_destinataire_email', true);
+                $current_post_type = get_post_meta($post_id, '_gdhrdv_current_post_type', true);
+                $current_post_id = get_post_meta($post_id, '_gdhrdv_current_post_id', true);
                 
                 // Get receiver configuration to determine mode
-                $receivers = get_option('gdh_receivers', []);
+                $receivers = get_option('gdhrdv_receivers', []);
                 $dynamicEnabled = isset($receivers['dynamic']['enabled']) && $receivers['dynamic']['enabled'] === '1';
                 
                 if (!$destinataire_email) {
@@ -330,12 +329,12 @@ class AppointmentPostType
                 break;
 
             case 'email_sent':
-                $email_sent = get_post_meta($post_id, '_gdh_email_sent', true);
+                $email_sent = get_post_meta($post_id, '_gdhrdv_email_sent', true);
                 if ($email_sent === '1') {
                     echo '<span style="color:#46b450;font-weight:600;">✓ Oui</span>';
                 } else {
                     echo '<span style="color:#dc3232;font-weight:600;">✗ Non</span>';
-                    echo '<button type="button" class="button button-small gdh-resend-email" data-post-id="' . esc_attr($post_id) . '" style="margin:0px 30px;">Envoyer</button>';
+                    echo '<button type="button" class="button button-small gdhrdv-resend-email" data-post-id="' . esc_attr($post_id) . '" style="margin:0px 30px;">Envoyer</button>';
                 }
                 break;
         }
@@ -354,7 +353,7 @@ class AppointmentPostType
 
 // []
 
-// [Create anew appointment from form data]
+// [Création d'un rendez-vous à partir des données du formulaire]
 
     public static function createAppointment($data)
     {
@@ -378,19 +377,19 @@ class AppointmentPostType
         }
 
         // Save meta data
-        update_post_meta($post_id, '_gdh_first_name', sanitize_text_field($data['first_name']));
-        update_post_meta($post_id, '_gdh_last_name', sanitize_text_field($data['last_name']));
-        update_post_meta($post_id, '_gdh_email', sanitize_email($data['email']));
-        update_post_meta($post_id, '_gdh_phone', sanitize_text_field($data['phone']));
-        update_post_meta($post_id, '_gdh_address', sanitize_text_field($data['address']));
-        update_post_meta($post_id, '_gdh_postal_code', sanitize_text_field($data['postal_code']));
-        update_post_meta($post_id, '_gdh_city', sanitize_text_field($data['city']));
-        update_post_meta($post_id, '_gdh_accept_terms', $data['accept_terms'] ? '1' : '0');
-        update_post_meta($post_id, '_gdh_email_sent', '0');
+        update_post_meta($post_id, '_gdhrdv_first_name', sanitize_text_field($data['first_name']));
+        update_post_meta($post_id, '_gdhrdv_last_name', sanitize_text_field($data['last_name']));
+        update_post_meta($post_id, '_gdhrdv_email', sanitize_email($data['email']));
+        update_post_meta($post_id, '_gdhrdv_phone', sanitize_text_field($data['phone']));
+        update_post_meta($post_id, '_gdhrdv_address', sanitize_text_field($data['address']));
+        update_post_meta($post_id, '_gdhrdv_postal_code', sanitize_text_field($data['postal_code']));
+        update_post_meta($post_id, '_gdhrdv_city', sanitize_text_field($data['city']));
+        update_post_meta($post_id, '_gdhrdv_accept_terms', $data['accept_terms'] ? '1' : '0');
+        update_post_meta($post_id, '_gdhrdv_email_sent', '0');
 
         // Save slots data
         if (! empty($data['slots']) && is_array($data['slots'])) {
-            update_post_meta($post_id, '_gdh_slots', $data['slots']);
+            update_post_meta($post_id, '_gdhrdv_slots', $data['slots']);
         }
 
         return $post_id;
@@ -398,7 +397,7 @@ class AppointmentPostType
 // [/]
 
     /**
-     * Add JavaScript for resending emails
+     * Ajoute le JavaScript pour renvoyer les e‑mails depuis la liste des rendez‑vous
      */
     public function addResendEmailScript()
     {
@@ -409,48 +408,48 @@ class AppointmentPostType
         ?>
         <script type="text/javascript">
         jQuery(document).ready(function($) {
-            $(document).on('click', '.gdh-resend-email', function() {
+            $(document).on('click', '.gdhrdv-resend-email', function() {
                 const button = $(this);
                 const postId = button.data('post-id');
                 
                 if (!postId) return;
                 
-                // Disable button and show loading state
+                // Désactive le bouton et affiche l'état de chargement
                 button.prop('disabled', true).text('Envoi...');
                 
-                // Send AJAX request
+                // Envoie la requête AJAX
                 $.ajax({
                     url: ajaxurl,
                     type: 'POST',
                     data: {
-                        action: 'gdh_resend_email',
+                        action: 'gdhrdv_resend_email',
                         post_id: postId,
-                        nonce: '<?php echo wp_create_nonce('gdh_resend_email_nonce'); ?>'
+                        nonce: '<?php echo wp_create_nonce('gdhrdv_resend_email'); ?>'
                     },
                     success: function(response) {
                         if (response.success) {
-                            // Update the email_sent column to show success
+                            // Met à jour la colonne "Email envoyé" pour indiquer le succès
                             const row = button.closest('tr');
                             row.find('td.column-email_sent').html('<span style="color:#46b450;font-weight:600;">✓ Oui</span>');
-                            // Remove the button
+                            // Supprime le bouton
                             button.remove();
                             
-                            // Reload page if there was an error message to show
+                            // Recharge la page si un message doit être affiché
                             if (response.data && response.data.reload) {
                                 window.location.reload();
                             }
                         } else {
-                            // Restore button
+                            // Restaure le bouton
                             button.prop('disabled', false).text('Envoyer');
                             
-                            // Reload page to show admin notice
+                            // Recharge la page pour afficher l'avis admin
                             window.location.reload();
                         }
                     },
                     error: function() {
-                        // Restore button
+                        // Restaure le bouton
                         button.prop('disabled', false).text('Envoyer');
-                        // Reload page to show admin notice
+                        // Recharge la page pour afficher l'avis admin
                         window.location.reload();
                     }
                 });
@@ -461,100 +460,47 @@ class AppointmentPostType
     }
     
     /**
-     * AJAX handler for resending email
+     * Méthode statique pour renvoyer un email (appelée par AdminAjaxHandler)
      */
-    public function resendEmail()
+    public static function resendEmail($post_id)
     {
-        // Check nonce
-        if (!isset($_POST['nonce']) || !wp_verify_nonce($_POST['nonce'], 'gdh_resend_email_nonce')) {
-            $this->setAdminNotice('error', 'Erreur de sécurité. Veuillez rafraîchir la page.');
-            wp_send_json_error(['reload' => true]);
-        }
-        
-        // Check post ID
-        $post_id = isset($_POST['post_id']) ? intval($_POST['post_id']) : 0;
-        if (!$post_id) {
-            $this->setAdminNotice('error', 'ID de rendez-vous invalide.');
-            wp_send_json_error(['reload' => true]);
-        }
-        
-        // Check if post exists and is of correct type
-        $post = get_post($post_id);
-        if (!$post || $post->post_type !== self::POST_TYPE) {
-            $this->setAdminNotice('error', 'Rendez-vous introuvable.');
-            wp_send_json_error(['reload' => true]);
-        }
-        
-        // Initialize logger and email service
         $logger = new Logger();
         $emailService = new EmailTemplateService($logger);
         
-        // Prepare form data from post meta
+        // Prépare les données du formulaire depuis les meta
         $formData = [
-            'first_name' => get_post_meta($post_id, '_gdh_first_name', true),
-            'last_name' => get_post_meta($post_id, '_gdh_last_name', true),
-            'email' => get_post_meta($post_id, '_gdh_email', true),
-            'phone' => get_post_meta($post_id, '_gdh_phone', true),
-            'address' => get_post_meta($post_id, '_gdh_address', true),
-            'postal_code' => get_post_meta($post_id, '_gdh_postal_code', true),
-            'city' => get_post_meta($post_id, '_gdh_city', true),
-            'current_post_type' => get_post_meta($post_id, '_gdh_current_post_type', true),
-            'current_post_id' => get_post_meta($post_id, '_gdh_current_post_id', true),
+            'first_name' => get_post_meta($post_id, '_gdhrdv_first_name', true),
+            'last_name' => get_post_meta($post_id, '_gdhrdv_last_name', true),
+            'email' => get_post_meta($post_id, '_gdhrdv_email', true),
+            'phone' => get_post_meta($post_id, '_gdhrdv_phone', true),
+            'address' => get_post_meta($post_id, '_gdhrdv_address', true),
+            'postal_code' => get_post_meta($post_id, '_gdhrdv_postal_code', true),
+            'city' => get_post_meta($post_id, '_gdhrdv_city', true),
+            'current_post_type' => get_post_meta($post_id, '_gdhrdv_current_post_type', true),
+            'current_post_id' => get_post_meta($post_id, '_gdhrdv_current_post_id', true),
         ];
         
-        // Try to send the email
-        try {
-            // Send notification email to receiver
-            $receiverSent = $emailService->sendOnAppointment($post_id, $formData);
+        // Envoi email de notification au destinataire
+        $receiverSent = $emailService->sendOnAppointment($post_id, $formData);
+        
+        if ($receiverSent) {
+            update_post_meta($post_id, '_gdhrdv_email_sent', '1');
             
-            if ($receiverSent) {
-                // Update email sent status
-                update_post_meta($post_id, '_gdh_email_sent', '1');
-                
-                // Check if client confirmation email is enabled
-                $confirmEnabled = get_option('gdh_email_confirm_enabled', '0') === '1';
-                
-                if ($confirmEnabled) {
-                    // Send confirmation email to client
-                    try {
-                        $confirmSent = $emailService->sendConfirmationToClient($post_id, $formData);
-                        if (!$confirmSent) {
-                            $logger->error("Client confirmation email failed for appointment ID: {$post_id}");
-                            $this->setAdminNotice('warning', 'Email destinataire envoyé avec succès, mais l\'email de confirmation au client a échoué.');
-                            wp_send_json_success(['reload' => true]);
-                        } else {
-                            $logger->info("Both emails sent successfully for appointment ID: {$post_id}");
-                            $this->setAdminNotice('success', 'Emails envoyés avec succès au destinataire et au client.');
-                            wp_send_json_success(['reload' => true]);
-                        }
-                    } catch (\Throwable $e) {
-                        $logger->error('GDH Resend: Client confirmation exception - ' . $e->getMessage());
-                        $this->setAdminNotice('warning', 'Email destinataire envoyé avec succès, mais l\'email de confirmation au client a échoué: ' . $e->getMessage());
-                        wp_send_json_success(['reload' => true]);
-                    }
-                } else {
-                    // Client confirmation is disabled, just show success for receiver email
-                    $logger->info("Receiver email resent successfully for appointment ID: {$post_id}");
-                    $this->setAdminNotice('success', 'Email envoyé avec succès au destinataire.');
-                    wp_send_json_success(['reload' => true]);
-                }
-            } else {
-                $logger->error("Failed to resend receiver email for appointment ID: {$post_id}");
-                $this->setAdminNotice('error', 'Échec de l\'envoi de l\'email. Vérifiez la configuration du destinataire.');
-                wp_send_json_error(['reload' => true]);
+            // Envoi confirmation au client si activé
+            $confirmEnabled = get_option('gdhrdv_email_confirm_enabled', '0') === '1';
+            if ($confirmEnabled) {
+                $emailService->sendConfirmationToClient($post_id, $formData);
             }
-        } catch (\Exception $e) {
-            $logger->error("Exception while resending email: " . $e->getMessage());
-            $this->setAdminNotice('error', 'Erreur: ' . $e->getMessage());
-            wp_send_json_error(['reload' => true]);
         }
+        
+        return $receiverSent;
     }
     
     /**
      * Store admin notice in transient for display
      */
     private function setAdminNotice($type, $message) {
-        set_transient('gdh_admin_notice', [
+        set_transient('gdhrdv_admin_notice', [
             'type' => $type,
             'message' => $message
         ], 45); // Expires after 45 seconds
@@ -569,13 +515,13 @@ class AppointmentPostType
             return;
         }
         
-        $notice = get_transient('gdh_admin_notice');
+        $notice = get_transient('gdhrdv_admin_notice');
         if (!$notice) {
             return;
         }
         
         // Clear the notice right after displaying it
-        delete_transient('gdh_admin_notice');
+        delete_transient('gdhrdv_admin_notice');
         
         $type = isset($notice['type']) ? $notice['type'] : 'info';
         $message = isset($notice['message']) ? $notice['message'] : '';

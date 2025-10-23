@@ -1,30 +1,38 @@
 jQuery(document).ready(function ($) {
+  const gdhrdvDebug = (window.gdhrdvData && !!gdhrdvData.debug) || false;
+  const gdhrdvLog = {
+    trace: (...a) => { if (gdhrdvDebug && console && console.trace) try { console.trace(...a); } catch (_) {} },
+    info:  (...a) => { if (gdhrdvDebug && console && console.info)  try { console.info(...a); }  catch (_) {} },
+    warn:  (...a) => { if (gdhrdvDebug && console && console.warn)  try { console.warn(...a); }  catch (_) {} },
+    error: (...a) => { if (gdhrdvDebug && console && console.error) try { console.error(...a); } catch (_) {} },
+  };
+  try { window.GDHRDV = window.GDHRDV || {}; window.GDHRDV.log = gdhrdvLog; } catch (_) {}
   let currentStep = 1;
   const totalSteps = 3;
 
-  // Open modal
-  $(document).on("click", "[data-gdh-rdv-open]", function (e) {
+  // Ouvrir la popup
+  $(document).on("click", "[data-gdhrdv-rdv-open]", function (e) {
     e.preventDefault();
-    $("#gdh-rdv-popup").show();
+    $("#gdhrdv-rdv-popup").show();
     resetForm();
   });
 
-  // Close modal when clicking the close button
-  $(document).on("click", "[data-gdh-rdv-close]", function (e) {
+  // Fermer la popup via le bouton de fermeture
+  $(document).on("click", "[data-gdhrdv-rdv-close]", function (e) {
     e.preventDefault();
-    $("#gdh-rdv-popup").hide();
+    $("#gdhrdv-rdv-popup").hide();
   });
 
-  // Close modal when clicking the overlay
-  $(document).on("click", ".gdh-rdv-popup-overlay", function (e) {
-    $("#gdh-rdv-popup").hide();
+  // Fermer la popup en cliquant sur l'overlay
+  $(document).on("click", ".gdhrdv-rdv-popup-overlay", function (e) {
+    $("#gdhrdv-rdv-popup").hide();
   });
 
-  //next button
-  $(document).on("click", ".gdh-rdv-next", function (e) {
+  // Bouton suivant
+  $(document).on("click", ".gdhrdv-rdv-next", function (e) {
     e.preventDefault();
     
-    const $popup = $(this).closest('.gdh-rdv-popup');
+    const $popup = $(this).closest('.gdhrdv-rdv-popup');
     if (validateCurrentStep($popup)) {
       if (currentStep < totalSteps) {
         currentStep++;
@@ -33,33 +41,33 @@ jQuery(document).ready(function ($) {
     }
   });
 
-  // previous button
-  $(document).on("click", ".gdh-rdv-prev", function (e) {
+  // Bouton précédent
+  $(document).on("click", ".gdhrdv-rdv-prev", function (e) {
     e.preventDefault();
 
-    const $popup = $(this).closest('.gdh-rdv-popup');
+    const $popup = $(this).closest('.gdhrdv-rdv-popup');
     if (currentStep > 1) {
       currentStep--;
       updateStep($popup);
     }
   });
 
-  // submit button - validate and show all errors
-  $(document).on("click", ".gdh-rdv-submit", function (e) {
+  // Bouton envoyer - valide et affiche toutes les erreurs
+  $(document).on("click", ".gdhrdv-rdv-submit", function (e) {
     e.preventDefault();
 
-    const $popup = $(this).closest('.gdh-rdv-popup');
-    // Clear previous errors
-    $popup.find(".gdh-rdv-error").remove();
+    const $popup = $(this).closest('.gdhrdv-rdv-popup');
+    // Nettoyer les erreurs précédentes
+    $popup.find(".gdhrdv-rdv-error").remove();
 
-    // Validate step 3 and show all field errors
+    // Valider l'étape 3 et afficher toutes les erreurs de champs
     const isValid = validateAllFieldsInStep(3, $popup);
 
     if (isValid) {
-      // If validation passes, submit the form
+      // Si la validation passe, soumettre le formulaire
       submitForm();
     } else {
-      // Scroll to first error
+      // Faire défiler jusqu'à la première erreur
       scrollToFirstError();
     }
   });
@@ -67,7 +75,7 @@ jQuery(document).ready(function ($) {
   function validateCurrentStep($popup) {
     let isValid = true;
 
-    $popup.find(".gdh-rdv-error").remove();
+    $popup.find(".gdhrdv-rdv-error").remove();
 
     switch (currentStep) {
       case 1:
@@ -83,12 +91,12 @@ jQuery(document).ready(function ($) {
   }
 
   function updateStep($popup) {
-    $popup.find(".gdh-rdv-step-content").removeClass("active");
-    $popup.find(`.gdh-rdv-step-content[data-step="${currentStep}"]`).addClass("active");
+    $popup.find(".gdhrdv-rdv-step-content").removeClass("active");
+    $popup.find(`.gdhrdv-rdv-step-content[data-step="${currentStep}"]`).addClass("active");
 
-    // Update legacy steps
-    $popup.find(".gdh-rdv-step").removeClass("active completed");
-    $popup.find(".gdh-rdv-step").each(function (index) {
+    // Met à jour les anciens indicateurs d'étapes
+    $popup.find(".gdhrdv-rdv-step").removeClass("active completed");
+    $popup.find(".gdhrdv-rdv-step").each(function (index) {
       if (index + 1 < currentStep) {
         $(this).addClass("completed");
       } else if (index + 1 === currentStep) {
@@ -96,9 +104,9 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    // Update modern step items
-    $popup.find(".gdh-rdv-step-item").removeClass("active completed");
-    $popup.find(".gdh-rdv-step-item").each(function () {
+    // Met à jour les éléments d'étapes modernes
+    $popup.find(".gdhrdv-rdv-step-item").removeClass("active completed");
+    $popup.find(".gdhrdv-rdv-step-item").each(function () {
       const stepNum = parseInt($(this).data("step"));
       if (stepNum < currentStep) {
         $(this).addClass("completed");
@@ -107,9 +115,9 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    // Update connectors
-    $popup.find(".gdh-rdv-step-connector").removeClass("active");
-    $popup.find(".gdh-rdv-step-connector").each(function () {
+    // Met à jour les connecteurs
+    $popup.find(".gdhrdv-rdv-step-connector").removeClass("active");
+    $popup.find(".gdhrdv-rdv-step-connector").each(function () {
       const connector = $(this).data("connector");
       if (connector) {
         const [from, to] = connector.split("-").map(Number);
@@ -123,18 +131,18 @@ jQuery(document).ready(function ($) {
   }
 
   function updateButtons($popup) {
-    const $prevBtn = $popup.find(".gdh-rdv-prev");
-    const $nextBtn = $popup.find(".gdh-rdv-next");
-    const $submitBtn = $popup.find(".gdh-rdv-submit");
+    const $prevBtn = $popup.find(".gdhrdv-rdv-prev");
+    const $nextBtn = $popup.find(".gdhrdv-rdv-next");
+    const $submitBtn = $popup.find(".gdhrdv-rdv-submit");
 
-    // Previous button
+    // Bouton précédent
     if (currentStep === 1) {
       $prevBtn.hide();
     } else {
       $prevBtn.show();
     }
 
-    // Next/Submit buttons
+    // Boutons Suivant/Envoyer
     if (currentStep === totalSteps) {
       $nextBtn.hide();
       $submitBtn.show();
@@ -146,71 +154,71 @@ jQuery(document).ready(function ($) {
 
   function showError(message) {
     const $currentStepContent = $(
-      `.gdh-rdv-step-content[data-step="${currentStep}"]`
+      `.gdhrdv-rdv-step-content[data-step="${currentStep}"]`
     );
     const $errorDiv = $(
-      '<div class="gdh-rdv-error" style="color: #e74c3c; margin-top: 10px; padding: 10px; background: #fdf2f2; border: 1px solid #e74c3c; border-radius: 4px;"></div>'
+      '<div class="gdhrdv-rdv-error" style="color: #e74c3c; margin-top: 10px; padding: 10px; background: #fdf2f2; border: 1px solid #e74c3c; border-radius: 4px;"></div>'
     );
     $errorDiv.text(message);
     $currentStepContent.append($errorDiv);
   }
 
-  // Show success message
+  // Afficher le message de succès
   function showSuccess() {
-    $("#gdh-rdv-form").hide();
-    $("#gdh-rdv-success").show();
+    $("#gdhrdv-rdv-form").hide();
+    $("#gdhrdv-rdv-success").show();
 
-    // Auto-close popup after 3 seconds
+    // Auto-close popup après 3 secondes
     setTimeout(() => {
-      $("#gdh-rdv-popup").hide();
+      $("#gdhrdv-rdv-popup").hide();
     }, 3000);
   }
 
   function resetForm() {
     currentStep = 1;
-    $("#gdh-rdv-form")[0].reset();
-    $("#gdh-rdv-form").show();
-    $("#gdh-rdv-success").hide();
-    $(".gdh-rdv-error").remove();
+    $("#gdhrdv-rdv-form")[0].reset();
+    $("#gdhrdv-rdv-form").show();
+    $("#gdhrdv-rdv-success").hide();
+    $(".gdhrdv-rdv-error").remove();
     resetStep1Slots();
-    const $popup = $("#gdh-rdv-popup");
+    const $popup = $("#gdhrdv-rdv-popup");
     updateStep($popup);
     initStep1Slots();
   }
 
-  const $popup = $("#gdh-rdv-popup");
+  const $popup = $("#gdhrdv-rdv-popup");
   if ($popup.length) updateStep($popup);
 
-  // ===== Real-time Validation for Steps 2 & 3 =====
+  // ===== Validation en temps réel pour les étapes 2 & 3 =====
   function initFieldValidation() {
-    // Validate on blur (when user leaves the field)
-    $(document).on('blur', '.gdh-rdv-field input', function () {
+    // Valider au blur (quand l'utilisateur quitte le champ)
+    $(document).on('blur', '.gdhrdv-rdv-field input', function () {
       validateField($(this));
     });
 
-    // Validate on input (real-time)
-    $(document).on('input', '.gdh-rdv-field input', function () {
+    // Valider à la saisie (temps réel)
+    $(document).on('input', '.gdhrdv-rdv-field input', function () {
       const $input = $(this);
-      // Only validate if field has been touched (has error or was valid)
-      if ($input.hasClass('gdh-rdv-field-error') || $input.closest('.gdh-rdv-field').hasClass('has-error')) {
+      // Valider uniquement si le champ a déjà été touché (erreur ou valide)
+      if ($input.hasClass('gdhrdv-rdv-field-error') || $input.closest('.gdhrdv-rdv-field').hasClass('has-error')) {
         validateField($input);
       }
     });
 
-    // Validate checkbox
-    $(document).on('change', '.gdh-rdv-checkbox-modern input[type="checkbox"]', function () {
+    // Valider la case à cocher
+    $(document).on('change', '.gdhrdv-rdv-checkbox-modern input[type="checkbox"]', function () {
       validateCheckbox($(this));
     });
   }
 
   function validateField($input) {
-    const $field = $input.closest('.gdh-rdv-field');
-    const $errorMsg = $field.find('.gdh-rdv-error-message');
+    const $field = $input.closest('.gdhrdv-rdv-field');
+    const $errorMsg = $field.find('.gdhrdv-rdv-error-message');
     const value = $input.val().trim();
     const errorMessage = $input.data('error-message') || 'Ce champ est requis';
 
     // Remove previous error state
-    $input.removeClass('gdh-rdv-field-error');
+    $input.removeClass('gdhrdv-rdv-field-error');
     $field.removeClass('has-error');
     $errorMsg.hide().text('');
 
@@ -256,7 +264,7 @@ jQuery(document).ready(function ($) {
     }
 
     if (!isValid) {
-      $input.addClass('gdh-rdv-field-error');
+      $input.addClass('gdhrdv-rdv-field-error');
       $field.addClass('has-error');
       $errorMsg.text(customError).show();
     }
@@ -265,9 +273,9 @@ jQuery(document).ready(function ($) {
   }
 
   function validateCheckbox($checkbox) {
-    const $label = $checkbox.closest('.gdh-rdv-checkbox-modern');
-    const $field = $checkbox.closest('.gdh-rdv-field-checkbox');
-    const $errorMsg = $field.find('.gdh-rdv-error-message');
+    const $label = $checkbox.closest('.gdhrdv-rdv-checkbox-modern');
+    const $field = $checkbox.closest('.gdhrdv-rdv-field-checkbox');
+    const $errorMsg = $field.find('.gdhrdv-rdv-error-message');
     const errorMessage = $checkbox.data('error-message') || 'Vous devez accepter les conditions';
 
     // Remove previous error state
@@ -283,20 +291,20 @@ jQuery(document).ready(function ($) {
     return true;
   }
 
-  // Validate all fields in current step
+  // Valider tous les champs de l'étape courante
   function validateAllFieldsInStep(stepNumber, $popup) {
-    const $step = $popup.find(`.gdh-rdv-step-content[data-step="${stepNumber}"]`);
+    const $step = $popup.find(`.gdhrdv-rdv-step-content[data-step="${stepNumber}"]`);
     let isValid = true;
 
-    // Validate all inputs
-    $step.find('.gdh-rdv-field input').each(function () {
+    // Valider tous les inputs
+    $step.find('.gdhrdv-rdv-field input').each(function () {
       if (!validateField($(this))) {
         isValid = false;
       }
     });
 
-    // Validate checkboxes
-    const $checkboxes = $step.find('.gdh-rdv-checkbox-modern input[type="checkbox"]');
+    // Valider les cases à cocher
+    const $checkboxes = $step.find('.gdhrdv-rdv-checkbox-modern input[type="checkbox"]');
     if ($checkboxes.length) {
       $checkboxes.each(function () {
         if (!validateCheckbox($(this))) {
@@ -308,19 +316,19 @@ jQuery(document).ready(function ($) {
     return isValid;
   }
 
-  // Scroll to first error in current step
+  // Faire défiler jusqu'à la première erreur de l'étape courante
   function scrollToFirstError() {
-    const $step = $(`.gdh-rdv-step-content[data-step="${currentStep}"]`);
-    const $firstError = $step.find('.gdh-rdv-field-error, .gdh-rdv-checkbox-modern.has-error').first();
+    const $step = $(`.gdhrdv-rdv-step-content[data-step="${currentStep}"]`);
+    const $firstError = $step.find('.gdhrdv-rdv-field-error, .gdhrdv-rdv-checkbox-modern.has-error').first();
 
     if ($firstError.length) {
-      // Scroll to the error field
+      // Faire défiler jusqu'au champ en erreur
       $firstError[0].scrollIntoView({
         behavior: 'smooth',
         block: 'center'
       });
 
-      // Focus on the field after scroll
+      // Donner le focus au champ après le défilement
       setTimeout(() => {
         if ($firstError.is('input')) {
           $firstError.focus();
@@ -331,50 +339,50 @@ jQuery(document).ready(function ($) {
     }
   }
 
-  // Submit form function
+  // Soumission du formulaire
   function submitForm() {
-    const $form = $("#gdh-rdv-form");
-    const $popup = $("#gdh-rdv-popup");
+    const $form = $("#gdhrdv-rdv-form");
+    const $popup = $("#gdhrdv-rdv-popup");
 
-    // Get current post type and ID for dynamic recipient
+    // Récupère le type de contenu et l'ID courants pour le destinataire dynamique
     const currentPostType = $popup.data('post-type') || '';
     const currentPostId = $popup.data('post-id') || 0;
 
 
-    // Collect form data
+    // Collecte des données du formulaire
     const formData = {
-      // Step 1 - Slots
+      // Étape 1 - Créneaux
       slots: [],
-      // Step 2 - Address
+      // Étape 2 - Adresse
       address: $('input[name="address"]').val(),
       postal_code: $('input[name="postal_code"]').val(),
       city: $('input[name="city"]').val(),
-      // Step 3 - Personal info
+      // Étape 3 - Informations personnelles
       first_name: $('input[name="first_name"]').val(),
       last_name: $('input[name="last_name"]').val(),
       email: $('input[name="email"]').val(),
       phone: $('input[name="phone"]').val(),
       accept_terms: $('input[name="accept_terms"]').is(':checked'),
-      // Recipient information (from hidden inputs)
+      // Informations du destinataire (à partir des champs cachés)
       recipient_email: $('input[name="recipient_email"]').val(),
       recipient_name: $('input[name="recipient_name"]').val(),
-      // Auto-detected post context for dynamic recipient
+      // Contexte de publication auto-détecté pour le destinataire dynamique
       current_post_type: currentPostType,
       current_post_id: currentPostId
     };
 
 
-    // Collect slots data
-    $('.gdh-rdv-slot-card').each(function () {
+    // Collecte des créneaux
+    $('.gdhrdv-rdv-slot-card').each(function () {
       const $card = $(this);
-      const date = $card.find('.gdh-rdv-date').val();
+      const date = $card.find('.gdhrdv-rdv-date').val();
       const times = [];
 
-      $card.find('.gdh-rdv-time.selected').each(function () {
+      $card.find('.gdhrdv-rdv-time.selected').each(function () {
         times.push($(this).data('value'));
       });
 
-      const allDay = $card.find('.gdh-rdv-all-day').hasClass('active');
+      const allDay = $card.find('.gdhrdv-rdv-all-day').hasClass('active');
 
       if (date && (times.length > 0 || allDay)) {
         formData.slots.push({
@@ -384,18 +392,18 @@ jQuery(document).ready(function ($) {
       }
     });
 
-    // Show loading state
-    const $submitBtn = $('.gdh-rdv-submit');
+    // Affiche l'état de chargement
+    const $submitBtn = $('.gdhrdv-rdv-submit');
     const originalText = $submitBtn.text();
     $submitBtn.prop('disabled', true).text('Envoi en cours...');
 
-    // AJAX submission
+    // Soumission AJAX
     $.ajax({
-      url: gdhRdvData.ajaxUrl,
+      url: gdhrdvData.ajaxUrl,
       type: 'POST',
       data: {
-        action: 'gdh_rdv_submit',
-        nonce: gdhRdvData.nonce,
+        action: 'gdhrdv_submit_appointment',
+        nonce: gdhrdvData.nonce,
         formData: JSON.stringify(formData)
       },
       success: function (response) {
@@ -407,29 +415,29 @@ jQuery(document).ready(function ($) {
         }
       },
       error: function (xhr, status, error) {
-        console.error('AJAX Error:', status, error);
-        console.error('Response:', xhr.responseText);
+        gdhrdvLog.error('Erreur AJAX :', status, error);
+        gdhrdvLog.error('Réponse :', xhr.responseText);
         $submitBtn.prop('disabled', false).text(originalText);
         showError('Erreur de connexion. Veuillez réessayer.');
       }
     });
   }
 
-  // Initialize validation
+  // Initialiser la validation
   initFieldValidation();
 
   function initStep1Slots() {
-    const $c = $('.gdh-rdv-step-content[data-step="1"]');
+    const $c = $('.gdhrdv-rdv-step-content[data-step="1"]');
     if (!$c.length) return;
 
-    // Check if already initialized to prevent duplicate event listeners
+    // Évite une double initialisation (listeners dupliqués)
     if ($c.data('slots-initialized')) return;
 
-    const $slotsWrapper = $c.find('.gdh-rdv-slots');
-    const $slotsContainer = $c.find('.gdh-rdv-slots-container');
+    const $slotsWrapper = $c.find('.gdhrdv-rdv-slots');
+    const $slotsContainer = $c.find('.gdhrdv-rdv-slots-container');
     const max = parseInt($slotsWrapper.attr('data-max') || '3', 10);
     const min = parseInt($slotsWrapper.attr('data-min') || '1', 10);
-    const $addBtn = $c.find('.gdh-rdv-add-slot');
+    const $addBtn = $c.find('.gdhrdv-rdv-add-slot');
     const todayStr = new Date().toISOString().slice(0, 10);
 
     const timeSlots = [
@@ -445,7 +453,7 @@ jQuery(document).ready(function ($) {
       const isRequired = index === 1;
       const showRemove = index > min;
 
-      // Professional titles for slots
+      // Titres professionnels pour les créneaux
       const titles = {
         1: 'Disponibilité principale',
         2: 'Disponibilité alternative',
@@ -454,16 +462,16 @@ jQuery(document).ready(function ($) {
 
       const cardTitle = titles[index] || `Disponibilité ${index}`;
 
-      // Try client-side Twig rendering first
+      // Essayer de rendre le modèle Twig côté client en premier
       const context = { index, isRequired, showRemove, todayStr, timeSlots, cardTitle };
       let html = '';
       try {
         if (window.Twig && typeof window.Twig.twig === 'function' &&
-          window.gdhRdvData && window.gdhRdvData.templates && window.gdhRdvData.templates.slotCard) {
-          html = window.Twig.twig({ data: window.gdhRdvData.templates.slotCard }).render(context);
+          window.gdhrdvData && window.gdhrdvData.templates && window.gdhrdvData.templates.slotCard) {
+          html = window.Twig.twig({ data: window.gdhrdvData.templates.slotCard }).render(context);
         }
       } catch (e) {
-        console.error('Twig render error (slotCard):', e);
+        gdhrdvLog.error('Erreur de rendu Twig (slotCard) :', e);
       }
 
       const $card = html && typeof html === 'string' && html.trim().length
@@ -475,13 +483,13 @@ jQuery(document).ready(function ($) {
     }
 
     function attachCardEvents($card) {
-      const $date = $card.find('.gdh-rdv-date');
-      const $dateIcon = $card.find('.gdh-rdv-date-icon');
+      const $date = $card.find('.gdhrdv-rdv-date');
+      const $dateIcon = $card.find('.gdhrdv-rdv-date-icon');
       const $allDay = $card.find('[data-all-day]');
-      const $timeBtns = $card.find('.gdh-rdv-time');
-      const $removeBtn = $card.find('.gdh-rdv-remove-slot');
+      const $timeBtns = $card.find('.gdhrdv-rdv-time');
+      const $removeBtn = $card.find('.gdhrdv-rdv-remove-slot');
 
-      // Date icon click event - trigger date input
+      // Icône du calendrier — déclenche l'ouverture du sélecteur de date
       $dateIcon.on('click', function () {
         $date.focus();
         if ($date[0] && typeof $date[0].showPicker === 'function') {
@@ -489,7 +497,7 @@ jQuery(document).ready(function ($) {
         }
       });
 
-      // Date input click/keyboard - open native picker when available
+      // Clic/clavier sur l'input date — ouvre le sélecteur natif si disponible
       $date.on('click', function () {
         if (this && typeof this.showPicker === 'function') {
           this.showPicker();
@@ -504,14 +512,14 @@ jQuery(document).ready(function ($) {
         }
       });
 
-      // Date change event
+      // Changement de date
       $date.on('change', function () {
         updateCombinedValue($card);
-        // Remove date error when date is selected
+        // Retire l'erreur de date lorsqu'une date est sélectionnée
         if ($date.val()) {
-          $date.removeClass('gdh-rdv-field-error');
+          $date.removeClass('gdhrdv-rdv-field-error');
           // Check if we should clear the whole card error
-          const hasTimeSelected = $card.find('.gdh-rdv-time.selected').length > 0 ||
+          const hasTimeSelected = $card.find('.gdhrdv-rdv-time.selected').length > 0 ||
             $card.find('[data-all-day]').hasClass('active');
           if (hasTimeSelected) {
             clearCardError($card);
@@ -519,7 +527,7 @@ jQuery(document).ready(function ($) {
         }
       });
 
-      // All day button event
+      // Bouton "Toute la journée"
       $allDay.on('click', function () {
         $allDay.toggleClass('active');
         $allDay.attr('aria-pressed', $allDay.hasClass('active') ? 'true' : 'false');
@@ -530,16 +538,16 @@ jQuery(document).ready(function ($) {
           $timeBtns.prop('disabled', false);
         }
         updateCombinedValue($card);
-        // Remove error when time is selected
+        // Retire l'erreur lorsqu'un horaire est sélectionné
         clearCardError($card);
       });
 
-      // Time button events
+      // Boutons d'horaires
       $timeBtns.on('click', function () {
         const $btn = $(this);
         if ($btn.is(':disabled')) return;
 
-        // If all day is active, deactivate it
+        // Si "Toute la journée" est actif, le désactiver
         if ($allDay.hasClass('active')) {
           $allDay.removeClass('active').attr('aria-pressed', 'false');
           $timeBtns.prop('disabled', false);
@@ -548,14 +556,14 @@ jQuery(document).ready(function ($) {
         $btn.toggleClass('selected');
         $btn.attr('aria-pressed', $btn.hasClass('selected') ? 'true' : 'false');
 
-        // Check if all 6 time slots are selected
-        const selectedCount = $card.find('.gdh-rdv-time.selected').length;
+        // Vérifier si les 6 créneaux sont sélectionnés
+        const selectedCount = $card.find('.gdhrdv-rdv-time.selected').length;
         const totalSlots = $timeBtns.length;
 
         if (selectedCount === totalSlots && totalSlots === 6) {
-          // Deselect all time slots
+          // Désélectionner tous les créneaux
           $timeBtns.removeClass('selected').attr('aria-pressed', 'false');
-          // Activate "Toute la journée"
+          // Activer "Toute la journée"
           $allDay.addClass('active').attr('aria-pressed', 'true');
           $timeBtns.prop('disabled', true);
         }
@@ -565,7 +573,7 @@ jQuery(document).ready(function ($) {
         clearCardError($card);
       });
 
-      // Remove button event
+      // Bouton de suppression de créneau
       if ($removeBtn.length) {
         $removeBtn.on('click', function () {
           removeSlotCard($card);
@@ -576,8 +584,8 @@ jQuery(document).ready(function ($) {
     }
 
     function updateCombinedValue($card) {
-      const date = $card.find('.gdh-rdv-date').val();
-      const $combined = $card.find('.gdh-rdv-combined');
+      const date = $card.find('.gdhrdv-rdv-date').val();
+      const $combined = $card.find('.gdhrdv-rdv-combined');
       const $allDay = $card.find('[data-all-day]');
 
       if (!date) {
@@ -592,7 +600,7 @@ jQuery(document).ready(function ($) {
         value += ' | Toute la journée';
         $card.addClass('has-selection has-all-day');
       } else {
-        const selectedTimes = $card.find('.gdh-rdv-time.selected').map(function () {
+        const selectedTimes = $card.find('.gdhrdv-rdv-time.selected').map(function () {
           return $(this).data('value');
         }).get();
 
@@ -610,23 +618,23 @@ jQuery(document).ready(function ($) {
 
     function clearCardError($card) {
       // Remove error classes from the card elements
-      $card.find('.gdh-rdv-date, .gdh-rdv-times-grid').removeClass('gdh-rdv-field-error');
+      $card.find('.gdhrdv-rdv-date, .gdhrdv-rdv-times-grid').removeClass('gdhrdv-rdv-field-error');
 
       // Remove error message from the card
-      $card.find('.gdh-rdv-slot-error').remove();
+      $card.find('.gdhrdv-rdv-slot-error').remove();
 
       // Check if this was the last error in step 1
-      const $step1 = $('.gdh-rdv-step-content[data-step="1"]');
-      const remainingErrors = $step1.find('.gdh-rdv-field-error, .gdh-rdv-slot-error').length;
+      const $step1 = $('.gdhrdv-rdv-step-content[data-step="1"]');
+      const remainingErrors = $step1.find('.gdhrdv-rdv-field-error, .gdhrdv-rdv-slot-error').length;
 
       // If no more errors, remove the general error message
       if (remainingErrors === 0) {
-        $step1.find('.gdh-rdv-error').remove();
+        $step1.find('.gdhrdv-rdv-error').remove();
       }
     }
 
     function addSlotCard() {
-      const currentCount = $slotsWrapper.find('.gdh-rdv-slot-card').length;
+      const currentCount = $slotsWrapper.find('.gdhrdv-rdv-slot-card').length;
       if (currentCount >= max) return;
 
       const newIndex = currentCount + 1;
@@ -634,9 +642,9 @@ jQuery(document).ready(function ($) {
       $slotsWrapper.append($newCard);
       updateAddButtonState();
 
-      // Scroll to show the newly added card
+      // Faire défiler pour afficher la carte ajoutée
       setTimeout(() => {
-        // Get the actual position of the new card after it's been rendered
+        // Récupère la position réelle de la carte après rendu
         const newCardOffset = $newCard[0].offsetLeft;
         const cardWidth = $newCard.outerWidth(true);
         const containerWidth = $slotsContainer.width();
@@ -644,30 +652,30 @@ jQuery(document).ready(function ($) {
 
         let targetScroll;
 
-        // Always scroll to show the new card properly
+        // Toujours faire défiler pour bien afficher la nouvelle carte
         if (newIndex === max) {
-          // For the last card, scroll all the way to the end
+          // Pour la dernière carte, défiler jusqu'à la fin
           targetScroll = scrollWidth - containerWidth;
         } else {
-          // For other cards, position them in the center-right of the viewport
+          // Pour les autres, les centrer dans la zone visible
           targetScroll = newCardOffset - (containerWidth / 2) + (cardWidth / 2);
         }
 
-        // Ensure we don't scroll past boundaries
+        // Empêche de défiler au-delà des limites
         targetScroll = Math.max(0, Math.min(targetScroll, scrollWidth - containerWidth));
 
         $slotsContainer.animate({
           scrollLeft: targetScroll
         }, 600, 'swing');
 
-        // Add a subtle highlight effect for the new card
+        // Ajoute un léger effet de surbrillance sur la nouvelle carte
         $newCard.css('opacity', '0.5').animate({ opacity: '1' }, 500);
 
       }, 150);
     }
 
     function removeSlotCard($card) {
-      const currentCount = $slotsWrapper.find('.gdh-rdv-slot-card').length;
+      const currentCount = $slotsWrapper.find('.gdhrdv-rdv-slot-card').length;
       if (currentCount <= min) return;
 
       $card.fadeOut(200, function () {
@@ -678,37 +686,37 @@ jQuery(document).ready(function ($) {
     }
 
     function reindexCards() {
-      // Professional titles for slots
+      // Titres professionnels pour les créneaux
       const titles = {
         1: 'Disponibilité principale',
         2: 'Disponibilité alternative',
         3: 'Disponibilité de secours'
       };
 
-      $slotsWrapper.find('.gdh-rdv-slot-card').each(function (index) {
+      $slotsWrapper.find('.gdhrdv-rdv-slot-card').each(function (index) {
         const newIndex = index + 1;
         const $card = $(this);
         const cardTitle = titles[newIndex] || `Disponibilité ${newIndex}`;
 
         $card.attr('data-index', newIndex);
-        $card.find('.gdh-rdv-slot-title').text(cardTitle);
-        $card.find('.gdh-rdv-date').attr('name', `slot_${newIndex}_date`);
-        $card.find('.gdh-rdv-combined').attr('name', `slot_${newIndex}`);
+        $card.find('.gdhrdv-rdv-slot-title').text(cardTitle);
+        $card.find('.gdhrdv-rdv-date').attr('name', `slot_${newIndex}_date`);
+        $card.find('.gdhrdv-rdv-combined').attr('name', `slot_${newIndex}`);
 
         // Update required attributes for first card
         if (newIndex === 1) {
-          $card.find('.gdh-rdv-date').attr('required', 'required');
-          $card.find('.gdh-rdv-combined').attr('required', 'required');
-          $card.find('.gdh-rdv-remove-slot').remove();
+          $card.find('.gdhrdv-rdv-date').attr('required', 'required');
+          $card.find('.gdhrdv-rdv-combined').attr('required', 'required');
+          $card.find('.gdhrdv-rdv-remove-slot').remove();
         } else {
-          $card.find('.gdh-rdv-date').removeAttr('required');
-          $card.find('.gdh-rdv-combined').removeAttr('required');
+          $card.find('.gdhrdv-rdv-date').removeAttr('required');
+          $card.find('.gdhrdv-rdv-combined').removeAttr('required');
         }
       });
     }
 
     function updateAddButtonState() {
-      const currentCount = $slotsWrapper.find('.gdh-rdv-slot-card').length;
+      const currentCount = $slotsWrapper.find('.gdhrdv-rdv-slot-card').length;
       $addBtn.prop('disabled', currentCount >= max);
     }
 
@@ -721,92 +729,92 @@ jQuery(document).ready(function ($) {
       updateAddButtonState();
     }
 
-    // Remove any existing event listeners to prevent duplicates
+    // Retire les écouteurs existants pour éviter les doublons
     $addBtn.off('click.slots');
 
-    // Add button event with namespace
+    // Ajoute l'événement du bouton avec un namespace
     $addBtn.on('click.slots', addSlotCard);
 
-    // Initialize with minimum number of slots
+    // Initialise avec le nombre minimum de créneaux
     initializeSlots();
 
-    // Mark as initialized
+    // Marque comme initialisé
     $c.data('slots-initialized', true);
   }
 
   function resetStep1Slots() {
-    const $c = $('.gdh-rdv-step-content[data-step="1"]');
+    const $c = $('.gdhrdv-rdv-step-content[data-step="1"]');
     if (!$c.length) return;
 
-    // Clear initialization flag and re-initialize
+    // Réinitialise le flag d'initialisation et relance l'init
     $c.removeData('slots-initialized');
-    const $addBtn = $c.find('.gdh-rdv-add-slot');
+    const $addBtn = $c.find('.gdhrdv-rdv-add-slot');
     $addBtn.off('click.slots');
 
     initStep1Slots();
   }
 
   function validateStep1Slots() {
-    const $step1 = $('.gdh-rdv-step-content[data-step="1"]');
-    const $cards = $step1.find('.gdh-rdv-slot-card');
-    const $slotsContainer = $step1.find('.gdh-rdv-slots-container');
+    const $step1 = $('.gdhrdv-rdv-step-content[data-step="1"]');
+    const $cards = $step1.find('.gdhrdv-rdv-slot-card');
+    const $slotsContainer = $step1.find('.gdhrdv-rdv-slots-container');
     let isValid = true;
     let firstErrorCard = null;
 
-    // Remove previous error highlights
-    $cards.find('.gdh-rdv-date, .gdh-rdv-times-grid').removeClass('gdh-rdv-field-error');
-    $('.gdh-rdv-slot-error').remove();
+    // Retirer les surbrillances d'erreur précédentes
+    $cards.find('.gdhrdv-rdv-date, .gdhrdv-rdv-times-grid').removeClass('gdhrdv-rdv-field-error');
+    $('.gdhrdv-rdv-slot-error').remove();
 
     $cards.each(function (index) {
       const $card = $(this);
       const cardIndex = index + 1;
       const isRequired = cardIndex === 1;
-      const $date = $card.find('.gdh-rdv-date');
+      const $date = $card.find('.gdhrdv-rdv-date');
       const dateValue = $date.val();
       const $allDay = $card.find('[data-all-day]');
-      const $selectedTimes = $card.find('.gdh-rdv-time.selected');
+      const $selectedTimes = $card.find('.gdhrdv-rdv-time.selected');
       const hasAllDay = $allDay.hasClass('active');
       const hasTimeSelected = $selectedTimes.length > 0;
 
-      // Check if card has any data
+      // Vérifie si la carte a des données
       const hasData = dateValue || hasAllDay || hasTimeSelected;
 
-      // Validation for required first card
+      // Validation pour la première carte (obligatoire)
       if (isRequired) {
         if (!dateValue) {
           isValid = false;
-          $date.addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner une date</div>');
+          $date.addClass('gdhrdv-rdv-field-error');
+          $card.append('<div class="gdhrdv-rdv-slot-error">Veuillez sélectionner une date</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
 
         if (dateValue && !hasAllDay && !hasTimeSelected) {
           isValid = false;
-          $card.find('.gdh-rdv-times-grid').addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
+          $card.find('.gdhrdv-rdv-times-grid').addClass('gdhrdv-rdv-field-error');
+          $card.append('<div class="gdhrdv-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
       }
 
-      // Validation for optional cards (if they have partial data)
+      // Validation pour les cartes facultatives (si données partielles)
       if (!isRequired && hasData) {
         if (!dateValue) {
           isValid = false;
-          $date.addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner une date pour cette disponibilité</div>');
+          $date.addClass('gdhrdv-rdv-field-error');
+          $card.append('<div class="gdhrdv-rdv-slot-error">Veuillez sélectionner une date pour cette disponibilité</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
 
         if (dateValue && !hasAllDay && !hasTimeSelected) {
           isValid = false;
-          $card.find('.gdh-rdv-times-grid').addClass('gdh-rdv-field-error');
-          $card.append('<div class="gdh-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
+          $card.find('.gdhrdv-rdv-times-grid').addClass('gdhrdv-rdv-field-error');
+          $card.append('<div class="gdhrdv-rdv-slot-error">Veuillez sélectionner au moins un horaire ou "Toute la journée"</div>');
           if (!firstErrorCard) firstErrorCard = $card;
         }
       }
     });
 
-    // Scroll to first error if validation failed
+    // Défile jusqu'à la première erreur si la validation échoue
     if (!isValid && firstErrorCard) {
       const cardPosition = firstErrorCard.position().left;
       const containerWidth = $slotsContainer.width();
@@ -817,9 +825,9 @@ jQuery(document).ready(function ($) {
         scrollLeft: Math.max(0, scrollPosition)
       }, 400);
 
-      // Focus on the first error field
+      // Donne le focus au premier champ en erreur
       setTimeout(() => {
-        const $errorField = firstErrorCard.find('.gdh-rdv-field-error').first();
+        const $errorField = firstErrorCard.find('.gdhrdv-rdv-field-error').first();
         if ($errorField.length) {
           $errorField.focus();
         }
@@ -830,4 +838,27 @@ jQuery(document).ready(function ($) {
   }
 
   initStep1Slots();
+
+  // Expose a read-only namespace for organization and debugging (no behavior change)
+  try {
+    window.GDHRDV = window.GDHRDV || {};
+    window.GDHRDV.Frontend = Object.freeze({
+      get state() { return { currentStep, totalSteps }; },
+      validateCurrentStep,
+      updateStep,
+      showError,
+      showSuccess,
+      resetForm,
+      initFieldValidation,
+      validateField,
+      validateCheckbox,
+      validateAllFieldsInStep,
+      scrollToFirstError,
+      submitForm,
+      initStep1Slots,
+      resetStep1Slots,
+      validateStep1Slots,
+      log: gdhrdvLog,
+    });
+  } catch (_) {}
 });

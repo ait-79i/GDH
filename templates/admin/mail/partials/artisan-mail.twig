@@ -1,30 +1,30 @@
-<h3 class="gdh-section-title">Modèle d’e-mail à envoyer au destinataire</h3>
-<table class="form-table gdh-inner-table" role="presentation">
+<h3 class="gdhrdv-section-title">Modèle d’e-mail à envoyer au destinataire</h3>
+<table class="form-table gdhrdv-inner-table" role="presentation">
 	<tr>
 		<th scope="row">
-			<label for="gdh_subject">Sujet</label>
+			<label for="gdhrdv_subject">Sujet</label>
 		</th>
 		<td>
-			<div class="gdh-varbar" style="margin-bottom: 5px;">
+			<div class="gdhrdv-varbar" style="margin-bottom: 5px;">
 				{% for var in variables_sujet_gauche %}
 					{% set placeholder = '{{' ~ var ~ '}}' %}
 					{% set label = var_labels[var]|default(var) %}
-					<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
+					<span class="gdhrdv-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
 				{% endfor %}
 			</div>
-			<input type="text" id="gdh_subject" name="gdh_email_subject" class="regular-text" value="{{ subject_value|e }}" required/>
+			<input type="text" id="gdhrdv_subject" name="gdhrdv_email_subject" class="regular-text" value="{{ subject_value|e }}" required/>
 		</td>
 	</tr>
 	<tr>
 		<th scope="row">
-			<label for="gdh_body">Corps</label>
+			<label for="gdhrdv_body">Corps</label>
 		</th>
 		<td>
-			<div class="gdh-varbar">
+			<div class="gdhrdv-varbar">
 				{% for var in variables %}
 					{% set placeholder = '{{' ~ var ~ '}}' %}
 					{% set label = var_labels[var]|default(var) %}
-					<span class="gdh-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
+					<span class="gdhrdv-chip" data-var="{{ placeholder }}" title="Cliquez pour copier" tabindex="0">{{ '{{' ~ label ~ '}}' }}</span>
 				{% endfor %}
 			</div>
 		</td>
