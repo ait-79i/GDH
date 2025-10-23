@@ -211,7 +211,7 @@ class AppointmentPostType
         $new_columns                 = [];
         $new_columns['cb']           = $columns['cb'];
         $new_columns['title']        = 'Référence';
-        $new_columns['client']       = 'Client';
+        $new_columns['created_at']   = 'Date de création';
         $new_columns['email']        = 'Email';
         $new_columns['phone']        = 'Téléphone';
         $new_columns['address']      = 'Adresse';
@@ -225,10 +225,11 @@ class AppointmentPostType
     public function renderCustomColumns($column, $post_id)
     {
         switch ($column) {
-            case 'client':
-                $first_name = get_post_meta($post_id, '_gdhrdv_first_name', true);
-                $last_name  = get_post_meta($post_id, '_gdhrdv_last_name', true);
-                echo esc_html($first_name . ' ' . $last_name);
+            case 'created_at':
+                $post_obj = get_post($post_id);
+                if ($post_obj) {
+                    echo esc_html(date_i18n('d/m/Y H:i', strtotime($post_obj->post_date)));
+                }
                 break;
 
             case 'email':
