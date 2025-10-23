@@ -29,6 +29,10 @@
   --gdhrdv-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
+/* Visibility controlled by accessibility attribute to avoid theme overrides (supports multiple popups) */
+.gdhrdv-rdv-popup[aria-hidden="true"] { display: none; }
+.gdhrdv-rdv-popup[aria-hidden="false"] { display: flex; }
+
 /* Base Button Styles */
 .gdhrdv-rdv-button {
   display: inline-flex !important;
@@ -102,6 +106,15 @@
   z-index: 9999 !important;
   font-family: var(--gdhrdv-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
   padding: 20px !important;
+  width: 100dvw !important;
+  height: 100dvh !important;
+  margin: 0 !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Scoped box-sizing reset to avoid theme overrides */
+.gdhrdv-rdv-popup, .gdhrdv-rdv-popup * {
+  box-sizing: border-box;
 }
 
 .gdhrdv-rdv-popup-overlay {
@@ -112,6 +125,7 @@
   -webkit-backdrop-filter: blur(12px) !important;
   animation: overlayFadeIn 0.4s ease !important;
 }
+
 
 @keyframes overlayFadeIn {
   from {
@@ -211,6 +225,7 @@
 }
 
 .gdhrdv-rdv-close {
+  padding: 0 !important;
   background: var(--gdhrdv-bg-light) !important;
   border: none !important;
   width: 30px !important;
@@ -269,17 +284,17 @@
 
 /* Step Circle */
 .gdhrdv-rdv-step-circle {
-  width: 48px !important;
-  height: 48px !important;
-  border-radius: 50% !important;
-  background: var(--gdhrdv-bg-light) !important;
-  border: 2px solid var(--gdhrdv-border-light) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  position: relative !important;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) !important;
-  cursor: pointer !important;
+  width: 48px ;
+  height: 48px ;
+  border-radius: 50% ;
+  background: var(--gdhrdv-bg-light) ;
+  border: 2px solid var(--gdhrdv-border-light) ;
+  display: flex ;
+  align-items: center ;
+  justify-content: center ;
+  position: relative ;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) ;
+  cursor: pointer ;
 }
 
 .gdhrdv-rdv-step-circle:hover {
@@ -289,17 +304,23 @@
 
 /* Step Icon */
 .gdhrdv-rdv-step-icon {
-  font-size: 20px !important;
-  color: var(--gdhrdv-text-light) !important;
-  transition: all 0.3s ease !important;
-  display: none !important;
+  font-size: 20px ;
+  color: var(--gdhrdv-text-light) ;
+  transition: all 0.3s ease ;
+  display: none ;
 }
 
 .gdhrdv-rdv-step-number {
-  font-size: 18px !important;
-  font-weight: 700 !important;
-  color: var(--gdhrdv-text-light) !important;
-  transition: all 0.3s ease !important;
+  font-size: 18px ;
+  font-weight: 700 ;
+  color: var(--gdhrdv-text-light) ;
+  transition: all 0.3s ease ;
+}
+
+/* Hide number when step is active or completed */
+.gdhrdv-rdv-step-item.active .gdhrdv-rdv-step-number,
+.gdhrdv-rdv-step-item.completed .gdhrdv-rdv-step-number {
+  display: none;
 }
 
 /* Step Pulse Animation */
@@ -342,10 +363,6 @@
 .gdhrdv-rdv-step-item.active .gdhrdv-rdv-step-icon {
   display: block;
   color: white;
-}
-
-.gdhrdv-rdv-step-item.active .gdhrdv-rdv-step-number {
-  display: none;
 }
 
 .gdhrdv-rdv-step-item.active .gdhrdv-rdv-step-title {
@@ -849,84 +866,81 @@
 }
 
 .gdhrdv-rdv-btn {
-  padding: 11px 20px;
-  border-radius: var(--gdhrdv-radius-md);
-  border: none;
-  font-family: var(--gdhrdv-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--gdhrdv-transition);
-  position: relative;
-  overflow: hidden;
-  letter-spacing: 0.3px;
-  min-width: 120px;
+  padding: 11px 20px !important;
+  border-radius: var(--gdhrdv-radius-md) !important;
+  border: none !important;
+  font-family: var(--gdhrdv-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif) !important;
+  font-size: 13px !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  transition: var(--gdhrdv-transition) !important;
+  position: relative !important;
+  overflow: hidden !important;
+  letter-spacing: 0.3px !important;
+  min-width: 120px !important;
 }
 
 .gdhrdv-rdv-btn::before {
   content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: translate(-50%, -50%);
-  transition: width 0.6s, height 0.6s;
+  position: absolute !important;
+  top: 50% !important;
+  left: 50% !important;
+  width: 0 !important;
+  height: 0 !important;
+  border-radius: 50% !important;
+  background: rgba(255, 255, 255, 0.3) !important;
+  transform: translate(-50%, -50%) !important;
+  transition: width 0.6s, height 0.6s !important;
 }
 
 .gdhrdv-rdv-btn:hover::before {
-  width: 300px;
-  height: 300px;
+  width: 300px !important;
+  height: 300px !important;
 }
 
 .gdhrdv-rdv-btn-primary {
-  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow) 0%, var(--gdhrdv-accent-yellow-dark) 100%);
-  color: var(--gdhrdv-button-text-color, #000000);
-  font-weight: 700;
-  box-shadow: var(--gdhrdv-shadow-md);
+  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow) 0%, var(--gdhrdv-accent-yellow-dark) 100%) !important;
+  color: var(--gdhrdv-button-text-color, #000000) !important;
+  font-weight: 700 !important;
+  box-shadow: var(--gdhrdv-shadow-md) !important;
 }
 
 .gdhrdv-rdv-btn-primary:hover {
-  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow-dark) 0%, #e09616 100%);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4);
+  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow-dark) 0%, #e09616 100%) !important;
+  box-shadow: 0 6px 20px rgba(245, 166, 35, 0.4) !important;
 }
 
 .gdhrdv-rdv-btn-secondary {
-  background: var(--gdhrdv-bg-light);
-  color: var(--gdhrdv-text-dark);
-  font-weight: 600;
-  border: 2px solid var(--gdhrdv-border-light);
+  background: var(--gdhrdv-bg-light) !important;
+  color: var(--gdhrdv-text-dark) !important;
+  font-weight: 600 !important;
 }
 
 .gdhrdv-rdv-btn-secondary:hover {
-  background: white;
-  border-color: var(--gdhrdv-primary-green);
-  color: var(--gdhrdv-primary-green);
-  transform: translateY(-1px);
-  box-shadow: var(--gdhrdv-shadow-sm);
+  background: white !important;
+  border-color: var(--gdhrdv-primary-green) !important;
+  color: var(--gdhrdv-primary-green) !important;
+  transform: translateY(-1px) !important;
 }
 
 .gdhrdv-rdv-btn:active {
-  transform: scale(0.98);
+  transform: scale(0.98) !important;
 }
 
 .gdhrdv-rdv-btn:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-  position: relative;
+  opacity: 0.7 !important;
+  cursor: not-allowed !important;
+  transform: none !important;
+  position: relative !important;
 }
 
 .gdhrdv-rdv-btn:disabled:hover {
-  transform: none;
+  transform: none !important;
   box-shadow: var(--gdhrdv-shadow-md);
 }
 
 .gdhrdv-rdv-btn-primary:disabled {
-  background: linear-gradient(135deg, #d4a017 0%, #c89116 100%);
+  background: linear-gradient(135deg, #d4a017 0%, #c89116 100%) !important;
 }
 
 .gdhrdv-rdv-btn:disabled::after {
@@ -1424,9 +1438,9 @@
   /* Buttons mobile phone */
   .gdhrdv-rdv-form-actions {
     gap: 8px;
-    margin-top: 12px;
     position: fixed;
-    bottom: 1rem;
+    left: 0;
+    bottom: 3rem;
     width: 100%;
   }
 
@@ -1569,18 +1583,10 @@
     height: 14px;
   }
 
-  .gdhrdv-rdv-all-day-badge {
-    top: 5px;
-    right: 8px;
-    font-size: 8px;
-    padding: 2px 5px;
-    border-radius: 6px;
-  }
-
   .gdhrdv-rdv-add-slot {
     position: fixed !important;
-    bottom: 70px !important;
-    right: 16px !important;
+    bottom: 100px !important;
+    right: 50px !important;
     left: auto !important;
     top: auto !important;
     width: 52px;
@@ -1788,24 +1794,24 @@
 }
 
 .gdhrdv-rdv-remove-slot {
-  background: transparent;
-  border: none;
-  color: #999;
-  cursor: pointer;
-  padding: 0;
-  font-size: 24px;
-  line-height: 1;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 24px;
-  height: 24px;
+  background: transparent !important;
+  border: none !important;
+  color: #999 !important;
+  cursor: pointer !important;
+  padding: 0 !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  transition: all 0.3s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .gdhrdv-rdv-remove-slot:hover {
-  color: var(--gdhrdv-error);
-  transform: scale(1.2);
+  color: var(--gdhrdv-error) !important;
+  transform: scale(1.2) !important;
 }
 
 /* Slot Content */
@@ -1942,22 +1948,23 @@
 }
 
 .gdhrdv-rdv-add-slot {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border: none;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow) 0%, var(--gdhrdv-accent-yellow-dark) 100%);
-  color: var(--gdhrdv-button-text-color, #000000);
-  cursor: pointer;
-  transition: var(--gdhrdv-transition);
-  box-shadow: var(--gdhrdv-shadow-md);
-  flex-shrink: 0;
-  font-weight: 700;
-  position: relative;
-  overflow: hidden;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  border: none !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, var(--gdhrdv-accent-yellow) 0%, var(--gdhrdv-accent-yellow-dark) 100%) !important;
+  color: var(--gdhrdv-button-text-color, #000000) !important;
+  cursor: pointer !important;
+  transition: var(--gdhrdv-transition) !important;
+  box-shadow: var(--gdhrdv-shadow-md) !important;
+  flex-shrink: 0 !important;
+  font-weight: 700 !important;
+  position: relative ;
+  overflow: hidden !important;
 }
 
 .gdhrdv-rdv-add-slot::before {
@@ -1999,22 +2006,22 @@
 
 /* Time Buttons */
 .gdhrdv-rdv-time {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 3px;
-  padding: 8px 6px;
-  border-radius: 8px;
-  border: 2px solid var(--gdhrdv-border-light);
-  background: white;
-  color: var(--gdhrdv-text-dark);
-  font-weight: 600;
-  font-size: 11px;
-  cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 3px !important;
+  padding: 8px 6px !important;
+  border-radius: 8px !important;
+  border: 2px solid var(--gdhrdv-border-light) !important;
+  background: white !important;
+  color: var(--gdhrdv-text-dark) !important;
+  font-weight: 600 !important;
+  font-size: 11px !important;
+  cursor: pointer !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  position: relative !important;
+  overflow: hidden !important;
 }
 
 .gdhrdv-rdv-time-icon {
@@ -2069,24 +2076,24 @@
 
 .gdhrdv-rdv-time.selected,
 .gdhrdv-rdv-time[aria-pressed="true"] {
-  background: linear-gradient(135deg, var(--gdhrdv-primary-green) 0%, var(--gdhrdv-primary-green-light) 100%);
-  border-color: var(--gdhrdv-primary-green);
-  color: white;
-  font-weight: 700;
-  box-shadow: 0 6px 20px rgba(0, 104, 71, 0.35);
-  transform: translateY(-4px) scale(1.03);
-  animation: select-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  background: linear-gradient(135deg, var(--gdhrdv-primary-green) 0%, var(--gdhrdv-primary-green-light) 100%) !important;
+  border-color: var(--gdhrdv-primary-green) !important;
+  color: white !important;
+  font-weight: 700 !important;
+  box-shadow: 0 6px 20px rgba(0, 104, 71, 0.35) !important;
+  transform: translateY(-4px) scale(1.03) !important;
+  animation: select-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) !important;
 }
 
 .gdhrdv-rdv-time.selected .gdhrdv-rdv-time-icon,
 .gdhrdv-rdv-time[aria-pressed="true"] .gdhrdv-rdv-time-icon {
-  color: white;
+  color: white !important;
 }
 
 .gdhrdv-rdv-time.selected .gdhrdv-rdv-time-check,
 .gdhrdv-rdv-time[aria-pressed="true"] .gdhrdv-rdv-time-check {
-  opacity: 1;
-  transform: scale(1);
+  opacity: 1 !important;
+  transform: scale(1) !important;
 }
 
 @keyframes select-bounce {
@@ -2105,18 +2112,18 @@
 
 /* All-day Button */
 .gdhrdv-rdv-all-day {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 10px 12px;
-  border-radius: 8px;
-  border: 2px dashed var(--gdhrdv-accent-blue);
-  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%);
-  color: var(--gdhrdv-accent-blue-dark);
-  font-weight: 700;
-  font-size: 11px;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  padding: 10px 12px !important;
+  border-radius: 8px !important;
+  border: 2px dashed var(--gdhrdv-accent-blue) !important;
+  background: linear-gradient(135deg, #e3f2fd 0%, #ffffff 100%) !important;
+  color: var(--gdhrdv-accent-blue-dark) !important;
+  font-weight: 700 !important;
+  font-size: 11px !important;
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
@@ -2124,48 +2131,27 @@
 }
 
 .gdhrdv-rdv-all-day .dashicons {
-  font-size: 16px;
-  width: 16px;
-  height: 16px;
-}
-
-.gdhrdv-rdv-all-day-badge {
-  position: absolute;
-  top: 6px;
-  right: 10px;
-  font-size: 9px;
-  font-weight: 600;
-  padding: 3px 6px;
-  background: var(--gdhrdv-accent-blue);
-  color: white;
-  border-radius: 8px;
-  opacity: 0;
-  transform: scale(0);
-  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+  font-size: 16px !important;
+  width: 16px !important;
+  height: 16px !important;
 }
 
 .gdhrdv-rdv-all-day:hover {
-  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%);
-  border-color: var(--gdhrdv-accent-blue-dark);
-  transform: translateY(-3px);
-  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.25);
+  background: linear-gradient(135deg, #bbdefb 0%, #e3f2fd 100%) !important;
+  border-color: var(--gdhrdv-accent-blue-dark) !important;
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(66, 133, 244, 0.25) !important;
 }
 
 .gdhrdv-rdv-all-day.active,
 .gdhrdv-rdv-all-day[aria-pressed="true"] {
-  background: linear-gradient(135deg, var(--gdhrdv-accent-blue) 0%, var(--gdhrdv-accent-blue-dark) 100%);
-  border-color: var(--gdhrdv-accent-blue-dark);
-  border-style: solid;
-  color: white;
-  box-shadow: 0 6px 24px rgba(26, 115, 232, 0.4);
-  transform: translateY(-4px) scale(1.02);
+  background: linear-gradient(135deg, var(--gdhrdv-accent-blue) 0%, var(--gdhrdv-accent-blue-dark) 100%) !important;
+  border-color: var(--gdhrdv-accent-blue-dark) !important;
+  border-style: solid !important;
+  color: white !important;
+  box-shadow: 0 6px 24px rgba(26, 115, 232, 0.4) !important;
+  transform: translateY(-4px) scale(1.02) !important;
   animation: select-bounce 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-}
-
-.gdhrdv-rdv-all-day.active .gdhrdv-rdv-all-day-badge,
-.gdhrdv-rdv-all-day[aria-pressed="true"] .gdhrdv-rdv-all-day-badge {
-  opacity: 1;
-  transform: scale(1);
 }
 
 /* === Error Styling & Validation === */
@@ -2180,14 +2166,14 @@
 .gdhrdv-rdv-field-error {
   border-color: var(--gdhrdv-error) !important;
   background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%) !important;
-  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  animation: shake 0.4s cubic-bezier(0.36, 0.07, 0.19, 0.97) !important;
   box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.1) !important;
 }
 
 /* Input invalid state (HTML5 validation) */
 .gdhrdv-rdv-field input:invalid:not(:placeholder-shown) {
-  border-color: var(--gdhrdv-error);
-  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+  border-color: var(--gdhrdv-error) !important;
+  background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%) !important;
 }
 
 /* Input valid state */

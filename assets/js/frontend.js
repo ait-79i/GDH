@@ -9,23 +9,87 @@ jQuery(document).ready(function ($) {
   try { window.GDHRDV = window.GDHRDV || {}; window.GDHRDV.log = gdhrdvLog; } catch (_) {}
   let currentStep = 1;
   const totalSteps = 3;
+  let $activePopup = null;
+  let activePopupId = null;
 
   // Ouvrir la popup
   $(document).on("click", "[data-gdhrdv-rdv-open]", function (e) {
     e.preventDefault();
-    $("#gdhrdv-rdv-popup").show();
-    resetForm();
+    try {
+      const $trigger = $(this);
+      const targetSel = $trigger.attr('data-gdhrdv-target') || '';
+      let $popup = targetSel ? $(targetSel) : $trigger.siblings('.gdhrdv-rdv-popup').first();
+      if (!$popup.length) { $popup = $(".gdhrdv-rdv-popup").first(); }
+      if ($popup.length && $popup.parent()[0] !== document.body) {
+        $popup.appendTo(document.body);
+      }
+      if ($popup.length) {
+        $activePopup = $popup;
+        activePopupId = $popup.attr('id') || null;
+        $popup.attr('aria-hidden', 'false');
+        try { $popup.css('display', 'flex'); } catch (_) {}
+        resetForm();
+      } else {
+        gdhrdvLog.warn && gdhrdvLog.warn('GDHRDV: aucun élément .gdhrdv-rdv-popup trouvé pour le déclencheur.');
+      }
+    } catch (_) {}
   });
 
   // Fermer la popup via le bouton de fermeture
   $(document).on("click", "[data-gdhrdv-rdv-close]", function (e) {
     e.preventDefault();
-    $("#gdhrdv-rdv-popup").hide();
+    const $p = $(this).closest('.gdhrdv-rdv-popup');
+    $p.attr('aria-hidden', 'true');
+    try { $p.css('display', 'none'); } catch (_) {}
+    if ($activePopup && $activePopup[0] === $p[0]) { 
+      $activePopup = null;
+      activePopupId = null;
+    }
   });
 
   // Fermer la popup en cliquant sur l'overlay
   $(document).on("click", ".gdhrdv-rdv-popup-overlay", function (e) {
-    $("#gdhrdv-rdv-popup").hide();
+    const $p = $(this).closest('.gdhrdv-rdv-popup');
+    $p.attr('aria-hidden', 'true');
+    try { $p.css('display', 'none'); } catch (_) {}
+    if ($activePopup && $activePopup[0] === $p[0]) { 
+      $activePopup = null;
+      activePopupId = null;
+    }
+  });
+
+  // Fermer en cliquant en dehors du contenu (zone grise si overlay non cliquée)
+  $(document).on('mousedown', '.gdhrdv-rdv-popup', function (e) {
+    const $content = $(this).find('.gdhrdv-rdv-popup-content');
+    if (!$(e.target).closest('.gdhrdv-rdv-popup-content').length) {
+      const $p = $(this);
+      $p.attr('aria-hidden', 'true');
+      try { $p.css('display', 'none'); } catch (_) {}
+      if ($activePopup && $activePopup[0] === $p[0]) { 
+        $activePopup = null;
+        activePopupId = null;
+      }
+    }
+  });
+
+  // Empêche la propagation des clics à l'intérieur du contenu
+  $(document).on('mousedown', '.gdhrdv-rdv-popup-content', function (e) {
+    e.stopPropagation();
+  });
+
+  // Fermer avec la touche Echap
+  $(document).on('keydown', function (e) {
+    if (e.key === 'Escape' || e.key === 'Esc') {
+      const $open = $('.gdhrdv-rdv-popup[aria-hidden="false"]').last();
+      if ($open.length) {
+        $open.attr('aria-hidden', 'true');
+        try { $open.css('display', 'none'); } catch (_) {}
+        if ($activePopup && $activePopup[0] === $open[0]) { 
+          $activePopup = null;
+          activePopupId = null;
+        }
+      }
+    }
   });
 
   // Bouton suivant
@@ -65,7 +129,7 @@ jQuery(document).ready(function ($) {
 
     if (isValid) {
       // Si la validation passe, soumettre le formulaire
-      submitForm();
+      submitForm($popup);
     } else {
       // Faire défiler jusqu'à la première erreur
       scrollToFirstError();
@@ -152,8 +216,9 @@ jQuery(document).ready(function ($) {
     }
   }
 
-  function showError(message) {
-    const $currentStepContent = $(
+  function showError(message, $context) {
+    const $scope = $context && $context.length ? $context : (activePopupId ? $('#' + activePopupId) : ($activePopup || $(document)));
+    const $currentStepContent = $scope.find(
       `.gdhrdv-rdv-step-content[data-step="${currentStep}"]`
     );
     const $errorDiv = $(
@@ -165,29 +230,45 @@ jQuery(document).ready(function ($) {
 
   // Afficher le message de succès
   function showSuccess() {
-    $("#gdhrdv-rdv-form").hide();
-    $("#gdhrdv-rdv-success").show();
+    const $root = activePopupId ? $('#' + activePopupId) : ($activePopup || $(document));
+    $root.find('.gdhrdv-rdv-form').hide();
+    $root.find('.gdhrdv-rdv-success').show();
 
     // Auto-close popup après 3 secondes
     setTimeout(() => {
-      $("#gdhrdv-rdv-popup").hide();
+      const $popup = activePopupId ? $('#' + activePopupId) : ($activePopup || $('.gdhrdv-rdv-popup[aria-hidden="false"]').last());
+      if ($popup && $popup.length) {
+        $popup.attr('aria-hidden', 'true');
+        try { $popup.css('display', 'none'); } catch (_) {}
+        if ($activePopup && $activePopup[0] === $popup[0]) { 
+          $activePopup = null;
+          activePopupId = null;
+        }
+      }
     }, 3000);
   }
 
   function resetForm() {
     currentStep = 1;
-    $("#gdhrdv-rdv-form")[0].reset();
-    $("#gdhrdv-rdv-form").show();
-    $("#gdhrdv-rdv-success").hide();
-    $(".gdhrdv-rdv-error").remove();
+    const $root = activePopupId ? $('#' + activePopupId) : ($activePopup || $(document));
+    const $form = $root.find('.gdhrdv-rdv-form').first();
+    if ($form.length && $form[0] && typeof $form[0].reset === 'function') {
+      $form[0].reset();
+      $form.show();
+    }
+    $root.find('.gdhrdv-rdv-success').hide();
+    $root.find('.gdhrdv-rdv-error').remove();
     resetStep1Slots();
-    const $popup = $("#gdhrdv-rdv-popup");
-    updateStep($popup);
+    const $popup = activePopupId ? $('#' + activePopupId) : ($activePopup || $('.gdhrdv-rdv-popup[aria-hidden="false"]').last());
+    if ($popup && $popup.length) {
+      updateStep($popup);
+    }
     initStep1Slots();
   }
 
-  const $popup = $("#gdhrdv-rdv-popup");
-  if ($popup.length) updateStep($popup);
+  // Initial update only if a popup is already open (rare); otherwise deferred until open
+  const $_initialOpen = $('.gdhrdv-rdv-popup[aria-hidden="false"]').last();
+  if ($_initialOpen.length) updateStep($_initialOpen);
 
   // ===== Validation en temps réel pour les étapes 2 & 3 =====
   function initFieldValidation() {
@@ -317,8 +398,9 @@ jQuery(document).ready(function ($) {
   }
 
   // Faire défiler jusqu'à la première erreur de l'étape courante
-  function scrollToFirstError() {
-    const $step = $(`.gdhrdv-rdv-step-content[data-step="${currentStep}"]`);
+  function scrollToFirstError($context) {
+    const $scope = $context && $context.length ? $context : (activePopupId ? $('#' + activePopupId) : ($activePopup || $(document)));
+    const $step = $scope.find(`.gdhrdv-rdv-step-content[data-step="${currentStep}"]`);
     const $firstError = $step.find('.gdhrdv-rdv-field-error, .gdhrdv-rdv-checkbox-modern.has-error').first();
 
     if ($firstError.length) {
@@ -340,40 +422,50 @@ jQuery(document).ready(function ($) {
   }
 
   // Soumission du formulaire
-  function submitForm() {
-    const $form = $("#gdhrdv-rdv-form");
-    const $popup = $("#gdhrdv-rdv-popup");
+  function submitForm($popup) {
+    // Use the active popup or fallback to activePopupId
+    if (!$popup || !$popup.length) {
+      $popup = activePopupId ? $('#' + activePopupId) : ($activePopup || $('.gdhrdv-rdv-popup[aria-hidden="false"]').last());
+    }
+    const $form = $popup.find('.gdhrdv-rdv-form').first();
 
     // Récupère le type de contenu et l'ID courants pour le destinataire dynamique
     const currentPostType = $popup.data('post-type') || '';
     const currentPostId = $popup.data('post-id') || 0;
 
 
+    // Debug: Log popup info
+    gdhrdvLog.info && gdhrdvLog.info('GDHRDV Submit: Popup ID =', $popup.attr('id'), 'Post Type =', currentPostType, 'Post ID =', currentPostId);
+    gdhrdvLog.info && gdhrdvLog.info('GDHRDV Submit: Form fields found =', $popup.find('input').length);
+    
     // Collecte des données du formulaire
     const formData = {
       // Étape 1 - Créneaux
       slots: [],
       // Étape 2 - Adresse
-      address: $('input[name="address"]').val(),
-      postal_code: $('input[name="postal_code"]').val(),
-      city: $('input[name="city"]').val(),
+      address: $popup.find('input[name="address"]').val(),
+      postal_code: $popup.find('input[name="postal_code"]').val(),
+      city: $popup.find('input[name="city"]').val(),
       // Étape 3 - Informations personnelles
-      first_name: $('input[name="first_name"]').val(),
-      last_name: $('input[name="last_name"]').val(),
-      email: $('input[name="email"]').val(),
-      phone: $('input[name="phone"]').val(),
-      accept_terms: $('input[name="accept_terms"]').is(':checked'),
+      first_name: $popup.find('input[name="first_name"]').val(),
+      last_name: $popup.find('input[name="last_name"]').val(),
+      email: $popup.find('input[name="email"]').val(),
+      phone: $popup.find('input[name="phone"]').val(),
+      accept_terms: $popup.find('input[name="accept_terms"]').is(':checked'),
       // Informations du destinataire (à partir des champs cachés)
-      recipient_email: $('input[name="recipient_email"]').val(),
-      recipient_name: $('input[name="recipient_name"]').val(),
+      recipient_email: $popup.find('input[name="recipient_email"]').val(),
+      recipient_name: $popup.find('input[name="recipient_name"]').val(),
       // Contexte de publication auto-détecté pour le destinataire dynamique
       current_post_type: currentPostType,
       current_post_id: currentPostId
     };
+    
+    // Debug: Log collected data
+    gdhrdvLog.info && gdhrdvLog.info('GDHRDV Submit: Collected form data =', formData);
 
 
     // Collecte des créneaux
-    $('.gdhrdv-rdv-slot-card').each(function () {
+    $popup.find('.gdhrdv-rdv-slot-card').each(function () {
       const $card = $(this);
       const date = $card.find('.gdhrdv-rdv-date').val();
       const times = [];
@@ -393,8 +485,9 @@ jQuery(document).ready(function ($) {
     });
 
     // Affiche l'état de chargement
-    const $submitBtn = $('.gdhrdv-rdv-submit');
-    const originalText = $submitBtn.text();
+    const $submitBtn = $popup.find('.gdhrdv-rdv-submit');
+    const originalText = $submitBtn.data('orig-text') || ($submitBtn.first().text() || '').trim();
+    $submitBtn.data('orig-text', originalText);
     $submitBtn.prop('disabled', true).text('Envoi en cours...');
 
     // Soumission AJAX
@@ -427,7 +520,8 @@ jQuery(document).ready(function ($) {
   initFieldValidation();
 
   function initStep1Slots() {
-    const $c = $('.gdhrdv-rdv-step-content[data-step="1"]');
+    const $root = activePopupId ? $('#' + activePopupId) : ($activePopup || $(document));
+    const $c = $root.find('.gdhrdv-rdv-step-content[data-step="1"]');
     if (!$c.length) return;
 
     // Évite une double initialisation (listeners dupliqués)
@@ -624,7 +718,7 @@ jQuery(document).ready(function ($) {
       $card.find('.gdhrdv-rdv-slot-error').remove();
 
       // Check if this was the last error in step 1
-      const $step1 = $('.gdhrdv-rdv-step-content[data-step="1"]');
+      const $step1 = $root.find('.gdhrdv-rdv-step-content[data-step="1"]');
       const remainingErrors = $step1.find('.gdhrdv-rdv-field-error, .gdhrdv-rdv-slot-error').length;
 
       // If no more errors, remove the general error message
@@ -743,7 +837,8 @@ jQuery(document).ready(function ($) {
   }
 
   function resetStep1Slots() {
-    const $c = $('.gdhrdv-rdv-step-content[data-step="1"]');
+    const $root = activePopupId ? $('#' + activePopupId) : ($activePopup || $(document));
+    const $c = $root.find('.gdhrdv-rdv-step-content[data-step="1"]');
     if (!$c.length) return;
 
     // Réinitialise le flag d'initialisation et relance l'init
@@ -754,8 +849,9 @@ jQuery(document).ready(function ($) {
     initStep1Slots();
   }
 
-  function validateStep1Slots() {
-    const $step1 = $('.gdhrdv-rdv-step-content[data-step="1"]');
+  function validateStep1Slots($context) {
+    const $scope = $context && $context.length ? $context : (activePopupId ? $('#' + activePopupId) : ($activePopup || $(document)));
+    const $step1 = $scope.find('.gdhrdv-rdv-step-content[data-step="1"]');
     const $cards = $step1.find('.gdhrdv-rdv-slot-card');
     const $slotsContainer = $step1.find('.gdhrdv-rdv-slots-container');
     let isValid = true;

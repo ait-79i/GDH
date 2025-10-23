@@ -8,32 +8,32 @@
 
 	<div class="gdhrdv-rdv-form-section">
 		<div class="gdhrdv-rdv-field gdhrdv-rdv-field-full">
-			<label for="address">
+			<label for="{{ popup_id }}-address">
 				<span class="gdhrdv-rdv-label-icon dashicons dashicons-admin-home"></span>
 				<span class="gdhrdv-rdv-label-text">Adresse complète</span>
 				<span class="gdhrdv-rdv-required">*</span>
 			</label>
-			<input type="text" id="address" name="address" placeholder="Ex: 123 Rue de la République" data-error-message="Veuillez saisir une adresse valide" required>
+			<input type="text" id="{{ popup_id }}-address" name="address" placeholder="Ex: 123 Rue de la République" data-error-message="Veuillez saisir une adresse valide" required>
 			<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 		</div>
 
 		<div class="gdhrdv-rdv-field-group gdhrdv-rdv-field-row">
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-small">
-				<label for="postal_code">
+				<label for="{{ popup_id }}-postal_code">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-admin-post"></span>
 					<span class="gdhrdv-rdv-label-text">Code postal</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="text" id="postal_code" name="postal_code" placeholder="75001" data-error-message="Le code postal doit contenir 5 chiffres" required pattern="[0-9]{5}" maxlength="5">
+				<input type="text" id="{{ popup_id }}-postal_code" name="postal_code" placeholder="75001" data-error-message="Le code postal doit contenir 5 chiffres" required pattern="[0-9]{5}" maxlength="5">
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-large">
-				<label for="city">
+				<label for="{{ popup_id }}-city">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-building"></span>
 					<span class="gdhrdv-rdv-label-text">Ville</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="text" id="city" name="city" placeholder="Paris" data-error-message="Veuillez saisir une ville valide" required>
+				<input type="text" id="{{ popup_id }}-city" name="city" placeholder="Paris" data-error-message="Veuillez saisir une ville valide" required>
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 		</div>

@@ -14,11 +14,14 @@ class FrontendController
         $this->logger = $logger;
         $this->twig   = $twig;
         $this->init();
+        
+
     }
 
     private function init()
     {
         add_action('wp_enqueue_scripts', [$this, 'enqueue_front_scripts'], 99);
+
     }
 
     public function enqueue_front_scripts()

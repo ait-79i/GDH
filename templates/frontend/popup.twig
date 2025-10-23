@@ -1,14 +1,15 @@
+
 {% if config_error %}
 	<div class="gdhrdv-rdv-config-error" style="background:#fff3cd;border:1px solid #ffc107;border-radius:4px;padding:15px;margin:10px 0;color:#856404;">
 		<strong>⚠️ Configuration requise</strong>
 		<p style="margin:10px 0 0 0;">{{ config_error|raw }}</p>
 	</div>
 {% else %}
-	<button type="button" class="{{ class }}" data-gdhrdv-rdv-open style="{{ style }}">
+	<button type="button" class="{{ class }}" data-gdhrdv-rdv-open data-gdhrdv-target="#{{ popup_id }}" style="{{ style }}">
 		{{ button_label }}
 	</button>
 
-	<div id="gdhrdv-rdv-popup" class="gdhrdv-rdv-popup" style="display: none;" data-post-type="{{ current_post_type }}" data-post-id="{{ current_post_id }}">
+	<div id="{{ popup_id }}" class="gdhrdv-rdv-popup" aria-hidden="true" role="dialog" aria-modal="true" data-post-type="{{ current_post_type }}" data-post-id="{{ current_post_id }}">
 	<div class="gdhrdv-rdv-popup-overlay"></div>
 	<div
 		class="gdhrdv-rdv-popup-content">
@@ -23,26 +24,26 @@
 
 		{# Form #}
 		<form
-			id="gdhrdv-rdv-form" class="gdhrdv-rdv-form">
+			id="{{ popup_id }}-form" class="gdhrdv-rdv-form">
 			{# Hidden inputs for recipient information #}
 			<input type="hidden" name="recipient_email" value="{{ recipient_email }}" />
 			<input type="hidden" name="recipient_name" value="{{ recipient_name }}" />
 			
 			{# Step 1: Time Slots #}
-			{% include 'frontend/steps/step-1-slots.twig' %}
+			{% include 'frontend/steps/step-1-slots.twig' with {'popup_id': popup_id} %}
 
 			{# Step 2: Slots #}
-			{% include 'frontend/steps/step-2-slots.twig' %}
+			{% include 'frontend/steps/step-2-slots.twig' with {'popup_id': popup_id} %}
 
 			{# Step 3: Slots #}
-			{% include 'frontend/steps/step-3-slots.twig' %}
+			{% include 'frontend/steps/step-3-slots.twig' with {'popup_id': popup_id} %}
 
 			{# Form Actions #}
 			{% include 'frontend/parts/form-actions.twig' %}
 		</form>
 
 		{# Success Message #}
-		{% include 'frontend/parts/success.twig' %}
+		{% include 'frontend/parts/success.twig' with {'popup_id': popup_id} %}
 	</div>
 </div>
 {% endif %}

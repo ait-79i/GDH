@@ -63,6 +63,10 @@ class ShortcodeManager
             }
         }
 
+        // Génère un ID de popup unique et prédictible
+        $base_id  = substr(uniqid('', false), -6);
+        $popup_id = 'gdhrdv-rdv-popup-' . $base_id;
+
         // Valide la configuration
         $config_error = $this->validateConfiguration($current_post_type);
 
@@ -100,6 +104,7 @@ class ShortcodeManager
             'config_error'      => $config_error,
             'recipient_email'   => $recipient_email,
             'recipient_name'    => $recipient_name,
+            'popup_id'          => $popup_id,
         ]);
 
         if (trim($html) === '') {

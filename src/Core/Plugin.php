@@ -43,15 +43,13 @@ class Plugin
         // Enregistre les types de contenu personnalisés
         new AppointmentPostType();
 
-        // Enregistre les gestionnaires AJAX séparés
         new FrontendAjaxHandler($this->logger);
+        new FrontendController($this->logger, $this->twig);
         
         if (is_admin()) {
             new AdminController();
             new AdminAjaxHandler($this->logger);
-        } else {
-            new FrontendController($this->logger, $this->twig);
-        }
+        } 
 
         new ShortcodeManager($this->logger, $this->twig);
     }

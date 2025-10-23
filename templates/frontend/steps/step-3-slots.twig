@@ -9,42 +9,42 @@
 	<div class="gdhrdv-rdv-form-section">
 		<div class="gdhrdv-rdv-field-group gdhrdv-rdv-field-row">
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-half">
-				<label for="first_name">
+				<label for="{{ popup_id }}-first_name">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-admin-users"></span>
 					<span class="gdhrdv-rdv-label-text">Prénom</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="text" id="first_name" name="first_name" placeholder="Jean" data-error-message="Veuillez saisir votre prénom" minlength="2" required>
+				<input type="text" id="{{ popup_id }}-first_name" name="first_name" placeholder="Jean" data-error-message="Veuillez saisir votre prénom" minlength="2" required>
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-half">
-				<label for="last_name">
+				<label for="{{ popup_id }}-last_name">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-groups"></span>
 					<span class="gdhrdv-rdv-label-text">Nom</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="text" id="last_name" name="last_name" placeholder="Dupont" data-error-message="Veuillez saisir votre nom" minlength="2" required>
+				<input type="text" id="{{ popup_id }}-last_name" name="last_name" placeholder="Dupont" data-error-message="Veuillez saisir votre nom" minlength="2" required>
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 		</div>
 
 		<div class="gdhrdv-rdv-field-group gdhrdv-rdv-field-row">
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-half">
-				<label for="email">
+				<label for="{{ popup_id }}-email">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-email"></span>
 					<span class="gdhrdv-rdv-label-text">Email</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="email" id="email" name="email" placeholder="jean.dupont@exemple.fr" data-error-message="Veuillez saisir une adresse email valide" required>
+				<input type="email" id="{{ popup_id }}-email" name="email" placeholder="jean.dupont@exemple.fr" data-error-message="Veuillez saisir une adresse email valide" required>
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 			<div class="gdhrdv-rdv-field gdhrdv-rdv-field-half">
-				<label for="phone">
+				<label for="{{ popup_id }}-phone">
 					<span class="gdhrdv-rdv-label-icon dashicons dashicons-phone"></span>
 					<span class="gdhrdv-rdv-label-text">Téléphone</span>
 					<span class="gdhrdv-rdv-required">*</span>
 				</label>
-				<input type="tel" id="phone" name="phone" placeholder="06 12 34 56 78" data-error-message="Veuillez saisir un numéro de téléphone valide" pattern="[0-9\s\.\-\+]{10,}" required>
+				<input type="tel" id="{{ popup_id }}-phone" name="phone" placeholder="06 12 34 56 78" data-error-message="Veuillez saisir un numéro de téléphone valide" pattern="[0-9\s\.\-\+]{10,}" required>
 				<div class="gdhrdv-rdv-error-message" style="display: none;"></div>
 			</div>
 		</div>

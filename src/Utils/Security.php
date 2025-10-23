@@ -101,7 +101,7 @@ class Security
         // Vérifie l'acceptation des CGV si configurées (via gdhrdv_design_settings)
         $design_opts = get_option('gdhrdv_design_settings', []);
         $cgvPageId = is_array($design_opts) && isset($design_opts['cgv_page_id']) ? (string) $design_opts['cgv_page_id'] : '';
-        if ($cgvPageId !== '' && !$data['accept_terms']) {
+        if ($cgvPageId && !$data['accept_terms']) {
             return false;
         }
 
