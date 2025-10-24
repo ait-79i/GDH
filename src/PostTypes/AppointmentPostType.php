@@ -24,6 +24,9 @@ class AppointmentPostType
         add_action('admin_head', [$this, 'makeTitleReadonly']);
         add_action('admin_footer', [$this, 'addResendEmailScript']);
         add_action('admin_notices', [$this, 'displayAdminNotices']);
+        
+        // Ajouter la recherche personnalisée pour les champs meta
+        add_filter('posts_where', [$this, 'extendSearchToCustomFields'], 10, 2);
     }
 
     public function register()
@@ -533,5 +536,59 @@ class AppointmentPostType
         
         $class = 'notice notice-' . $type . ' is-dismissible';
         printf('<div class="%1$s"><p>%2$s</p></div>', esc_attr($class), esc_html($message));
+    }
+    
+    /**
+     * Étend la recherche WordPress aux champs personnalisés pour les rendez-vous
+     * 
+     * @param string $where La clause WHERE de la requête SQL
+     * @param WP_Query $wp_query L'objet WP_Query
+     * @return string La clause WHERE modifiée
+     */
+    public function extendSearchToCustomFields($where, $wp_query) {
+        global $wpdb;
+        
+        // Ne s'applique qu'aux recherches dans l'admin pour notre type de post
+        if (!is_admin() || empty($wp_query->query_vars['s']) || $wp_query->query_vars['post_type'] !== self::POST_TYPE) {
+            return $where;
+        }
+        
+        $search_term = $wp_query->query_vars['s'];
+        
+        // Échapper le terme de recherche pour la requête SQL
+        $search_term_like = '%' . $wpdb->esc_like($search_term) . '%';
+        
+        // Champs meta à inclure dans la recherche
+        $meta_keys = [
+            '_gdhrdv_phone',           // Téléphone du lead
+            '_gdhrdv_email',           // Email du lead
+            '_gdhrdv_destinataire_email', // Email du destinataire
+            '_gdhrdv_destinataire_name',  // Nom du destinataire
+            '_gdhrdv_first_name',       // Prénom du lead
+            '_gdhrdv_last_name',        // Nom du lead
+            '_gdhrdv_address',          // Adresse d'intervention
+            '_gdhrdv_postal_code',      // Code postal
+            '_gdhrdv_city',             // Ville
+        ];
+        
+        // Construire la requête SQL pour rechercher dans les meta
+        $meta_query = [];
+        foreach ($meta_keys as $meta_key) {
+            $meta_query[] = $wpdb->prepare(
+                "(pm.meta_key = %s AND pm.meta_value LIKE %s)",
+                $meta_key,
+                $search_term_like
+            );
+        }
+        
+        // Joindre toutes les conditions avec OR
+        $meta_query = implode(' OR ', $meta_query);
+        
+        // Ajouter la recherche dans les meta à la clause WHERE existante
+        $where .= " OR ($wpdb->posts.post_type = '" . self::POST_TYPE . "' AND $wpdb->posts.ID IN (
+            SELECT DISTINCT post_id FROM $wpdb->postmeta pm WHERE $meta_query
+        ))";
+        
+        return $where;
     }
 }
