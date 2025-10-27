@@ -9,9 +9,15 @@
 	}
 	.gdhrdv-meta-field input[type="text"],
 	.gdhrdv-meta-field input[type="email"],
-	.gdhrdv-meta-field input[type="tel"] {
+	.gdhrdv-meta-field input[type="tel"],
+	.gdhrdv-meta-field textarea {
 		width: 100%;
 		padding: 8px;
+	}
+	.gdhrdv-meta-field textarea {
+		min-height: 80px;
+		resize: vertical;
+		font-family: inherit;
 	}
 	.gdhrdv-meta-field-group {
 		display: flex;
@@ -43,6 +49,13 @@
 		<input type="tel" id="gdhrdv_phone" name="gdhrdv_phone" value="{{ phone }}" readonly>
 	</div>
 </div>
+
+{% if message %}
+<div class="gdhrdv-meta-field">
+	<label for="gdhrdv_message">Message du client</label>
+	<textarea id="gdhrdv_message" name="gdhrdv_message" readonly>{{ message }}</textarea>
+</div>
+{% endif %}
 
 <div class="gdhrdv-meta-field">
 	<label>

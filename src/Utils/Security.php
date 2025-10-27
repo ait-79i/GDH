@@ -40,6 +40,14 @@ class Security
             $sanitized[$field] = isset($data[$field]) ? sanitize_text_field($data[$field]) : '';
         }
         
+        // Message (textarea avec limite de caractères)
+        $sanitized['message'] = '';
+        if (isset($data['message']) && is_string($data['message'])) {
+            $message = wp_strip_all_tags($data['message']); // Retire les balises HTML
+            $message = substr($message, 0, 500); // Limite à 500 caractères
+            $sanitized['message'] = sanitize_textarea_field($message);
+        }
+        
         // Email
         $sanitized['email'] = isset($data['email']) ? sanitize_email($data['email']) : '';
         

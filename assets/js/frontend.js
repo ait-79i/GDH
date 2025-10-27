@@ -277,12 +277,32 @@ jQuery(document).ready(function ($) {
       validateField($(this));
     });
 
+    // Valider au blur pour le textarea
+    $(document).on('blur', '.gdhrdv-rdv-field textarea', function () {
+      validateTextarea($(this));
+    });
+
     // Valider à la saisie (temps réel)
     $(document).on('input', '.gdhrdv-rdv-field input', function () {
       const $input = $(this);
       // Valider uniquement si le champ a déjà été touché (erreur ou valide)
       if ($input.hasClass('gdhrdv-rdv-field-error') || $input.closest('.gdhrdv-rdv-field').hasClass('has-error')) {
         validateField($input);
+      }
+    });
+
+    // Gérer le compteur de caractères pour le textarea message
+    $(document).on('input', 'textarea[name="message"]', function () {
+      const $textarea = $(this);
+      const $counter = $textarea.siblings('.gdhrdv-rdv-field-counter').find('.gdhrdv-rdv-counter-text');
+      const maxLength = parseInt($textarea.attr('maxlength') || '500', 10);
+      const currentLength = $textarea.val().length;
+      
+      $counter.text(`${currentLength}/${maxLength} caractères`);
+      
+      // Validation optionnelle si le champ a déjà été touché
+      if ($textarea.hasClass('gdhrdv-rdv-field-error') || $textarea.closest('.gdhrdv-rdv-field').hasClass('has-error')) {
+        validateTextarea($textarea);
       }
     });
 
@@ -372,6 +392,41 @@ jQuery(document).ready(function ($) {
     return true;
   }
 
+  function validateTextarea($textarea) {
+    const $field = $textarea.closest('.gdhrdv-rdv-field');
+    const $errorMsg = $field.find('.gdhrdv-rdv-error-message');
+    const value = $textarea.val().trim();
+    const maxLength = parseInt($textarea.attr('maxlength') || '500', 10);
+    const errorMessage = $textarea.data('error-message') || 'Ce champ contient trop de caractères';
+
+    // Remove previous error state
+    $textarea.removeClass('gdhrdv-rdv-field-error');
+    $field.removeClass('has-error');
+    $errorMsg.hide().text('');
+
+    let isValid = true;
+    let customError = '';
+
+    // Check if field is required and empty
+    if ($textarea.prop('required') && !value) {
+      isValid = false;
+      customError = $textarea.data('error-message') || 'Ce champ est requis';
+    }
+    // Check maxlength
+    else if (value && value.length > maxLength) {
+      isValid = false;
+      customError = `Le message ne peut pas dépasser ${maxLength} caractères`;
+    }
+
+    if (!isValid) {
+      $textarea.addClass('gdhrdv-rdv-field-error');
+      $field.addClass('has-error');
+      $errorMsg.text(customError).show();
+    }
+
+    return isValid;
+  }
+
   // Valider tous les champs de l'étape courante
   function validateAllFieldsInStep(stepNumber, $popup) {
     const $step = $popup.find(`.gdhrdv-rdv-step-content[data-step="${stepNumber}"]`);
@@ -380,6 +435,13 @@ jQuery(document).ready(function ($) {
     // Valider tous les inputs
     $step.find('.gdhrdv-rdv-field input').each(function () {
       if (!validateField($(this))) {
+        isValid = false;
+      }
+    });
+
+    // Valider les textareas
+    $step.find('.gdhrdv-rdv-field textarea').each(function () {
+      if (!validateTextarea($(this))) {
         isValid = false;
       }
     });
@@ -451,6 +513,7 @@ jQuery(document).ready(function ($) {
       last_name: $popup.find('input[name="last_name"]').val(),
       email: $popup.find('input[name="email"]').val(),
       phone: $popup.find('input[name="phone"]').val(),
+      message: $popup.find('textarea[name="message"]').val(),
       accept_terms: $popup.find('input[name="accept_terms"]').is(':checked'),
       // Informations du destinataire (à partir des champs cachés)
       recipient_email: $popup.find('input[name="recipient_email"]').val(),
@@ -948,6 +1011,7 @@ jQuery(document).ready(function ($) {
       initFieldValidation,
       validateField,
       validateCheckbox,
+      validateTextarea,
       validateAllFieldsInStep,
       scrollToFirstError,
       submitForm,

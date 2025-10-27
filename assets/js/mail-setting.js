@@ -4,10 +4,10 @@
   // Logger conditionnel (affiche uniquement si debug est activé)
   const gdhrdvDebug = (window.gdhrdvMailSettings && !!gdhrdvMailSettings.debug) || false;
   const gdhrdvLog = {
-    trace: (...a) => { if (gdhrdvDebug && console && console.trace) try { console.trace(...a); } catch (_) {} },
-    info:  (...a) => { if (gdhrdvDebug && console && console.info)  try { console.info(...a); }  catch (_) {} },
-    warn:  (...a) => { if (gdhrdvDebug && console && console.warn)  try { console.warn(...a); }  catch (_) {} },
-    error: (...a) => { if (gdhrdvDebug && console && console.error) try { console.error(...a); } catch (_) {} },
+    trace: (...a) => { if (gdhrdvDebug && console && console.trace) try { console.trace(...a); } catch (_) { } },
+    info: (...a) => { if (gdhrdvDebug && console && console.info) try { console.info(...a); } catch (_) { } },
+    warn: (...a) => { if (gdhrdvDebug && console && console.warn) try { console.warn(...a); } catch (_) { } },
+    error: (...a) => { if (gdhrdvDebug && console && console.error) try { console.error(...a); } catch (_) { } },
   };
 
   // Copy placeholder chips to clipboard
@@ -36,6 +36,7 @@
         '<li>E‑mail&nbsp;: {{email_lead}}</li>' +
         '<li>Téléphone&nbsp;: {{phone}}</li>' +
         '<li>Adresse&nbsp;: {{address}}, {{postal_code}} {{city}}</li>' +
+        '<li>Message&nbsp;: {{message}}</li>' +
         '</ul>' +
         '<h3 style="margin:16px 0 8px;">Créneaux proposés</h3>' +
         '{{creneaux_rdv}}' +
@@ -56,6 +57,7 @@
         '<li>E‑mail&nbsp;: {{email_lead}}</li>' +
         '<li>Téléphone&nbsp;: {{phone}}</li>' +
         '<li>Adresse&nbsp;: {{address}}, {{postal_code}} {{city}}</li>' +
+        '<li>Message&nbsp;: {{message}}</li>' +
         '</ul>' +
         '<p>Cordialement</p>'
       )
@@ -506,5 +508,5 @@
       gdhrdvPopulateMetaSelect,
       gdhrdvFetchAndPopulateMeta,
     });
-  } catch (_) {}
+  } catch (_) { }
 })(jQuery);

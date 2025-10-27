@@ -114,6 +114,7 @@ class AppointmentPostType
             'last_name'    => get_post_meta($post->ID, '_gdhrdv_last_name', true),
             'email'        => get_post_meta($post->ID, '_gdhrdv_email', true),
             'phone'        => get_post_meta($post->ID, '_gdhrdv_phone', true),
+            'message'      => get_post_meta($post->ID, '_gdhrdv_message', true),
             'accept_terms' => get_post_meta($post->ID, '_gdhrdv_accept_terms', true),
         ]);
     }
@@ -388,6 +389,7 @@ class AppointmentPostType
         update_post_meta($post_id, '_gdhrdv_address', sanitize_text_field($data['address']));
         update_post_meta($post_id, '_gdhrdv_postal_code', sanitize_text_field($data['postal_code']));
         update_post_meta($post_id, '_gdhrdv_city', sanitize_text_field($data['city']));
+        update_post_meta($post_id, '_gdhrdv_message', isset($data['message']) ? sanitize_textarea_field($data['message']) : '');
         update_post_meta($post_id, '_gdhrdv_accept_terms', $data['accept_terms'] ? '1' : '0');
         update_post_meta($post_id, '_gdhrdv_email_sent', '0');
 

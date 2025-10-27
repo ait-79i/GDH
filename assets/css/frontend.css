@@ -30,8 +30,13 @@
 }
 
 /* Visibility controlled by accessibility attribute to avoid theme overrides (supports multiple popups) */
-.gdhrdv-rdv-popup[aria-hidden="true"] { display: none; }
-.gdhrdv-rdv-popup[aria-hidden="false"] { display: flex; }
+.gdhrdv-rdv-popup[aria-hidden="true"] {
+  display: none;
+}
+
+.gdhrdv-rdv-popup[aria-hidden="false"] {
+  display: flex;
+}
 
 /* Base Button Styles */
 .gdhrdv-rdv-button {
@@ -113,7 +118,8 @@
 }
 
 /* Scoped box-sizing reset to avoid theme overrides */
-.gdhrdv-rdv-popup, .gdhrdv-rdv-popup * {
+.gdhrdv-rdv-popup,
+.gdhrdv-rdv-popup * {
   box-sizing: border-box;
 }
 
@@ -284,17 +290,17 @@
 
 /* Step Circle */
 .gdhrdv-rdv-step-circle {
-  width: 48px ;
-  height: 48px ;
-  border-radius: 50% ;
-  background: var(--gdhrdv-bg-light) ;
-  border: 2px solid var(--gdhrdv-border-light) ;
-  display: flex ;
-  align-items: center ;
-  justify-content: center ;
-  position: relative ;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1) ;
-  cursor: pointer ;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: var(--gdhrdv-bg-light);
+  border: 2px solid var(--gdhrdv-border-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 .gdhrdv-rdv-step-circle:hover {
@@ -304,17 +310,17 @@
 
 /* Step Icon */
 .gdhrdv-rdv-step-icon {
-  font-size: 20px ;
-  color: var(--gdhrdv-text-light) ;
-  transition: all 0.3s ease ;
-  display: none ;
+  font-size: 20px;
+  color: var(--gdhrdv-text-light);
+  transition: all 0.3s ease;
+  display: none;
 }
 
 .gdhrdv-rdv-step-number {
-  font-size: 18px ;
-  font-weight: 700 ;
-  color: var(--gdhrdv-text-light) ;
-  transition: all 0.3s ease ;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--gdhrdv-text-light);
+  transition: all 0.3s ease;
 }
 
 /* Hide number when step is active or completed */
@@ -757,6 +763,98 @@
   opacity: 0.5;
 }
 
+/* === Textarea === */
+.gdhrdv-rdv-field textarea {
+  width: 100%;
+  padding: 16px;
+  border: 2px solid var(--gdhrdv-border-light);
+  border-radius: var(--gdhrdv-radius-md);
+  font-size: 14px;
+  font-family: inherit;
+  line-height: 1.6;
+  transition: var(--gdhrdv-transition);
+  background: var(--gdhrdv-bg-card);
+  color: var(--gdhrdv-text-dark);
+  font-weight: 500;
+  resize: vertical;
+  min-height: 120px;
+  max-height: 240px;
+  box-sizing: border-box;
+}
+
+/* Textarea en pleine largeur - style spécial */
+.gdhrdv-rdv-field-full textarea {
+  box-sizing: border-box;
+  width: 100% !important;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+/* Layout spécial contact (desktop) */
+.gdhrdv-rdv-contact-layout {
+  display: flex;
+  gap: 20px;
+}
+
+.gdhrdv-rdv-contact-left {
+  flex: 0 0 45%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.gdhrdv-rdv-contact-right {
+  flex: 1;
+}
+
+/* Style pour les champs avec textarea */
+.gdhrdv-rdv-field-textarea {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.gdhrdv-rdv-field-textarea textarea {
+  min-height: 132px;
+  max-height: 280px;
+  flex-grow: 1;
+}
+
+.gdhrdv-rdv-field textarea:hover {
+  border-color: var(--gdhrdv-primary-green-light);
+}
+
+.gdhrdv-rdv-field textarea:focus {
+  outline: none;
+  border-color: var(--gdhrdv-primary-green);
+  box-shadow: 0 0 0 4px rgba(0, 104, 71, 0.12);
+  transform: translateY(-1px);
+}
+
+.gdhrdv-rdv-field textarea::placeholder {
+  color: var(--gdhrdv-text-light);
+  opacity: 0.7;
+  font-weight: 400;
+}
+
+.gdhrdv-rdv-field textarea:focus::placeholder {
+  opacity: 0.5;
+}
+
+/* Compteur de caractères */
+.gdhrdv-rdv-field-counter {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 6px;
+}
+
+.gdhrdv-rdv-counter-text {
+  font-size: 11px;
+  color: var(--gdhrdv-text-light);
+  font-weight: 500;
+  opacity: 0.8;
+}
+
 /* === Checkbox === */
 .gdhrdv-rdv-field-checkbox {
   margin-top: 8px;
@@ -1157,9 +1255,35 @@
 
   /* Inputs mobile */
   .gdhrdv-rdv-field input,
+  .gdhrdv-rdv-field textarea,
   .gdhrdv-rdv-slot input {
     padding: 10px 12px;
     font-size: 14px;
+  }
+
+  .gdhrdv-rdv-field textarea {
+    min-height: 90px;
+    max-height: 180px;
+  }
+
+  /* Layout contact mobile - retour au layout vertical */
+  .gdhrdv-rdv-contact-layout {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .gdhrdv-rdv-contact-left {
+    flex: 1;
+    gap: 12px;
+  }
+
+  .gdhrdv-rdv-contact-right {
+    flex: 1;
+  }
+
+  .gdhrdv-rdv-contact-right textarea {
+    min-height: 90px;
+    max-height: 180px;
   }
 
   .gdhrdv-rdv-field label,
@@ -1402,10 +1526,32 @@
   }
 
   .gdhrdv-rdv-field input,
+  .gdhrdv-rdv-field textarea,
   .gdhrdv-rdv-slot input {
     padding: 9px 11px;
     font-size: 14px;
     border-width: 1.5px;
+  }
+
+  .gdhrdv-rdv-field textarea {
+    min-height: 80px;
+    max-height: 160px;
+  }
+
+  /* Layout contact mobile phone - layout vertical compact */
+  .gdhrdv-rdv-contact-layout {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .gdhrdv-rdv-contact-left {
+    gap: 10px;
+  }
+
+  .gdhrdv-rdv-contact-right textarea {
+    min-height: 80px;
+    max-height: 160px;
+    min-width: 220px;
   }
 
   /* Checkbox mobile phone */
@@ -1963,7 +2109,7 @@
   box-shadow: var(--gdhrdv-shadow-md) !important;
   flex-shrink: 0 !important;
   font-weight: 700 !important;
-  position: relative ;
+  position: relative;
   overflow: hidden !important;
 }
 
@@ -2163,6 +2309,7 @@
 
 /* Input error state */
 .gdhrdv-rdv-field input.gdhrdv-rdv-field-error,
+.gdhrdv-rdv-field textarea.gdhrdv-rdv-field-error,
 .gdhrdv-rdv-field-error {
   border-color: var(--gdhrdv-error) !important;
   background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%) !important;

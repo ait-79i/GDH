@@ -22,6 +22,7 @@ class EmailTemplateService
             'address',
             'city',
             'postal_code',
+            'message',
             'nom_destinataire',
             'creneaux_rdv',
         ];
@@ -36,6 +37,7 @@ class EmailTemplateService
         $address        = isset($formData['address']) ? $formData['address'] : get_post_meta($post_id, '_gdhrdv_address', true);
         $postal         = isset($formData['postal_code']) ? $formData['postal_code'] : get_post_meta($post_id, '_gdhrdv_postal_code', true);
         $city           = isset($formData['city']) ? $formData['city'] : get_post_meta($post_id, '_gdhrdv_city', true);
+        $message        = isset($formData['message']) ? $formData['message'] : get_post_meta($post_id, '_gdhrdv_message', true);
         $slots          = get_post_meta($post_id, '_gdhrdv_slots', true);
         $aptDate        = '';
         $slotsFormatted = '';
@@ -99,6 +101,7 @@ class EmailTemplateService
             'address'          => (string) $address,
             'city'             => (string) $city,
             'postal_code'      => (string) $postal,
+            'message'          => (string) $message,
             'nom_destinataire' => (string) $recipientName,
             'creneaux_rdv'     => $slotsFormatted,
         ];
